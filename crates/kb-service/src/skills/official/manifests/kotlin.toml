@@ -1,0 +1,19 @@
+type = "plugin"
+name = "official-kotlin"
+version = "0.1.0"
+api_version = 1
+description = "按 Kotlin 顶层声明切块,imports 单独成块,类和方法不会被拆散"
+
+[index]
+include = ["**/*.kt", "**/*.kts"]
+exclude = ["**/build/**", "**/out/**", "**/.gradle/**"]
+lang = "kotlin"
+tags = ["kotlin", "jvm"]
+priority = 100
+
+[exec]
+command = "python3"
+args = ["plugin.py", "kotlin"]
+hooks = ["chunk"]
+timeout_ms = 20000
+max_output_bytes = 16777216

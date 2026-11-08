@@ -1,0 +1,38 @@
+type = "plugin"
+name = "official-redact"
+version = "0.1.0"
+api_version = 1
+description = "索引前遮蔽常见密钥、令牌和密码赋值,避免敏感值进入向量库与检索结果"
+
+# 只处理常见文本资料;默认不碰代码文件,避免把示例代码里的常量也改掉。
+# 这是高置信度规则,不可能覆盖所有内部密钥格式;需要更严格时编辑 script 或改用宿主侧脱敏。
+[index]
+include = [
+ "**/*.md",
+ "**/*.mdx",
+ "**/*.txt",
+ "**/*.log",
+ "**/*.json",
+ "**/*.jsonc",
+ "**/*.yaml",
+ "**/*.yml",
+ "**/*.toml",
+ "**/*.ini",
+ "**/*.conf",
+ "**/*.cfg",
+ "**/*.properties",
+ "**/*.env",
+ "**/.env",
+ "**/.env.*",
+ "**/*.sql",
+ "**/*.csv",
+]
+# 不写 tags:标签会合并进所有命中的 JSON / Markdown,把“脱敏”变成文件主题。
+priority = 100
+
+[exec]
+command = "python3"
+args = ["plugin.py", "redact"]
+hooks = ["enrich"]
+timeout_ms = 20000
+max_output_bytes = 16777216

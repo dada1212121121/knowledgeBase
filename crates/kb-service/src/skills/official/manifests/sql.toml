@@ -1,0 +1,19 @@
+type = "plugin"
+name = "official-sql"
+version = "0.1.0"
+api_version = 1
+description = "按 SQL 语句切块,保留注释和表名,字符串里的分号不会切错"
+
+[index]
+include = ["**/*.sql"]
+exclude = ["**/node_modules/**", "**/dist/**"]
+lang = "sql"
+tags = ["sql", "database"]
+priority = 100
+
+[exec]
+command = "python3"
+args = ["plugin.py", "sql"]
+hooks = ["chunk"]
+timeout_ms = 20000
+max_output_bytes = 16777216

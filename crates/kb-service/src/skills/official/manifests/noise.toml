@@ -1,0 +1,38 @@
+type = "plugin"
+name = "official-noise"
+version = "0.1.0"
+api_version = 1
+description = "排除常见构建产物、依赖目录、快照与锁文件,少索引一堆没有阅读价值的内容"
+
+# 纯声明式规则:没有 [exec],不需要 allow_exec 或沙箱。
+# 这是可编辑的起点:装好后按项目实际情况在设置页增删,别把它当成万能默认。
+[index]
+exclude = [
+ "**/node_modules/**",
+ "**/dist/**",
+ "**/build/**",
+ "**/out/**",
+ "**/target/**",
+ "**/coverage/**",
+ "**/.next/**",
+ "**/.nuxt/**",
+ "**/.svelte-kit/**",
+ "**/.cache/**",
+ "**/__pycache__/**",
+ "**/.pytest_cache/**",
+ "**/.venv/**",
+ "**/venv/**",
+ "**/previews/**",
+ "**/fixtures/**",
+ "**/__snapshots__/**",
+ "**/snapshots/**",
+ "**/*.min.js",
+ "**/*.min.css",
+ "**/*.map",
+ "**/*.lock",
+ "**/package-lock.json",
+ "**/pnpm-lock.yaml",
+ "**/yarn.lock",
+ "**/Cargo.lock",
+ "**/go.sum",
+]

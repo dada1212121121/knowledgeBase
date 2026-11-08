@@ -14,4 +14,4 @@ office-worker/node_modules/
 
 # 本地工作区探针与外部工具配置
 .claude/
-skills/
+/skills/

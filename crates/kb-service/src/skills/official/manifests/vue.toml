@@ -1,0 +1,19 @@
+type = "plugin"
+name = "official-vue"
+version = "0.1.0"
+api_version = 1
+description = "把 Vue 单文件组件的 template / script 分开切块,跳过 style"
+
+[index]
+include = ["**/*.vue"]
+exclude = ["**/node_modules/**", "**/dist/**", "**/.nuxt/**", "**/coverage/**"]
+lang = "vue"
+tags = ["vue", "frontend"]
+priority = 100
+
+[exec]
+command = "python3"
+args = ["plugin.py", "vue"]
+hooks = ["chunk"]
+timeout_ms = 20000
+max_output_bytes = 16777216

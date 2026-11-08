@@ -1,0 +1,19 @@
+type = "plugin"
+name = "official-svg"
+version = "0.1.0"
+api_version = 1
+description = "抽出 SVG 的 title / desc / text 和图形概况,不再索引大段路径坐标"
+
+[index]
+include = ["**/*.svg"]
+exclude = ["**/node_modules/**", "**/dist/**", "**/coverage/**"]
+lang = "svg"
+tags = ["svg", "design"]
+priority = 100
+
+[exec]
+command = "python3"
+args = ["plugin.py", "svg"]
+hooks = ["chunk"]
+timeout_ms = 20000
+max_output_bytes = 16777216
