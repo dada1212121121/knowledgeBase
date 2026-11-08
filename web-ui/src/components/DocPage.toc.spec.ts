@@ -11,6 +11,9 @@ const BODY = '# 第一章\n\n## 1.1 小节\n\n正文。\n\n# 第二章\n\n结尾
 
 const KEY = 'kb.doc.toc.collapsed'
 const clientWidthOf = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientWidth')
+// 每个用例结束必须显式卸载:MarkdownRead 在 unmount 时要清理 window 监听与异步渲染,
+// 交给测试环境销毁 document 会让清理跑到 window 已不存在的时刻。
+const mounted: ReturnType<typeof mount>[] = []
 const offsetWidthOf = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth')
 
 /**
@@ -28,6 +31,7 @@ async function open(width = 1200) {
     props: { title: '文档', modelValue: BODY, editing: false },
     attachTo: document.body,
   })
+  mounted.push(wrapper)
   // MarkdownRead 在 onMounted 里渲染、渲染完再发大纲,等两拍
   await flushPromises()
   await flushPromises()
@@ -46,6 +50,8 @@ beforeEach(() => {
   vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 0)
 })
 afterEach(() => {
+  for (const wrapper of mounted) wrapper.unmount()
+  mounted.length = 0
   vi.restoreAllMocks()
   restore('clientWidth', clientWidthOf)
   restore('offsetWidth', offsetWidthOf)
@@ -128,6 +134,7 @@ describe('DocPage 悬浮大纲', () => {
   it('标题少于两个:不显示大纲', async () => {
     setWidths(1700)
     const wrapper = mount(DocPage, { props: { title: '文档', modelValue: '# 唯一\n\n正文', editing: false }, attachTo: document.body })
+    mounted.push(wrapper)
     await flushPromises()
     await flushPromises()
     expect(wrapper.find('[data-testid=doc-toc]').exists()).toBe(false)

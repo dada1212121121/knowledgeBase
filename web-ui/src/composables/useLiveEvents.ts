@@ -21,7 +21,8 @@ let idleTimer: number | undefined
 let wanted = false
 
 function connect() {
-  if (!wanted || socket) return
+  // 退避定时器可能在测试环境 / SSR 拆掉 window 之后才触发,此时直接放弃重连
+  if (!wanted || socket || typeof window === 'undefined') return
   const scheme = window.location.protocol === 'https:' ? 'wss' : 'ws'
   const next = new WebSocket(`${scheme}://${window.location.host}/api/v1/ws`)
   socket = next

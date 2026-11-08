@@ -410,11 +410,12 @@ function onClick(event: MouseEvent): void {
 watch(() => props.source, () => void render())
 watch(() => [props.linkContext, props.linkStates], relink, { deep: true })
 onMounted(() => {
-  window.addEventListener('beforeprint', flush)
+  // 组件可能在 SSR / 测试环境拆掉 window 之后才卸载,注册与清理都先确认浏览器环境
+  if (typeof window !== 'undefined') window.addEventListener('beforeprint', flush)
   void render()
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('beforeprint', flush)
+  if (typeof window !== 'undefined') window.removeEventListener('beforeprint', flush)
   // 卸载后异步增强还会跑完:序号 +1 让它们认不出自己这一轮,不再碰 DOM
   seq += 1
   job = null
