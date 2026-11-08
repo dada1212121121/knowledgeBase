@@ -75,7 +75,7 @@ argon2 = "0.6"
 hyper = { version = "1", features = ["client", "http1"] }
 hyper-util = { version = "0.1", features = ["tokio"] }
 http-body-util = "0.1"
-reqwest = { version = "0.12", features = ["json", "stream"] }
+reqwest = { version = "0.13", features = ["json", "stream"] }
 # 进化
 notify = "8.2"
 git2 = { version = "0.21", default-features = false }
