@@ -235,6 +235,21 @@ async fn higher_priority_job_runs_alongside_the_full_index() {
 
     // 抢占的含义是「新任务不必等旧批次做完」:两个任务的执行区间必须重叠。
     // 以前一个知识库只有一个 worker,新上传的编辑要排在几千个文件的导入后面。
+    // 增量可能在全量之前就做完;先等全量真正结束,再用两个任务的开始/结束时间判断是否重叠。
+    let queue = fixture.queue.clone();
+    let full_id = full.id.clone();
+    assert!(
+        wait_until(Duration::from_secs(10), || {
+            let queue = queue.clone();
+            let id = full_id.clone();
+            async move {
+                let job = queue.get(&id).await.expect("查询").expect("存在");
+                job.state == JobState::Done
+            }
+        })
+        .await,
+        "全量任务最终应完成"
+    );
     let full_now = fixture
         .queue
         .get(&full.id)
@@ -252,22 +267,6 @@ async fn higher_priority_job_runs_alongside_the_full_index() {
     assert!(
         incremental_started < full_finished,
         "增量任务应和全量任务重叠执行(增量 {incremental_started} / 全量结束 {full_finished})"
-    );
-
-    // 全量任务最终也会完成
-    let queue = fixture.queue.clone();
-    let full_id = full.id.clone();
-    assert!(
-        wait_until(Duration::from_secs(10), || {
-            let queue = queue.clone();
-            let id = full_id.clone();
-            async move {
-                let job = queue.get(&id).await.expect("查询").expect("存在");
-                job.state == JobState::Done
-            }
-        })
-        .await,
-        "全量任务最终应完成"
     );
 
     // 收尾:让 worker 退出
