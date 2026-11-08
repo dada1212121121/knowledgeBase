@@ -38,7 +38,7 @@ lancedb = { version = "=0.40.0", default-features = false, features = ["remote"]
 lance = { version = "=13.0.0", default-features = false }
 arrow-array = "58"
 arrow-schema = "58"
-rusqlite = { version = "0.40.2", features = ["bundled"] }
+rusqlite = { version = "0.41.1", features = ["bundled"] }
 # 模型
 fastembed = "=7.1.2"
 # 与 fastembed 用同一个版本、同样的最小特性(Cargo 会合并成一份),只为了自己建 ONNX 环境:见 kb-embed 的 shared_environment
