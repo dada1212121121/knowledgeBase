@@ -27,6 +27,13 @@ jobs:
           toolchain: 1.99.1
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
+      # doctor 测试要求临时目录所在分区至少有 10GB 空闲;GitHub 标准 runner
+      # 预装的 Android/.NET/CodeQL 会占掉数 GB,先清理这些测试用不到的缓存。
+      - name: 释放磁盘空间
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo apt-get clean
+          df -h /
       - name: 架构门禁(依赖方向 / 文档对表 / 配置索引 / 文件行数)
         run: |
           node scripts/check-deps.mjs
