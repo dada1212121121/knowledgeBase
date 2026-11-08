@@ -1,0 +1,32 @@
+/* GENERATED — L3 component tokens + appearance axes (density / radius / font / motion) */
+:root{
+ --hl:1px;
+ --elev-0:var(--bg-canvas);--elev-1:var(--surface-1);--elev-2:var(--surface-2);--elev-3:var(--surface-3);
+ --hi:inset 0 1px 0 rgba(var(--ink),.04);
+ --sh1:0 1px 2px rgba(var(--shade),.4);
+ --sh2:0 0 0 var(--hl) rgba(var(--ink),.08),0 8px 24px -4px rgba(var(--shade),.55),0 2px 6px rgba(var(--shade),.3);
+ --sh3:0 0 0 var(--hl) rgba(var(--ink),.09),0 32px 80px -12px rgba(var(--shade),.75),0 8px 24px rgba(var(--shade),.4);
+ --r-xs:4px;--r1:6px;--r2:8px;--r3:10px;--r4:12px;--r-pill:999px;
+ --fs:1;
+ --ctl-h:28px;--nav-h:28px;--row-h:32px;--ch-h:40px;--page-pad:20px;--gap:12px;--card-px:16px;--card-py:16px;
+ --dur:.15s;
+ /* component tokens */
+ --card-bg:var(--surface-1);--card-border:var(--border-subtle);--card-radius:var(--r3);
+ --btn-bg:linear-gradient(180deg,rgba(var(--ink),.05),rgba(var(--ink),.02));--btn-border:var(--border-default);--btn-radius:var(--r1);
+ --btn-pri-bg:linear-gradient(180deg,var(--accent),var(--accent-active));--btn-pri-fg:var(--on-accent);
+ --badge-radius:5px;--input-bg:rgba(var(--shade),.22);--input-radius:var(--r2);
+ --nav-active-bg:linear-gradient(180deg,rgba(var(--ink),.06),rgba(var(--ink),.035));
+ --table-row-sel:color-mix(in srgb,var(--accent) 10%,transparent);--table-row-hover:rgba(var(--ink),.025);
+ --tooltip-bg:var(--surface-3);--palette-bg:linear-gradient(180deg,var(--surface-3),var(--surface-2));
+ --scroll-thumb:rgba(var(--ink),.1);
+}
+@media (min-resolution:2dppx){:root{--hl:.5px}}
+:root[data-tone=light]{--hi:inset 0 1px 0 rgba(255,255,255,.9);--sh1:0 1px 2px rgba(var(--shade),.05);
+ --sh2:0 0 0 var(--hl) rgba(var(--shade),.08),0 8px 24px -4px rgba(var(--shade),.14),0 2px 6px rgba(var(--shade),.06);
+ --sh3:0 0 0 var(--hl) rgba(var(--shade),.1),0 32px 80px -12px rgba(var(--shade),.25),0 8px 24px rgba(var(--shade),.1);
+ --btn-bg:var(--surface-2);--input-bg:var(--surface-2);--nav-active-bg:var(--surface-2);--palette-bg:var(--surface-2)}
+:root[data-density=compact]{--ctl-h:24px;--nav-h:26px;--row-h:28px;--ch-h:36px;--page-pad:16px;--gap:8px;--card-px:12px;--card-py:12px}
+:root[data-density=comfortable]{--ctl-h:32px;--nav-h:32px;--row-h:40px;--ch-h:48px;--page-pad:28px;--gap:16px;--card-px:20px;--card-py:16px}
+:root[data-radius=sharp]{--r-xs:2px;--r1:3px;--r2:4px;--r3:5px;--r4:6px;--badge-radius:3px}
+:root[data-radius=round]{--r-xs:6px;--r1:8px;--r2:10px;--r3:14px;--r4:18px;--badge-radius:999px}
+:root[data-font=s]{--fs:.923}:root[data-font=l]{--fs:1.077}

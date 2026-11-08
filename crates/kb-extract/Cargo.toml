@@ -1,0 +1,22 @@
+[package]
+name = "kb-extract"
+description = "多格式抽取与统一中间文档(当前阶段):Extractor 插件、魔数识别、DocChunker"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+encoding_rs = { workspace = true }
+flate2 = { workspace = true }
+kb-core = { path = "../kb-core" }
+pdf-extract = { workspace = true }
+pulldown-cmark = { workspace = true }
+quick-xml = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tempfile = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }

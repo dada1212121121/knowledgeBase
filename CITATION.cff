@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "如果 knowledgeBase 对你的研究或项目有帮助，请引用本文件。"
+title: knowledgeBase
+abstract: "本机优先的 AI 开发知识库：Rust 守护进程、MCP 接口与 Vue 3 管理端。"
+type: software
+authors:
+  - name: "knowledgeBase contributors"
+repository-code: "https://github.com/dada1212121121/knowledgeBase"
+url: "https://github.com/dada1212121121/knowledgeBase"
+license: other
+license-url: "https://polyformproject.org/licenses/noncommercial/1.0.0/"
+version: 0.1.0
+date-released: 2026-11-08
+keywords:
+  - knowledge-base
+  - retrieval-augmented-generation
+  - mcp
+  - rust
+  - lancedb

@@ -1,0 +1,69 @@
+---
+source: crates/kb-index/tests/chunk_snapshots.rs
+expression: views
+---
+- key: "#1"
+  start_line: 1
+  end_line: 4
+  symbol: ~
+  header: demo › fixtures/rust.rs
+- key: struct Config
+  start_line: 6
+  end_line: 14
+  symbol: struct Config
+  header: demo › fixtures/rust.rs › pub struct Config
+- key: impl Config
+  start_line: 16
+  end_line: 35
+  symbol: impl Config
+  header: demo › fixtures/rust.rs › impl Config
+- key: "impl fmt::Display for Config"
+  start_line: 37
+  end_line: 41
+  symbol: "impl fmt::Display for Config"
+  header: "demo › fixtures/rust.rs › impl fmt::Display for Config"
+- key: enum Status
+  start_line: 43
+  end_line: 52
+  symbol: enum Status
+  header: demo › fixtures/rust.rs › pub enum Status
+- key: trait Startable
+  start_line: 54
+  end_line: 66
+  symbol: trait Startable
+  header: demo › fixtures/rust.rs › pub trait Startable
+- key: struct Service
+  start_line: 68
+  end_line: 73
+  symbol: struct Service
+  header: demo › fixtures/rust.rs › pub struct Service
+- key: impl Service
+  start_line: 75
+  end_line: 94
+  symbol: impl Service
+  header: demo › fixtures/rust.rs › impl Service
+- key: impl Startable for Service
+  start_line: 96
+  end_line: 110
+  symbol: impl Startable for Service
+  header: demo › fixtures/rust.rs › impl Startable for Service
+- key: fn fibonacci
+  start_line: 112
+  end_line: 122
+  symbol: fn fibonacci
+  header: "demo › fixtures/rust.rs › pub fn fibonacci(n: u32) -> u64"
+- key: fn parse_port
+  start_line: 124
+  end_line: 127
+  symbol: fn parse_port
+  header: "demo › fixtures/rust.rs › pub fn parse_port(value: &str) -> Option<u16>"
+- key: macro assert_ok
+  start_line: 129
+  end_line: 135
+  symbol: macro assert_ok
+  header: demo › fixtures/rust.rs › macro_rules! assert_ok
+- key: mod tests
+  start_line: 137
+  end_line: 164
+  symbol: mod tests
+  header: demo › fixtures/rust.rs › mod tests

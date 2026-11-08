@@ -1,0 +1,25 @@
+/**
+ * 正文里的加粗 / 倾斜（编辑器与阅读共用）
+ *
+ * 全站样式有两条是给「界面」用的，用在正文里会让加粗 / 倾斜几乎看不出来：
+ * - `b, strong { font-weight: 500 }`：界面里的强调只要「比正文稍重」，正文是 400，500 肉眼几乎分不出；
+ * - `body { font-synthesis: none }`：禁止浏览器给没有粗体 / 斜体的字体合成。中文字体（微软雅黑、苹方、思源黑体）没有斜体字形，
+ *   于是倾斜对中文完全没效果。
+ * 正文区域里改回真正的加粗（700），并允许合成粗体 / 斜体（只对字体里缺的样式合成，有真字形时不会重复加粗）。
+ */
+.kb-text-prose,
+.kb-md-read-body {
+  font-synthesis: weight style;
+}
+.kb-text-prose strong,
+.kb-text-prose b,
+.kb-md-read-body strong,
+.kb-md-read-body b {
+  font-weight: 700;
+}
+.kb-text-prose em,
+.kb-text-prose i,
+.kb-md-read-body em,
+.kb-md-read-body i {
+  font-style: italic;
+}

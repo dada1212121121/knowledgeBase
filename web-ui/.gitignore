@@ -1,0 +1,10 @@
+node_modules/
+dist/
+e2e/shots/
+test-results/
+public/pdfjs
+# ED-002 性能基线:运行结果(报告另存 docs/reports/)、运行时生成的大样本、本机真实语料
+e2e/out/
+e2e/fixtures/editor/sheet-5m.csv
+e2e/fixtures/editor/real/
+__pycache__/

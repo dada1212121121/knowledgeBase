@@ -1,0 +1,655 @@
+/**
+ * 来源：BetterOffice（Apache-2.0）@betteroffice/docx-react 0.5.1 源码 `packages/docx-react/src/components/DocxEditor/peerless/inputAdmission.ts`，
+ * 为在 Vue 里复用上游「Worker 编辑会话 + 画布帧 + 回显 + 输入准入」这一层而原样收编（只改了 import 路径）。
+ * 为什么收编而不是重写：这一层是输入法组合、回显画笔与引擎命令围栏相互配合的状态机，行为正确性来自上游的长期验证；
+ * 上游把它放在 React 组件包里、没有作为框架无关包导出，所以只能放进 engines/（唯一允许 import @betteroffice/* 的目录）。
+ * 许可与署名见仓库 NOTICE。升级 @betteroffice/docx* 时对照上游同名文件。
+ */
+import type { CommandTicket, PresentationStatus, SubmitOptions, TicketOutcome } from './sessionTypes';
+import type {
+  DocxCommandSelection,
+  DocxCommandPayloads,
+  DocxWorkerEditSession,
+} from '@betteroffice/docx/worker';
+import type { YrsAuthor } from '@betteroffice/docx/yrs';
+import type { PeerlessEchoIntent, PeerlessEchoPainter } from './echoPainter';
+import { hasImplicitVerticalGoal, type PeerlessInputIntent, type PeerlessProposalIntent, type PeerlessRevisionIntent, type PeerlessTextIntent } from './inputEvents';
+import type { PeerlessViewStore } from './viewStore';
+
+/** @internal */
+export const DOCX_ECHO_MAX_UNACKED_INTENTS = 256;
+
+/** @internal Formatting operations that resolve from the causal predecessor selection. */
+export type PeerlessFormattingIntent = {
+  [K in 'toggleMark' | 'formatRange' | 'clearFormatting' | 'setParagraphAttrs' | 'applyParagraphStyle' | 'formatSelection' | 'toggleStrike' | 'toggleList' | 'changeIndent']:
+    { kind: K; payload: Omit<DocxCommandPayloads[K], 'selection'> };
+}['toggleMark' | 'formatRange' | 'clearFormatting' | 'setParagraphAttrs' | 'applyParagraphStyle' | 'formatSelection' | 'toggleStrike' | 'toggleList' | 'changeIndent'];
+
+/** @internal Original-intent accounting happens before the shared coalescing hook. */
+export interface PeerlessAdmissionSnapshot {
+  readOnly: boolean;
+  tail: CommandTicket | undefined;
+  originalUnackedIntents: number;
+  pendingInputs: number;
+  echoEnabled: boolean;
+  echoDisabledReason: 'context-cap' | 'intent-cap' | 'fence' | 'unsupported-shaping' | null;
+  compositionSlot: number | null;
+  heldIntents: number;
+}
+
+/** @internal Composition targets are worker snapshots or predecessor tickets. */
+export type PeerlessAdmissionTarget =
+  | { kind: 'predecessor'; ticket: CommandTicket; suggesting?: YrsAuthor }
+  | { kind: 'worker-selection'; snapshot: ReturnType<PeerlessViewStore['getSnapshot']>; suggesting?: YrsAuthor };
+
+/** @internal */
+export interface PeerlessAdmissionOptions extends Omit<SubmitOptions<PeerlessEchoIntent>, 'after' | 'echo'> {
+  source?: 'typing' | 'paste' | 'formatting' | 'selection' | 'composition';
+  tabDirection?: 'forward' | 'backward';
+  onSubmitted?(ticket: CommandTicket): void;
+  hostProposal?: boolean;
+}
+
+/** @internal Held intents remain admitted and `released` settles with their admission when the composition ends; cap overflow only suppresses their echo. */
+export type PeerlessAdmissionResult =
+  | { status: 'submitted'; ticket: CommandTicket; echoEnabled: boolean }
+  | { status: 'held'; slot: number; echoEnabled: false; released: Promise<PeerlessAdmissionResult> }
+  | { status: 'ignored'; reason: 'read-only' | 'empty-composition' };
+
+/** @internal */
+export interface PeerlessInputAdmission {
+  session: DocxWorkerEditSession<PeerlessEchoIntent>;
+  viewStore: PeerlessViewStore;
+  echoPainter: PeerlessEchoPainter;
+  getSnapshot(): PeerlessAdmissionSnapshot;
+  whenCompositionSettled?(): Promise<void>;
+  setReadOnly(readOnly: boolean): CommandTicket;
+  setSuggesting?(author: string | null): void;
+  subscribeReadOnly(listener: () => void): () => void;
+  reserveComposition(): { slot: number; target: PeerlessAdmissionTarget };
+  settleComposition(
+    slot: number,
+    commit: { text: string; target: PeerlessAdmissionTarget } | null
+  ): PeerlessAdmissionResult;
+  dispose(): void;
+}
+
+/** @internal */
+export interface PeerlessInputAdmissionOptions {
+  session: DocxWorkerEditSession<PeerlessEchoIntent>;
+  viewStore: PeerlessViewStore;
+  echoPainter: PeerlessEchoPainter;
+}
+
+export async function flushAdmittedInput(binding: {
+  admission?: PeerlessInputAdmission;
+  session: Pick<DocxWorkerEditSession<PeerlessEchoIntent>, 'flush'>;
+}): Promise<void> {
+  await binding.admission?.whenCompositionSettled?.();
+  await binding.admission?.getSnapshot?.().tail?.ack;
+  await binding.session.flush();
+}
+
+/** @internal */
+export function createInputAdmission(_options: PeerlessInputAdmissionOptions): PeerlessInputAdmission {
+  const { session, viewStore, echoPainter } = _options;
+  const pending = new Map<CommandTicket, number>();
+  const prefixes = new WeakMap<CommandTicket, Promise<boolean>>();
+  const reviewDependencies = new WeakMap<CommandTicket, CommandTicket | undefined>();
+  const deferred = new WeakMap<CommandTicket, Promise<{ ticket?: CommandTicket; blocked?: boolean }>>();
+  const cancellations = new Set<() => void>();
+  const held: Array<{ intent: AdmissionIntent; options: PeerlessAdmissionOptions; deletionExtension: boolean;
+    release(result: PeerlessAdmissionResult): void; drop(error: Error): void }> = [];
+  let tail: CommandTicket | undefined;
+  let originalUnackedIntents = 0;
+  let pendingInputs = 0;
+  let echoDisabledReason: PeerlessAdmissionSnapshot['echoDisabledReason'] = null;
+  let echoFence: { ticket?: CommandTicket; outcome?: TicketOutcome; tickets: Array<{ ticket?: CommandTicket; settled?: boolean; dropped?: boolean }> } | undefined;
+  let attachingEcho = false;
+  let compositionSlot: number | null = null;
+  let nextSlot = 0;
+  let nextTicket = 0;
+  let disposed = false;
+  const disposedError = () => Object.assign(new Error('Input admission is disposed'), { code: 'disposed' });
+  const compositionWaiters = new Set<{ resolve(): void; reject(error: Error): void }>();
+  let verticalGoal: number | undefined;
+  let suggesting: string | null = null;
+  const stamped = new WeakSet<AdmissionIntent>();
+  let requestedReadOnly: boolean | undefined;
+  let modeBarrier: CommandTicket | undefined;
+  const modeListeners = new Set<() => void>();
+
+  const disableEcho = (reason: NonNullable<PeerlessAdmissionSnapshot['echoDisabledReason']>) => {
+    if (echoDisabledReason === reason) return;
+    echoDisabledReason = reason;
+    echoPainter.disable(reason);
+  };
+  const count = () => {
+    originalUnackedIntents += 1;
+    if (originalUnackedIntents > DOCX_ECHO_MAX_UNACKED_INTENTS) disableEcho('intent-cap');
+  };
+  const resetIdle = () => {
+    if (originalUnackedIntents !== 0) return;
+    if (tail !== modeBarrier) tail = undefined;
+    if (compositionSlot === null && (echoDisabledReason !== 'fence' || echoFence?.ticket?.seq === undefined ||
+      echoFence?.outcome?.status !== 'applied')) {
+      echoDisabledReason = null;
+      echoFence = undefined;
+    }
+  };
+  const releaseCount = (count = 1) => {
+    originalUnackedIntents -= count;
+    resetIdle();
+  };
+  const readOnly = () => requestedReadOnly ?? viewStore.getSnapshot().editState?.readOnly ?? session.state.editState?.readOnly ?? false;
+  const workerSelection = () => latestSelection(session, viewStore);
+  const latestEditState = () => (session.state.throughSeq >= viewStore.getSnapshot().throughSeq ? session.state.editState : undefined) ??
+    viewStore.getSnapshot().editState;
+  const documentVersion = () => latestEditState()?.documentVersion ?? viewStore.getSnapshot().editState?.documentVersion ?? '';
+  const refusal = (reason: string): CommandTicket => ({ id: --nextTicket, seq: undefined,
+    ack: Promise.resolve({ status: 'refused', reason }), presented: Promise.resolve('dropped') });
+  const dependencyOf = (ticket: CommandTicket | undefined) => ticket && reviewDependencies.has(ticket) ? reviewDependencies.get(ticket) : ticket;
+  const track = (ticket: CommandTicket, review = false, recover = false) => {
+    const prefix = tail && !recover ? prefixes.get(tail) ?? Promise.resolve(true) : Promise.resolve(true);
+    prefixes.set(ticket, Promise.all([prefix, ticket.ack]).then(([ok, outcome]) =>
+      ok && (review || (outcome.status !== 'refused' && outcome.status !== 'cancelled')), () => false));
+    tail = ticket;
+    pending.set(ticket, 1);
+    const settle = (outcome?: TicketOutcome) => {
+      if (disposed) return;
+      if (echoFence?.ticket === ticket) echoFence.outcome = outcome;
+      const count = pending.get(ticket) ?? 0;
+      pending.delete(ticket);
+      releaseCount(count);
+    };
+    void ticket.ack.then(settle, () => settle());
+  };
+  const geometryGoal = (predecessor: CommandTicket | undefined, direction: 'up' | 'down'): Promise<number> => new Promise((resolve, reject) => {
+    let unsubscribe = () => {};
+    const finish = () => {
+      unsubscribe();
+      cancellations.delete(cancel);
+    };
+    const cancel = () => { finish(); reject(disposedError()); };
+    const check = () => {
+      const snapshot = viewStore.getSnapshot();
+      const geometry = snapshot.geometry;
+      const throughSeq = Math.max(predecessor?.seq ?? 0, snapshot.throughSeq, session.state.throughSeq);
+      if (!geometry || geometry.coversThroughSeq < throughSeq) return;
+      const rect = direction === 'down' ? geometry.selectionRects.at(-1) : geometry.selectionRects[0];
+      const focus = geometry.caret ?? geometry.selectionFocus;
+      const goalX = focus ? verticalGoal ?? focus.x
+        : rect ? rect.x + (direction === 'down' ? rect.width : 0)
+          : verticalGoal ?? geometry.pages[0]?.bounds.x ?? 0;
+      finish();
+      resolve(goalX);
+    };
+    cancellations.add(cancel);
+    unsubscribe = viewStore.subscribe(check);
+    check();
+  });
+  const defer = (
+    after: CommandTicket | undefined,
+    waitForSelection: boolean,
+    send: (predecessor: CommandTicket | undefined, goalX?: number) => CommandTicket | undefined,
+    verticalDirection?: 'up' | 'down',
+    barrier = false,
+    recover?: () => CommandTicket | undefined
+  ): CommandTicket => {
+    let backing: CommandTicket | undefined;
+    let resolveAck!: (outcome: TicketOutcome) => void;
+    let rejectAck!: (error: unknown) => void;
+    let resolvePresented!: (status: PresentationStatus) => void;
+    let resolveReady!: (value: { ticket?: CommandTicket; blocked?: boolean }) => void;
+    const ticket: CommandTicket = {
+      id: --nextTicket,
+      get seq() { return backing?.seq; },
+      ack: new Promise((resolve, reject) => { resolveAck = resolve; rejectAck = reject; }),
+      presented: new Promise((resolve) => { resolvePresented = resolve; }),
+    };
+    const ready = new Promise<{ ticket?: CommandTicket; blocked?: boolean }>((resolve) => { resolveReady = resolve; });
+    deferred.set(ticket, ready);
+    const cancel = (reason = 'disposed') => {
+      resolveAck({ status: 'cancelled', reason });
+      resolvePresented('dropped');
+      resolveReady({ blocked: true });
+    };
+    cancellations.add(cancel);
+    const dependency = after ? deferred.get(after) ?? Promise.resolve({ ticket: after }) : Promise.resolve({});
+    void dependency.then(async (value: { ticket?: CommandTicket; blocked?: boolean }) => {
+      if (disposed) return cancel();
+      let failed = value.blocked && !barrier;
+      if (waitForSelection && value.ticket && !failed) {
+        const ok = after && prefixes.has(after) ? await prefixes.get(after)! :
+          await value.ticket.ack.then((outcome) => outcome.status !== 'refused' && outcome.status !== 'cancelled');
+        if (disposed) return cancel();
+        failed = !ok;
+      }
+      if (failed && !recover) return cancel('dependency-refused');
+      const goalX = verticalDirection ? await geometryGoal(value.ticket, verticalDirection) : undefined;
+      if (disposed) return cancel();
+      backing = failed ? recover!() : send(value.ticket, goalX);
+      resolveReady({ ticket: backing });
+      if (backing) {
+        void backing.ack.then(resolveAck, rejectAck);
+        void backing.presented.then(resolvePresented, () => resolvePresented('dropped'));
+      } else {
+        resolveAck({ status: 'noop' });
+        resolvePresented('dropped');
+      }
+    }).catch((error: unknown) => {
+      rejectAck(error);
+      resolvePresented('dropped');
+      resolveReady({ blocked: true });
+    }).finally(() => { cancellations.delete(cancel); });
+    return ticket;
+  };
+  const submit = (
+    intent: AdmissionIntent,
+    options: PeerlessAdmissionOptions = {},
+    counted = false,
+    target?: PeerlessAdmissionTarget,
+    deletionExtension = false
+  ): PeerlessAdmissionResult => {
+    if (disposed) throw disposedError();
+    const environment = intent.kind === 'setRenderEnvironment' || intent.kind === 'setFontEnvironment';
+    const { source, tabDirection, onSubmitted, hostProposal, ...metadata } = options;
+    const granted = isProposal(intent) && hostProposal === true;
+    if (readOnly() && !environment && (!isSelection(intent) || deletionExtension) && !granted) {
+      if (counted) releaseCount();
+      return { status: 'ignored', reason: 'read-only' };
+    }
+    if (!isText(intent) || tabDirection !== undefined || source === 'paste' || source === 'composition') viewStore.setProvisionalCaret(null);
+    if (isProposal(intent)) {
+      const { hostProposal: _grant, ...payload } = intent.payload;
+      intent = { ...intent, payload: granted ? { ...payload, hostProposal: true } : payload } as AdmissionIntent;
+    }
+    const authored = SUGGESTED[intent.kind] && (intent.kind !== 'navigateCell' || intent.payload.createLastRow === true);
+    if (authored && !stamped.has(intent)) {
+      const author = target ? target.suggesting : suggesting === null ? undefined : { name: suggesting, date: new Date().toISOString() };
+      intent = { ...intent, payload: { ...intent.payload, ...(authored && author ? { suggesting: author } : {}) } } as AdmissionIntent;
+      stamped.add(intent);
+    }
+    let barrier: typeof echoFence;
+    let echoTicket: { ticket?: CommandTicket; settled?: boolean; dropped?: boolean } | undefined;
+    try {
+      if (!counted) count();
+      if (compositionSlot !== null && !target) {
+        let release!: (result: PeerlessAdmissionResult) => void;
+        let drop!: (error: Error) => void;
+        const released = new Promise<PeerlessAdmissionResult>((resolve, reject) => { release = resolve; drop = reject; });
+        released.catch(() => {});
+        held.push({ intent, options, deletionExtension, release, drop });
+        return { status: 'held', slot: compositionSlot, echoEnabled: false, released };
+      }
+      const fence = tabDirection !== undefined || 'suggesting' in intent.payload || metadata.fence || isSelection(intent) || !isText(intent) ||
+        intent.kind === 'paragraphBreak' || intent.kind === 'lineBreak' || intent.kind === 'replaceSelection' ||
+        source === 'paste' || source === 'composition';
+      if (fence) {
+        echoFence = source === 'composition' ? undefined : { tickets: [] };
+        if (echoDisabledReason !== 'intent-cap') disableEcho('fence');
+      }
+      barrier = echoFence;
+      if (!fence && echoDisabledReason === 'fence' && barrier) {
+        echoTicket = {};
+        barrier.tickets.push(echoTicket);
+      }
+      const after = target?.kind === 'predecessor' ? target.ticket : tail;
+      const preview = !echoDisabledReason && isText(intent) ? echoPainter.preview(intent) : undefined;
+      const echo = preview ? { ...preview, originalIntentCount: 1 } : undefined;
+      const vertical = intent.kind === 'navigate' && (intent.payload.direction === 'up' || intent.payload.direction === 'down')
+        ? intent.payload.direction : undefined;
+      const send = (predecessor: CommandTicket | undefined, goalX?: number, recoverTab = false) => {
+        const selection = workerSelection();
+        if (tabDirection && latestEditState()?.tableContext) {
+          const suggesting = 'suggesting' in intent.payload ? intent.payload.suggesting : undefined;
+          const createLastRow = tabDirection === 'forward' && !readOnly();
+          intent = { kind: 'navigateCell', payload: {
+            direction: tabDirection, extend: false, createLastRow,
+            ...(createLastRow && suggesting ? { suggesting } : {}),
+          } };
+        } else if (recoverTab && tabDirection === 'backward') return;
+        else if (tabDirection && !recoverTab) {
+          const toolbar = latestEditState()?.toolbar;
+          const numPr = toolbar?.paragraphProperties.numPr as { numId?: number; ilvl?: number } | null | undefined;
+          if (selection && (!isCollapsed(selection) || selection.focus.offset === 0) &&
+            (toolbar?.paraId === selection.focus.paraId || toolbar?.paraId === selection.anchor.paraId) && numPr?.numId && numPr.numId > 0) {
+            if (tabDirection === 'backward' && isCollapsed(selection) && (numPr.ilvl ?? 0) === 0) return;
+            const suggesting = 'suggesting' in intent.payload ? intent.payload.suggesting : undefined;
+            intent = { kind: 'changeIndent', payload: {
+              direction: tabDirection === 'backward' ? 'decrease' : 'increase',
+              ...(tabDirection === 'backward' ? { preserveNumbering: true } : {}),
+              ...(suggesting ? { suggesting } : {}),
+            } };
+          } else if (tabDirection === 'backward') return;
+        }
+        if (deletionExtension && !isCollapsed(selection)) return predecessor;
+        if (intent.kind === 'navigate' && 'goalX' in intent.payload) {
+          verticalGoal = hasImplicitVerticalGoal(intent) ? goalX : intent.payload.goalX;
+          goalX = verticalGoal;
+        } else verticalGoal = undefined;
+        const revisionId = isRevision(intent) ? intent.payload.revisionId ?? latestEditState()?.currentRevisionId : undefined;
+        if (isRevision(intent) && !revisionId) {
+          const refused = refusal('revision-required');
+          reviewDependencies.set(refused, dependencyOf(predecessor));
+          return refused;
+        }
+        const payload = intent.kind === 'formatRange'
+          ? { ...intent.payload, selection: requireSelection(selection) }
+          : isRevision(intent) ? { revisionId: revisionId ?? '', expectVersion: documentVersion() }
+          : vertical && intent.kind === 'navigate' && goalX !== undefined
+            ? { ...intent.payload, goalX }
+            : target?.kind === 'worker-selection' && target.snapshot.workerSelection && isText(intent)
+              ? { ...intent.payload, selection: target.snapshot.workerSelection } : intent.payload;
+        const ticket = session.submit(intent.kind, payload, {
+          ...metadata, after: dependencyOf(predecessor), fence: !!fence,
+          coalesceKey: fence ? undefined : metadata.coalesceKey ?? intent.kind,
+          echo,
+        });
+        if (echoTicket) echoTicket.ticket = ticket;
+        if (isRevision(intent)) reviewDependencies.set(ticket, dependencyOf(predecessor));
+        if (onSubmitted) {
+          try { onSubmitted(ticket); } catch (error) { console.error('[DocxEditor] submission observer failed', error); }
+        }
+        return ticket;
+      };
+      const waitForSelection = tabDirection !== undefined || intent.kind === 'formatRange' || isRevision(intent) || deletionExtension || vertical !== undefined;
+      const ticket = deletionExtension || vertical || (after && (waitForSelection || deferred.has(after))) ||
+        (intent.kind === 'formatRange' && !workerSelection())
+        ? defer(after, waitForSelection, send, vertical, false, tabDirection ? () => send(undefined, undefined, true) : undefined)
+        : send(after) ?? defer(after, false, () => undefined);
+      if (fence && barrier) barrier.ticket = ticket;
+      track(ticket, isRevision(intent), tabDirection !== undefined);
+      if (echoTicket) {
+        const entry = echoTicket;
+        const drop = () => { entry.dropped = true; };
+        void ticket.ack.then((outcome) => { if (outcome.status === 'refused' || outcome.status === 'cancelled') drop(); }, drop);
+      }
+      if (!environment) {
+        pendingInputs += 1;
+        const done = () => {
+          if (echoTicket) echoTicket.settled = true;
+          if (!disposed) pendingInputs -= 1;
+        };
+        void ticket.ack.then(done, done);
+      }
+      return { status: 'submitted', ticket, echoEnabled: echo !== undefined };
+    } catch (error) {
+      const failed = barrier && echoTicket ? barrier.tickets.indexOf(echoTicket) : -1;
+      if (failed >= 0) barrier?.tickets.splice(failed, 1);
+      if (!counted) releaseCount();
+      throw error;
+    }
+  };
+  const resumeEcho = (throughSeq: number) => {
+    const barrier = echoFence;
+    const seq = barrier?.ticket?.seq;
+    const contextThroughSeq = echoPainter.contextThroughSeq;
+    if (disposed || attachingEcho || echoDisabledReason !== 'fence' || !barrier || seq === undefined ||
+      compositionSlot !== null || readOnly() || contextThroughSeq === undefined ||
+      seq > throughSeq || contextThroughSeq !== throughSeq || !session.attachEcho) return;
+    const tickets: CommandTicket[] = [];
+    for (const entry of barrier.tickets) {
+      if (entry.dropped) continue;
+      if (!entry.ticket) {
+        if (entry.settled) continue;
+        return;
+      }
+      if (entry.ticket.seq === undefined || entry.ticket.seq > throughSeq) tickets.push(entry.ticket);
+    }
+    const ticketCount = barrier.tickets.length;
+    let originalIntents = 0;
+    let attached: boolean;
+    attachingEcho = true;
+    try {
+      attached = session.attachEcho(tickets, (draft, originalIntentCount) => {
+        originalIntents += originalIntentCount;
+        if (originalIntents > DOCX_ECHO_MAX_UNACKED_INTENTS) return undefined;
+        const intent = { kind: draft.kind, payload: draft.payload } as AdmissionIntent;
+        if (!isText(intent)) return undefined;
+        const preview = echoPainter.preview(intent);
+        return preview ? { ...preview, originalIntentCount } : undefined;
+      });
+    } finally { attachingEcho = false; }
+    if (barrier === echoFence && barrier.tickets.length !== ticketCount) {
+      echoFence = undefined;
+      echoPainter.disable('fence');
+      return;
+    }
+    if (!attached) { echoPainter.disable('fence'); return; }
+    if (disposed || barrier !== echoFence || echoDisabledReason !== 'fence') return;
+    echoDisabledReason = null;
+    echoFence = undefined;
+  };
+  const unsubscribeEcho = session.attachEcho ? session.subscribe((state) => resumeEcho(state.presentedThroughSeq)) : () => {};
+  const unsubscribeAck = session.subscribeAck?.((ack) => {
+    const seq = echoFence?.ticket?.seq;
+    if (disposed || attachingEcho || echoDisabledReason !== 'fence' || seq === undefined ||
+      compositionSlot !== null || readOnly() || !session.attachEcho || !ack.echoContext || ack.throughSeq !== seq ||
+      ack.throughSeq < session.state.throughSeq ||
+      !ack.outcomes.some((outcome) => outcome.seq === seq && outcome.status === 'noop')) return;
+    if (echoPainter.installAckContext?.(ack.echoContext, seq)) resumeEcho(seq);
+  });
+  const admission: PeerlessInputAdmission = {
+    session, viewStore, echoPainter,
+    whenCompositionSettled() {
+      if (disposed) return Promise.reject(disposedError());
+      if (compositionSlot === null) return Promise.resolve();
+      return new Promise<void>((resolve, reject) => { compositionWaiters.add({ resolve, reject }); });
+    },
+    getSnapshot: () => ({
+      readOnly: readOnly(),
+      tail, originalUnackedIntents, pendingInputs, echoEnabled: echoDisabledReason === null,
+      echoDisabledReason, compositionSlot, heldIntents: held.length,
+    }),
+    setSuggesting(author) { suggesting = author; },
+    setReadOnly(value) {
+      if (disposed) throw disposedError();
+      viewStore.setProvisionalCaret(null);
+      const send = () => session.submit('setReadOnly', { readOnly: value }, { fence: true });
+      const ticket = tail && deferred.has(tail) ? defer(tail, false, send, undefined, true) : send();
+      echoFence = undefined;
+      requestedReadOnly = value;
+      modeBarrier = tail = ticket;
+      prefixes.set(ticket, ticket.ack.then((outcome) =>
+        outcome.status !== 'refused' && outcome.status !== 'cancelled', () => false));
+      disableEcho('fence');
+      modeListeners.forEach((listener) => listener());
+      const settle = (failed: boolean) => {
+        if (disposed || modeBarrier !== ticket) return;
+        modeBarrier = undefined;
+        if (failed) requestedReadOnly = undefined;
+        if (tail === ticket && originalUnackedIntents === 0) tail = undefined;
+        modeListeners.forEach((listener) => listener());
+      };
+      void ticket.ack.then((outcome) => settle(outcome.status === 'refused' || outcome.status === 'cancelled'), () => settle(true));
+      return ticket;
+    },
+    subscribeReadOnly(listener) {
+      modeListeners.add(listener);
+      return () => { modeListeners.delete(listener); };
+    },
+    reserveComposition() {
+      if (disposed) throw disposedError();
+      if (compositionSlot !== null) throw new Error('Composition is already active');
+      viewStore.setProvisionalCaret(null);
+      echoFence = undefined;
+      compositionSlot = ++nextSlot;
+      const target: PeerlessAdmissionTarget = tail
+        ? { kind: 'predecessor', ticket: tail, suggesting: suggesting === null ? undefined : { name: suggesting, date: new Date().toISOString() } }
+        : { kind: 'worker-selection', snapshot: viewStore.getSnapshot(), suggesting: suggesting === null ? undefined : { name: suggesting, date: new Date().toISOString() } };
+      const fence = () => { void session.flush().catch(() => {}); return undefined; };
+      if (tail && deferred.has(tail)) defer(tail, false, fence, undefined, true);
+      else fence();
+      if (echoDisabledReason !== 'intent-cap') disableEcho('fence');
+      return { slot: compositionSlot, target };
+    },
+    settleComposition(slot, commit) {
+      if (disposed) throw disposedError();
+      if (slot !== compositionSlot) throw new Error('Composition slot is not active');
+      compositionSlot = null;
+      let failed = false;
+      let failure: unknown;
+      let result: PeerlessAdmissionResult = { status: 'ignored', reason: 'empty-composition' };
+      try {
+        if (commit?.text) result = submit({ kind: 'replaceSelection', payload: { text: commit.text } },
+          { source: 'composition', fence: true }, false, commit.target);
+      } catch (error) { failed = true; failure = error; }
+      const compositionFailed = failed;
+      for (const entry of held.splice(0)) {
+        if (!failed) {
+          try { entry.release(submit(entry.intent, entry.options, true, undefined, entry.deletionExtension)); continue; } catch (error) { failed = true; failure = error; }
+        }
+        releaseCount();
+        entry.drop(failure instanceof Error ? failure : new Error(String(failure)));
+      }
+      for (const waiter of compositionWaiters) waiter.resolve();
+      compositionWaiters.clear();
+      resetIdle();
+      if (compositionFailed) throw failure;
+      return result;
+    },
+    dispose() {
+      disposed = true;
+      unsubscribeEcho();
+      unsubscribeAck?.();
+      echoFence = undefined;
+      for (const waiter of compositionWaiters) waiter.reject(disposedError());
+      compositionWaiters.clear();
+      for (const cancel of cancellations) cancel();
+      cancellations.clear();
+      for (const entry of held.splice(0)) entry.drop(disposedError());
+      pending.clear();
+      pendingInputs = 0;
+      modeListeners.clear();
+      tail = undefined;
+      compositionSlot = null;
+      originalUnackedIntents = 0;
+      admissions.delete(admission);
+    },
+  };
+  admissions.set(admission, (intent, options, deletionExtension) => submit(intent, options, false, undefined, deletionExtension));
+  return admission;
+}
+
+/** @internal */
+export function admitIntent(
+  _admission: PeerlessInputAdmission,
+  _intent: PeerlessInputIntent,
+  _options?: PeerlessAdmissionOptions
+): PeerlessAdmissionResult {
+  return submitAdmission(_admission, _intent, _options);
+}
+
+/** @internal */
+export function admitInputIntents(
+  admission: PeerlessInputAdmission,
+  intents: readonly PeerlessInputIntent[],
+  options: PeerlessAdmissionOptions
+): void {
+  for (const [index, intent] of intents.entries()) {
+    const next = intents[index + 1];
+    const deletionExtension = intent.kind === 'navigate' && intent.payload.extend &&
+      (next?.kind === 'deleteBackward' || next?.kind === 'deleteForward');
+    const snapshot = admission.getSnapshot();
+    const waiting = snapshot.tail !== undefined || snapshot.compositionSlot !== null;
+    const readOnly = admission.getSnapshot().readOnly;
+    if (deletionExtension && readOnly) continue;
+    if (deletionExtension && !waiting && !isCollapsed(latestSelection(admission.session, admission.viewStore))) continue;
+    submitAdmission(admission, intent, {
+      ...options, source: intent.kind === 'navigate' ? 'selection' : options.source,
+    }, deletionExtension && waiting);
+  }
+}
+
+/** @internal */
+export function submitFormattingIntent(
+  _admission: PeerlessInputAdmission,
+  _intent: PeerlessFormattingIntent,
+  _options?: PeerlessAdmissionOptions
+): PeerlessAdmissionResult {
+  return submitAdmission(_admission, _intent, { ..._options, source: 'formatting', fence: true });
+}
+
+type AdmissionIntent = PeerlessInputIntent | PeerlessFormattingIntent;
+
+/** Kinds the worker records as suggestions; suggesting mode stamps its author on exactly these. */
+const SUGGESTED = {
+  insertText: true, replaceSelection: true, deleteBackward: true, deleteForward: true, paragraphBreak: true, lineBreak: true,
+  pasteFragment: true,
+  applyEdits: true, replaceMatches: true, insertImage: true, insertTable: true, insertPageBreak: true, insertSectionBreak: true,
+  toggleMark: true, formatRange: true, clearFormatting: true, setParagraphAttrs: true, applyParagraphStyle: true,
+  formatSelection: true, toggleStrike: true, toggleList: true, changeIndent: true, navigateCell: true,
+  insertTableRow: true, insertTableColumn: true, deleteTableRow: true, deleteTableColumn: true,
+  deleteTable: true, mergeTableCells: true, splitTableCell: true, setTableCellShading: true, setTableBorders: true, setTableProperties: true,
+  selectTableCells: false,
+  addComment: false, updateComment: false, removeComment: false, resizeObject: false, moveObject: false, moveEmbed: true,
+  setHyperlink: false, setObjectProperties: false, setSectionProperties: false, setNoteProperties: false, setWatermark: false,
+  setSectionMargins: false, setTabStops: false, removeTabStop: false,
+  setContentControlValue: false, addRepeatingItem: false, removeRepeatingItem: false,
+  openPart: false, ensurePart: false, removePart: false,
+  select: false, navigate: false, selectPoint: false, extendSelection: false,
+  undo: false, redo: false, setRenderEnvironment: false, setFontEnvironment: false,
+  propose: false, setProposalStates: false, withdrawProposals: false, acceptRevision: false, rejectRevision: false,
+} satisfies Record<AdmissionIntent['kind'], boolean>;
+const admissions = new WeakMap<PeerlessInputAdmission,
+  (intent: AdmissionIntent, options?: PeerlessAdmissionOptions, deletionExtension?: boolean) => PeerlessAdmissionResult>();
+
+const pointerExtensions = new WeakMap<PeerlessInputAdmission, () => void>();
+
+/**
+ * @internal A pointer extension held back while an earlier one is in flight. Any newer admission submits it first,
+ * so it never lands after a command the user issued later.
+ */
+export function holdPointerExtension(admission: PeerlessInputAdmission, flush: (() => void) | null): void {
+  if (flush) pointerExtensions.set(admission, flush);
+  else pointerExtensions.delete(admission);
+}
+
+function submitAdmission(
+  admission: PeerlessInputAdmission, intent: AdmissionIntent, options?: PeerlessAdmissionOptions,
+  deletionExtension = false
+): PeerlessAdmissionResult {
+  const submit = admissions.get(admission);
+  if (!submit) throw new Error('Input admission is unavailable');
+  const held = pointerExtensions.get(admission);
+  if (held) {
+    pointerExtensions.delete(admission);
+    held();
+  }
+  return submit(intent, options, deletionExtension);
+}
+
+function latestSelection(session: DocxWorkerEditSession<PeerlessEchoIntent>, viewStore: PeerlessViewStore) {
+  const snapshot = viewStore.getSnapshot();
+  return session.state.throughSeq >= snapshot.throughSeq && session.state.selection !== undefined
+    ? session.state.selection : snapshot.workerSelection;
+}
+
+function isCollapsed(selection: DocxCommandSelection | null | undefined): boolean {
+  return !!selection && selection.anchor.story === selection.focus.story &&
+    selection.anchor.paraId === selection.focus.paraId && selection.anchor.offset === selection.focus.offset;
+}
+
+function requireSelection(selection: DocxCommandSelection | null | undefined): DocxCommandSelection {
+  if (!selection) throw new Error('Worker selection is unavailable');
+  return selection;
+}
+
+function isProposal(intent: AdmissionIntent): intent is PeerlessProposalIntent {
+  return intent.kind === 'propose' || intent.kind === 'setProposalStates' || intent.kind === 'withdrawProposals';
+}
+
+function isRevision(intent: AdmissionIntent): intent is PeerlessRevisionIntent {
+  return intent.kind === 'acceptRevision' || intent.kind === 'rejectRevision';
+}
+
+function isSelection(intent: AdmissionIntent): boolean {
+  return intent.kind === 'openPart' || intent.kind === 'select' || intent.kind === 'navigate' || intent.kind === 'navigateCell' ||
+    intent.kind === 'selectTableCells' || intent.kind === 'selectPoint' || intent.kind === 'extendSelection';
+}
+
+function isText(intent: AdmissionIntent): intent is PeerlessTextIntent {
+  return intent.kind === 'insertText' || intent.kind === 'replaceSelection' ||
+    intent.kind === 'deleteBackward' || intent.kind === 'deleteForward' || intent.kind === 'paragraphBreak' || intent.kind === 'lineBreak';
+}

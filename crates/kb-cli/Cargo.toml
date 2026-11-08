@@ -1,0 +1,113 @@
+[package]
+name = "kb-cli"
+description = "`kb` 二进制(clap),组装根:唯一一处构造具体适配器并注入服务"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "kb"
+path = "src/main.rs"
+
+[features]
+# 测试专用:启用 Fake 嵌入后端(设计规范, 起用)
+testkit = ["kb-embed/testkit"]
+
+[dependencies]
+async-trait = { workspace = true }
+# 多线程服务用 glibc 的 malloc 会因为每线程一个 arena 而把内存"留住"(实测 4 个用户一上传常驻就到 3 GB);
+# jemalloc 按时间把空闲页还给系统,常驻内存稳定得多
+tikv-jemallocator = { version = "0.6", features = ["background_threads"] }
+chrono = { workspace = true }
+clap = { workspace = true }
+kb-acp = { path = "../kb-acp" }
+kb-collab = { path = "../kb-collab" }
+kb-core = { path = "../kb-core" }
+kb-extract = { path = "../kb-extract" }
+kb-embed = { path = "../kb-embed" }
+kb-capability = { path = "../kb-capability" }
+kb-index = { path = "../kb-index" }
+kb-mail = { path = "../kb-mail" }
+kb-meta = { path = "../kb-meta" }
+kb-service = { path = "../kb-service" }
+kb-store-lance = { path = "../kb-store-lance" }
+kb-web = { path = "../kb-web" }
+# doctor 只读打开 meta.db 做「物理行 vs chunks」对账；不建库、不迁移
+rusqlite = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+toml = { workspace = true }
+uuid = { workspace = true }
+tracing = { workspace = true }
+tracing-appender = { workspace = true }
+tracing-subscriber = { workspace = true }
+kb-llm = { path = "../kb-llm" }
+kb-mcp = { path = "../kb-mcp" }
+
+[dev-dependencies]
+kb-testkit = { path = "../kb-testkit" }
+encoding_rs = { workspace = true }
+flate2 = { workspace = true }
+tempfile = { workspace = true }
+# 协作端到端测试:同步 WebSocket 客户端 + 模拟浏览器里的 Yjs 文档
+tungstenite = "0.29"
+yrs = { version = "0.28", features = ["sync"] }
+
+[[test]]
+name = "e2e_ui"
+required-features = ["testkit"]
+
+[[test]]
+name = "e2e_office_collab"
+required-features = ["testkit"]
+
+[[test]]
+name = "e2e_doc_agent"
+required-features = ["testkit"]
+
+[[test]]
+name = "e2e_comments"
+required-features = ["testkit"]
+
+[[test]]
+name = "e2e_security"
+required-features = ["testkit"]
+
+[[test]]
+name = "e2e_backup_users"
+required-features = ["testkit"]
+
+[[test]]
+name = "loadtest"
+required-features = ["testkit"]
+
+[[test]]
+name = "e2e_totp"
+required-features = ["testkit"]
+
+[[test]]
+name = "e2e_mcp_users"
+required-features = ["testkit"]
+
+[[test]]
+name = "e2e_acp_users"
+required-features = ["testkit"]
+
+[[test]]
+name = "e2e_collab"
+required-features = ["testkit"]
+
+[[test]]
+name = "e2e_mcp"
+required-features = ["testkit"]
+
+[[test]]
+name = "e2e_daemon"
+required-features = ["testkit"]
+
+[[test]]
+name = "e2e_web"
+required-features = ["testkit"]

@@ -1,0 +1,17 @@
+/target
+# 仓库根跑 vite/vitest 时留下的缓存
+/node_modules/
+web-ui/node_modules/
+web-ui/dist/
+.kb-dev*/
+logs/
+scratch/
+# 本地模型缓存(OCR 等;默认路径是 <KB_HOME>/models,仓库根下这份是开发机软链,不入库)
+models/
+
+# 办公文档协同的服务端副本(office-worker)的依赖
+office-worker/node_modules/
+
+# 本地工作区探针与外部工具配置
+.claude/
+skills/

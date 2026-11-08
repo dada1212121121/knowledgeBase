@@ -1,0 +1,163 @@
+/* 图表(环形图 / 折线图 / 横向条):分类色板 + 三个组件的样式。
+   色板单独起 --viz-* 命名,不碰已有的 --chart-1…4(那四个跟随强调色,仪表盘的柱图在用)。
+   --viz-* 是固定色相、不随强调色变:同一页上「分类」要一眼分得开,强调色换成绿色就不能再和绿色分类撞车。
+   每个值在 5 个主题 × 6 层表面上的对比度 ≥ 3:1(WCAG 非文本),由 charts.spec.ts 守着,改色先跑它。 */
+:root {
+  --viz-1: #7c9cff; --viz-2: #4cc38a; --viz-3: #f0a23b; --viz-4: #c58cf5; --viz-5: #4fc3dc; --viz-6: #f06c8c;
+  /* 「其它」「剩余」这类汇总项用中性灰,不占分类色 */
+  --viz-other: var(--text-quaternary);
+  --viz-axis: var(--text-tertiary);
+  --viz-grid: var(--border-default);
+  --viz-flag: var(--status-danger);
+}
+:root[data-tone=light], [data-tone=light] {
+  --viz-1: #3b5bdb; --viz-2: #1f8a5b; --viz-3: #b45f06; --viz-4: #7b3fc4; --viz-5: #0b7285; --viz-6: #c2255c;
+}
+
+/* ---- 环形图 ---- */
+.kb-donut { display: flex; align-items: center; gap: var(--gap); min-width: 0; margin: 0; }
+.kb-donut-plot { position: relative; flex: none; width: var(--donut-size, 120px); height: var(--donut-size, 120px); }
+.kb-donut-svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
+.kb-donut-track { fill: none; stroke: var(--viz-grid); stroke-width: 12; opacity: .6; }
+.kb-donut-arc { fill: none; stroke-width: 12; transition: opacity var(--dur-fast) var(--ease-out), stroke-width var(--dur-fast) var(--ease-out); }
+.kb-donut.is-hover .kb-donut-arc:not(.is-on) { opacity: .35; }
+.kb-donut-arc.is-on { stroke-width: 14; }
+/* 先停在第一帧(透明),进入视口后才播放:不然会先闪一下画好的环再重新画 */
+.kb-donut-svg { animation: kb-donut-in calc(var(--dur-page) * 1.6) var(--ease-spring) both; animation-play-state: paused; }
+.kb-donut.is-in .kb-donut-svg { animation-play-state: running; }
+@keyframes kb-donut-in { from { opacity: 0; transform: rotate(-110deg) scale(.92); } to { opacity: 1; transform: rotate(-90deg) scale(1); } }
+.kb-donut-center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; padding: 22%; }
+.kb-donut-value { font-size: calc(18px * var(--fs)); font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--t); }
+.kb-donut-cap { font-size: calc(11px * var(--fs)); color: var(--m); line-height: 1.2; margin-top: 2px; }
+.kb-donut-legend { flex: 1 1 auto; min-width: 0; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.kb-donut-row { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto auto; align-items: center; gap: 8px; min-height: 28px; padding: 0 6px; border-radius: var(--r1); font-size: calc(13px * var(--fs)); }
+.kb-donut-row.is-on { background: var(--hover); }
+.kb-donut-sw { width: 10px; height: 10px; border-radius: 3px; }
+.kb-donut-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--t2); }
+/* 数值列定宽右对齐:各行的数量位数不同(637 / 12),不定宽时右边缘参差,百分比列会跟着抖 */
+.kb-donut-num { min-width: 4ch; text-align: right; font-variant-numeric: tabular-nums; color: var(--t); }
+.kb-donut-pct { min-width: 3.4ch; text-align: right; font-variant-numeric: tabular-nums; color: var(--m); }
+.kb-donut-empty { color: var(--m); font-size: calc(13px * var(--fs)); }
+@media (max-width: 479px) { .kb-donut { flex-direction: column; align-items: stretch; } .kb-donut-plot { align-self: center; } }
+
+/* ---- 折线图 ---- */
+.kb-line { position: relative; min-width: 0; margin: 0; outline: none; }
+.kb-line:focus-visible { box-shadow: var(--ring); border-radius: var(--r2); }
+.kb-line-svg { display: block; width: 100%; overflow: visible; }
+.kb-line-grid { stroke: var(--viz-grid); stroke-width: 1; stroke-dasharray: 2 4; }
+.kb-line-base { stroke: var(--viz-axis); stroke-width: 1; }
+.kb-line-tick { fill: var(--viz-axis); font-size: 11px; font-variant-numeric: tabular-nums; }
+.kb-line-path { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.kb-line-path.is-dash { stroke-dasharray: 6 4; }
+.kb-line-area { opacity: 1; }
+.kb-line-area.is-band { fill-opacity: .42; }
+.kb-line.is-stacked .kb-line-path { stroke-width: 1.5; }
+.kb-line-dot { stroke: var(--surface-1); stroke-width: 1.5; }
+.kb-line-flag { fill: none; stroke: var(--viz-flag); stroke-width: 2; }
+.kb-line-cursor { stroke: var(--viz-axis); stroke-width: 1; stroke-dasharray: 3 3; }
+.kb-line-tip-total { margin-top: 4px; padding-top: 4px; border-top: var(--hl, 1px) solid var(--viz-grid); }
+/* 入场:进入视口才开始(useReveal),线从左到右描出来,面积、点跟着淡入。
+   时长全用 motion 令牌;减弱动效时令牌是 0,直接是最终状态 */
+.kb-line .kb-line-path:not(.is-dash) { stroke-dasharray: 1 1; stroke-dashoffset: 1; opacity: 0; transition: stroke-dashoffset calc(var(--dur-page) * 2.2) var(--ease-out), opacity var(--dur-fast) linear; }
+.kb-line.is-in .kb-line-path:not(.is-dash) { stroke-dashoffset: 0; opacity: 1; }
+.kb-line .kb-line-path.is-dash { opacity: 0; transition: opacity var(--dur-slow) var(--ease-out); }
+.kb-line.is-in .kb-line-path.is-dash { opacity: 1; }
+.kb-line .kb-line-area { opacity: 0; transition: opacity calc(var(--dur-page) * 1.6) var(--ease-out) var(--dur-base); }
+.kb-line.is-in .kb-line-area { opacity: 1; }
+.kb-line .kb-line-dot { opacity: 0; transition: opacity var(--dur-slow) var(--ease-out) calc(var(--dur-page) * 1.4); }
+.kb-line.is-in .kb-line-dot { opacity: 1; }
+/* 实时点的呼吸光圈:表示「这是现在」 */
+.kb-line-now { fill: none; stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: kb-now-pulse calc(var(--dur-page) * 4.5) var(--ease-out) infinite; pointer-events: none; }
+@keyframes kb-now-pulse { from { opacity: .75; transform: scale(.7); } to { opacity: 0; transform: scale(2.6); } }
+/* 不用全局的 .tip:components.css 在手机上把 .tip 整个 display:none!important(给原来的设计稿用的),
+   提示气泡在手机上点一下图就是靠它看数,不能被藏掉 */
+.kb-line-tip { position: absolute; top: 0; z-index: 2; min-width: 150px; max-width: min(260px, 70%); padding: 6px 10px; pointer-events: none;
+  background: var(--surface-3); border: var(--hl) solid var(--b2); border-radius: var(--r2); box-shadow: var(--sh2); font-size: calc(12px * var(--fs)); }
+.kb-line-tip-title { margin-bottom: 4px; }
+.kb-line-tip-row { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; align-items: center; gap: 6px; font-size: calc(12px * var(--fs)); }
+.kb-line-tip-row b { font-variant-numeric: tabular-nums; }
+.kb-line-tip-flag { margin-top: 4px; color: var(--status-danger-text); font-size: calc(12px * var(--fs)); }
+.kb-line-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: calc(12px * var(--fs)); color: var(--t2); }
+.kb-line-legend span { display: inline-flex; align-items: center; gap: 6px; min-height: 20px; }
+.kb-line-empty { display: grid; place-items: center; min-height: 120px; color: var(--m); font-size: calc(13px * var(--fs)); }
+.kb-mark { flex: none; display: block; }
+
+/* ---- 环形仪表 ---- */
+.kb-gauge { position: relative; flex: none; width: var(--gauge-size, 120px); height: var(--gauge-size, 120px); margin: 0; }
+.kb-gauge-svg { display: block; width: 100%; height: 100%; transform: rotate(135deg); }
+.kb-gauge-track, .kb-gauge-arc { fill: none; stroke-width: 9; stroke-linecap: round; }
+.kb-gauge-track { stroke: var(--viz-grid); }
+.kb-gauge-arc { stroke: var(--viz-1); transition: stroke-dasharray calc(var(--dur-page) * 2) var(--ease-spring-soft), stroke var(--dur-base) var(--ease-out); }
+.kb-gauge.is-warn .kb-gauge-arc { stroke: var(--status-warning); }
+.kb-gauge.is-danger .kb-gauge-arc { stroke: var(--status-danger); }
+.kb-gauge-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; pointer-events: none; }
+.kb-gauge-value { font-size: calc(var(--gauge-size, 120px) * .24); line-height: 1; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--t); }
+.kb-gauge.is-warn .kb-gauge-value { color: var(--status-warning-text); }
+.kb-gauge.is-danger .kb-gauge-value { color: var(--status-danger-text); }
+.kb-gauge-caption { max-width: 84%; font-size: max(11px, calc(var(--gauge-size, 120px) * .1)); line-height: 1.25; overflow-wrap: anywhere; }
+
+/* ---- 行 × 列热力矩阵 ---- */
+.kb-heatgrid { margin: 0; min-width: 0; }
+.kb-heatgrid-plot { display: grid; grid-template-columns: auto repeat(var(--hg-cols, 24), minmax(0, 1fr)); gap: 3px; align-items: center; }
+.kb-heatgrid-plot > i { aspect-ratio: 1; min-height: 8px; border-radius: var(--r-xs, 3px); background: var(--viz-grid); animation: kb-cell-in calc(var(--dur-base) * 1.4) var(--ease-out) both; animation-delay: calc(var(--i, 0) * var(--stagger) * 2); animation-play-state: paused; }
+.kb-heatgrid.is-in .kb-heatgrid-plot > i { animation-play-state: running; }
+.kb-heatgrid i[data-level="1"] { background: color-mix(in srgb, var(--viz-1) 28%, transparent); }
+.kb-heatgrid i[data-level="2"] { background: color-mix(in srgb, var(--viz-1) 50%, transparent); }
+.kb-heatgrid i[data-level="3"] { background: color-mix(in srgb, var(--viz-1) 74%, transparent); }
+.kb-heatgrid i[data-level="4"] { background: var(--viz-1); }
+.kb-heatgrid-row { padding-right: 6px; font-size: calc(12px * var(--fs)); white-space: nowrap; }
+.kb-heatgrid-col { font-size: calc(11px * var(--fs)); text-align: center; white-space: nowrap; overflow: visible; font-variant-numeric: tabular-nums; }
+.kb-heatgrid-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 8px; font-size: calc(12px * var(--fs)); }
+.kb-heatgrid-legend i { width: 12px; height: 12px; border-radius: 3px; background: var(--viz-grid); }
+.kb-heatgrid-empty { display: grid; place-items: center; min-height: 120px; color: var(--m); font-size: calc(13px * var(--fs)); }
+
+/* ---- 漏斗 ---- */
+.kb-funnel { margin: 0; min-width: 0; }
+.kb-funnel-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.kb-funnel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: calc(13px * var(--fs)); }
+.kb-funnel-head b { font-variant-numeric: tabular-nums; }
+.kb-funnel-row.is-danger .kb-funnel-head b { color: var(--status-danger-text); }
+.kb-funnel-track { height: 10px; margin-top: 5px; border-radius: 5px; background: var(--viz-grid); overflow: hidden; }
+.kb-funnel-track i { display: block; height: 100%; border-radius: 5px; transform-origin: 0 50%; animation: kb-grow-x calc(var(--dur-page) * 1.4) var(--ease-out) both; animation-delay: calc(var(--i, 0) * var(--stagger) * 3); animation-play-state: paused; }
+.kb-funnel.is-in .kb-funnel-track i { animation-play-state: running; }
+.kb-funnel-rate { display: block; margin-top: 3px; font-size: calc(12px * var(--fs)); }
+.kb-funnel-empty { display: grid; place-items: center; min-height: 120px; color: var(--m); font-size: calc(13px * var(--fs)); }
+
+/* ---- 图表卡骨架 ---- */
+.kb-ccard { display: flex; flex-direction: column; min-width: 0; }
+.kb-ccard-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2) var(--sp-3); padding: var(--sp-3) var(--card-pad-ui) 0; }
+.kb-ccard-headline { margin: 0; min-width: 0; font-size: calc(13px * var(--fs)); color: var(--t); font-variant-numeric: tabular-nums; animation: kb-fade-in var(--dur-base) var(--ease-out) both; }
+.kb-ccard-body { flex: 1 1 auto; min-width: 0; padding: var(--sp-3) var(--card-pad-ui) var(--card-pad-ui); }
+.kb-ccard-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-2); min-height: 120px; text-align: center; font-size: calc(13px * var(--fs)); }
+.kb-ccard-foot { padding: 0 var(--card-pad-ui) var(--card-pad-ui); font-size: calc(12px * var(--fs)); }
+
+/* ---- 横向条(堆叠 / 单色 / 带上限刻度) ---- */
+.kb-hbars { margin: 0; min-width: 0; }
+.kb-hbars-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.kb-hbars-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; min-width: 0; font-size: calc(13px * var(--fs)); }
+.kb-hbars-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--t); }
+.kb-hbars-sub { color: var(--m); font-size: calc(12px * var(--fs)); margin-left: 6px; }
+.kb-hbars-total { flex: none; font-variant-numeric: tabular-nums; color: var(--t2); }
+.kb-hbars-row.is-over .kb-hbars-total { color: var(--status-danger-text); font-weight: 600; }
+.kb-hbars-track { position: relative; display: flex; height: 10px; margin-top: 5px; border-radius: 5px; background: var(--viz-grid); overflow: visible; }
+.kb-hbars-seg { height: 100%; min-width: 2px; transition: opacity var(--dur-fast) var(--ease-out); }
+.kb-hbars-seg:first-child { border-radius: 5px 0 0 5px; }
+.kb-hbars-seg:last-child { border-radius: 0 5px 5px 0; }
+.kb-hbars-seg:only-child { border-radius: 5px; }
+.kb-hbars-seg + .kb-hbars-seg { margin-left: 1px; }
+.kb-hbars-limit { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--t); border-radius: 1px; }
+.kb-hbars-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 10px; padding: 0; list-style: none; font-size: calc(12px * var(--fs)); color: var(--t2); }
+.kb-hbars-legend li { display: inline-flex; align-items: center; gap: 6px; min-height: 20px; }
+.kb-hbars-legend i { width: 10px; height: 10px; border-radius: 3px; }
+.kb-hbars-note { margin: 8px 0 0; color: var(--m); font-size: calc(12px * var(--fs)); }
+.kb-hbars-empty { color: var(--m); font-size: calc(13px * var(--fs)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .kb-line .kb-line-path, .kb-line .kb-line-area, .kb-line .kb-line-dot { transition: none; }
+  .kb-line-now { animation: none; opacity: .5; }
+  .kb-gauge-arc { transition: none; }
+  .kb-heatgrid-plot > i { animation: none; }
+  .kb-funnel-track i, .kb-ccard-headline { animation: none; }
+  .kb-donut-svg { animation: none; }
+  .kb-donut-arc, .kb-hbars-seg { transition: none; }
+}

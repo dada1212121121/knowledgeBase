@@ -1,0 +1,225 @@
+/* 组件包(.5):PageHeader · ResponsiveTable · BatchBar · Field · ActionBar · Sheet · Empty · Skeleton · 可滑动 Tabs。
+   手工维护,只读 token(设计规范)。断点同 shell.css:手机 <600。触屏(pointer: coarse)可点区域 ≥44px。 */
+
+.kb-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- PageHeader ---------- */
+.kb-ph { display: flex; flex-direction: column; gap: var(--gap-xs); min-width: 0; }
+.kb-ph-crumb { color: var(--m); font-size: var(--text-12); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kb-ph-row { display: flex; align-items: flex-end; gap: var(--gap-sm); min-width: 0; flex-wrap: wrap; }
+.kb-ph-main { flex: 1 1 280px; min-width: 0; }
+.kb-ph-title { margin: 0; font-size: var(--text-20); line-height: var(--lh-tight); font-weight: var(--fw-title); letter-spacing: -0.018em; overflow-wrap: anywhere; }
+.kb-ph-desc { margin: 0; color: var(--m); font-size: var(--text-13); line-height: var(--lh-body); }
+.kb-ph-actions { display: flex; align-items: center; gap: var(--gap-sm); flex-wrap: wrap; min-width: 0; }
+.kb-ph-back { margin-left: -4px; align-self: flex-start; }
+.kb-ph-extra { min-width: 0; }
+@media (max-width: 599px) {
+  /* 和手机顶栏的页面名重复的页内标题:视觉隐藏,DOM 保留(KbPageHeader 比较文字后加 is-dup) */
+  .kb-ph-title.is-dup { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .kb-ph-row { align-items: stretch; }
+  .kb-ph-actions { flex: 1 1 100%; }
+  .kb-ph-actions > .kb-btn, .kb-ph-actions > .btn { flex: 1 1 auto; justify-content: center; }
+}
+
+/* ---------- Field ---------- */
+.kb-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.kb-field-label { display: flex; align-items: center; gap: 4px; font-size: var(--text-13); font-weight: 500; color: var(--t2); }
+.kb-field-req { color: var(--status-danger-text); }
+.kb-field-extra { margin-left: auto; font-weight: 400; }
+.kb-field-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.kb-field-hint { margin: 0; font-size: var(--text-12); line-height: 1.5; color: var(--m); }
+.kb-field-error { margin: 0; display: flex; align-items: flex-start; gap: 4px; font-size: var(--text-12); line-height: 1.5; color: var(--status-danger-text); }
+.kb-field-error > svg { flex: none; margin-top: 2px; }
+.kb-field.is-invalid :where(input, textarea, select, .kb-input, .kb-textarea) { border-color: var(--status-danger); }
+/* 桌面「标签在左」;手机始终在上(宽度不够时并排会挤坏) */
+@media (min-width: 840px) {
+  .kb-field.is-inline { display: grid; grid-template-columns: var(--form-label-w) minmax(0, 1fr); align-items: start; column-gap: var(--gap); }
+  .kb-field.is-inline .kb-field-label { padding-top: 6px; }
+}
+/* 输入框字号 ≥16px,防止 iOS 聚焦时自动放大页面(设计规范) */
+@media (pointer: coarse) {
+  .kb-field :where(input, textarea, select) { font-size: max(16px, 1em); min-height: 44px; }
+}
+
+/* ---------- ActionBar:表单底部操作条 ---------- */
+.kb-actionbar {
+  position: sticky;
+  /* 软键盘占的位置由外壳的 padding-bottom 让出,所以这里不用再加 --kbd-inset(加了就重复) */
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  margin-top: var(--gap);
+  padding: var(--gap-sm) var(--card-px);
+  padding-bottom: calc(var(--gap-sm) + var(--safe-bottom));
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(12px);
+  border-top: var(--hl) solid var(--b);
+}
+.kb-actionbar-note { margin-right: auto; font-size: var(--text-12); color: var(--m); }
+.kb-actionbar.is-dirty .kb-actionbar-note { color: var(--status-warning-text); }
+.kb-actionbar-actions { display: flex; gap: var(--gap-sm); margin-left: auto; }
+@media (max-width: 599px) {
+  .kb-actionbar { flex-wrap: wrap; }
+  .kb-actionbar-actions { width: 100%; }
+  .kb-actionbar-actions > * { flex: 1 1 0; justify-content: center; }
+}
+
+/* ---------- BatchBar ---------- */
+.kb-batchbar {
+  position: sticky;
+  bottom: var(--gap-sm);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  flex-wrap: wrap;
+  margin-top: var(--gap-sm);
+  padding: var(--gap-sm) var(--gap);
+  padding-bottom: calc(var(--gap-sm) + var(--safe-bottom));
+  background: var(--surface-3);
+  border: var(--hl) solid var(--b2);
+  border-radius: var(--r3);
+  box-shadow: var(--sh2);
+}
+.kb-batchbar-count { font-weight: 600; font-variant-numeric: tabular-nums; }
+.kb-batchbar-actions { display: flex; align-items: center; gap: var(--gap-sm); flex-wrap: wrap; margin-left: auto; }
+.kb-batchbar-link { border: 0; background: transparent; padding: 0 var(--gap-xs); min-height: 32px; color: var(--accent-text); font: inherit; font-size: var(--text-13); cursor: pointer; }
+.kb-batchbar-link:focus-visible { outline: none; box-shadow: var(--ring); border-radius: var(--r1); }
+@media (pointer: coarse) { .kb-batchbar-link { min-height: 44px; } }
+/* 手机:第一行「已选 N 项 · 全选 · ………… 取消选择」,第二行操作按钮整行铺满。
+   原来操作区 margin-left:auto 把几个按钮推到右端挤成一排,左边空一截,「取消选择」被挤到第三行。
+   DOM 顺序不变(计数 / 全选 / 操作区 / 取消选择,读屏顺序也是这样),视觉顺序用 order 排 */
+@media (max-width: 599px) {
+  .kb-batchbar { flex-wrap: wrap; row-gap: var(--gap-xs); }
+  .kb-batchbar-actions { order: 3; flex: 1 1 100%; margin-left: 0; }
+  .kb-batchbar-actions > * { flex: 1 1 auto; justify-content: center; }
+  .kb-batchbar-link:last-child { order: 2; margin-left: auto; }
+}
+
+/* ---------- ResponsiveTable ---------- */
+.kb-rt { display: flex; flex-direction: column; min-width: 0; }
+.kb-rt-checkcell { width: 44px; padding-right: 0; }
+/* 表格行高跟密度走:舒适 48 / 紧凑 36(触屏 ≥44) */
+.kb-rt-table td, .kb-rt-table th { height: var(--list-row-h); }
+.kb-rt-actcell { width: 1%; white-space: nowrap; text-align: right; }
+/* 表格里的屏幕阅读器专用文字(.kb-sr 是绝对定位)要以单元格为定位基准,否则它逃出横向滚动容器,把整页撑宽(横屏 844 宽实测) */
+.kb-rt-table th, .kb-rt-table td { position: relative; }
+.kb-rt-check { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+@media (pointer: coarse) { .kb-rt-check { width: 22px; height: 22px; } .kb-rt-checkcell { width: 52px; } }
+.kb-rt-table tr.is-clickable { cursor: pointer; }
+.kb-rt-table tr.is-clickable:hover td { background: var(--table-row-hover); }
+.kb-rt-table tr:focus-visible { outline: none; box-shadow: inset var(--ring); }
+.kb-rt-tools { display: flex; justify-content: flex-end; padding: 0 0 var(--gap-xs); }
+.kb-rt-toggle { min-height: 36px; padding: 0 var(--gap); border: var(--hl) solid var(--b2); border-radius: var(--r2); background: var(--panel); color: var(--t2); font: inherit; font-size: var(--text-13); cursor: pointer; }
+.kb-rt-toggle[aria-pressed="true"] { color: var(--accent-text); border-color: var(--accent-soft-border); background: var(--accent-soft); }
+@media (pointer: coarse) { .kb-rt-toggle { min-height: 44px; } }
+.kb-rt-cards { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--gap-sm); }
+.kb-rt-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--gap-sm);
+  min-width: 0;
+  min-height: var(--list-row-h);
+  padding: var(--gap-sm) var(--gap);
+  background: var(--card-bg);
+  border: var(--hl) solid var(--b);
+  border-radius: var(--r3);
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+.kb-rt-card.is-clickable { cursor: pointer; }
+.kb-rt-card.is-selected { background: var(--table-row-sel); border-color: var(--accent-soft-border); }
+.kb-rt-card:focus-visible { outline: none; box-shadow: var(--ring); }
+/* 卡片列表已经装在一个 .card 里(好友、任务、审计、用量、导入……)时,条目再画一层同色同圆角的框就成了框套框:
+   去掉条目自己的框和背景,改成条目之间的分隔线。选中态(is-selected)靠背景高亮,保留。
+   卡片列表不在 .card 里时条目本身就是卡片,保持上面的样式 */
+.card .kb-rt-cards { gap: 0; }
+.card .kb-rt-card { border: 0; border-top: var(--hl) solid var(--b); border-radius: 0; background: transparent; }
+.card .kb-rt-card:first-child { border-top: 0; }
+.card .kb-rt-card.is-selected { background: var(--table-row-sel); }
+.card .kb-rt-card:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+.kb-rt-card-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.kb-rt-primary { font-weight: 600; overflow-wrap: anywhere; }
+.kb-rt-metas { margin: 0; display: flex; flex-direction: column; gap: 2px; }
+.kb-rt-meta { display: flex; gap: var(--gap-sm); min-width: 0; font-size: var(--text-13); }
+.kb-rt-meta dt { flex: none; color: var(--m); }
+.kb-rt-meta dd { margin: 0; min-width: 0; overflow-wrap: anywhere; color: var(--t2); }
+.kb-rt-card-actions { flex: none; display: flex; align-items: center; gap: var(--gap-xs); align-self: center; }
+.kb-rt-card .kb-rt-check { margin-top: 2px; flex: none; }
+
+/* ---------- Sheet:底部弹层 ---------- */
+.kb-sheet-wrap { position: fixed; inset: 0; z-index: var(--z-dialog, 31); display: flex; align-items: flex-end; justify-content: center; }
+.kb-sheet-scrim { position: absolute; inset: 0; background: rgba(var(--shade), 0.55); backdrop-filter: blur(1.5px); }
+.kb-sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(640px, 100%);
+  max-height: min(90dvh, calc(var(--app-h, 100dvh) - 44px));
+  background: var(--surface-3);
+  border: var(--hl) solid var(--b2);
+  border-bottom: 0;
+  border-radius: 16px 16px 0 0;
+  box-shadow: var(--sh3);
+  padding-bottom: var(--safe-bottom);
+  outline: none;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.kb-sheet.is-dragging { transition: none; }
+.kb-sheet-grab { flex: none; touch-action: none; cursor: grab; padding-top: 8px; }
+.kb-sheet-handle { display: block; width: 36px; height: 4px; margin: 0 auto; border-radius: 2px; background: var(--b3); }
+.kb-sheet-head { display: flex; align-items: center; gap: var(--gap-sm); padding: var(--gap-sm) var(--gap) var(--gap-sm) var(--gap-lg); }
+.kb-sheet-title { flex: 1 1 auto; min-width: 0; font-size: var(--text-16); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kb-sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 var(--gap-lg) var(--gap); }
+.kb-sheet-foot { flex: none; display: flex; gap: var(--gap-sm); padding: var(--gap-sm) var(--gap-lg); border-top: var(--hl) solid var(--b); }
+.kb-sheet-foot > * { flex: 1 1 0; justify-content: center; }
+.kb-sheet-enter-active .kb-sheet-scrim, .kb-sheet-leave-active .kb-sheet-scrim { transition: opacity var(--dur-base) var(--ease-out); }
+.kb-sheet-enter-from .kb-sheet-scrim, .kb-sheet-leave-to .kb-sheet-scrim { opacity: 0; }
+.kb-sheet-enter-active .kb-sheet { transition: transform var(--spring-dur) var(--ease-spring-soft); }
+.kb-sheet-leave-active .kb-sheet { transition: transform var(--dur-fast) var(--ease-in); }
+.kb-sheet-enter-from .kb-sheet, .kb-sheet-leave-to .kb-sheet { transform: translateY(100%); }
+
+/* ---------- Empty ---------- */
+.kb-empty.is-sm { padding: var(--gap-lg); gap: var(--gap-xs); }
+.kb-empty.is-sm .kb-empty-icon { width: 32px; height: 32px; border-radius: var(--r3); }
+.kb-empty-title { font-weight: 500; color: var(--t); }
+
+/* ---------- 触屏:按钮可点区域 ≥44px(设计规范,按输入方式而不是屏幕宽度——大平板也是触屏) ---------- */
+@media (pointer: coarse) {
+  .kb-btn { min-height: 44px; min-width: 44px; }
+  /* 小按钮视觉 36px,用伪元素把可点区域撑到 44px(上下各 4px),相邻按钮的间距仍 ≥8px */
+  .kb-btn.is-sm { min-height: 36px; min-width: 38px; position: relative; }
+  /* 同上:从内边距框算起,上下取 5px 才够 44px;左右 4px 不变(再宽会让贴边的按钮造成横向滚动) */
+  .kb-btn.is-sm::before { content: ""; position: absolute; inset: -5px -4px; }
+}
+
+/* ---------- Skeleton 变体 ---------- */
+.kb-skel { display: flex; flex-direction: column; gap: var(--gap-sm); min-width: 0; }
+.kb-skel-line { display: block; height: 12px; }
+.kb-skel-w100 { width: 100%; } .kb-skel-w70 { width: 70%; } .kb-skel-w62 { width: 62%; } .kb-skel-w40 { width: 40%; }
+.kb-skel-title { height: 16px; margin-bottom: var(--gap-xs); }
+.kb-skel-item { display: flex; align-items: center; gap: var(--gap-sm); }
+.kb-skel-avatar { flex: none; width: 32px; height: 32px; border-radius: var(--r-pill); }
+.kb-skel-stack { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.kb-skel-head { height: 14px; width: 100%; }
+.kb-skel-row { height: 32px; width: 100%; }
+
+/* ---------- Tabs:横向滑动的渐隐提示 + 「更多」 ---------- */
+.kb-tabs { position: relative; }
+/* 页签不收缩、不折行:放不下就横向滑动(而不是把「概览」挤成竖排) */
+.kb-tabs > .tab { flex: none; white-space: nowrap; }
+@media (max-width: 1023px) { .kb-tabs { overflow-x: auto; scrollbar-width: none; } }
+/* 桌面上放得下就不滚动(不然 overflow 会裁掉焦点环);放不下时才可滑动 */
+.kb-tabs.is-scroll { overflow-x: auto; scrollbar-width: none; }
+.kb-tabs.is-scroll::-webkit-scrollbar { display: none; }
+.kb-tabs.has-fade-right { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+.kb-tabs.has-fade-left { -webkit-mask-image: linear-gradient(90deg, transparent, #000 28px); mask-image: linear-gradient(90deg, transparent, #000 28px); }
+.kb-tabs.has-fade-left.has-fade-right { -webkit-mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent); }
+.kb-tabs-more { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.kb-tabs-menu { position: fixed; z-index: 60; min-width: 160px; padding: 4px; display: flex; flex-direction: column; background: var(--surface-3); border: var(--hl) solid var(--b2); border-radius: var(--r2); box-shadow: var(--sh3); }
+.kb-tabs-menu-item { display: flex; align-items: center; justify-content: space-between; gap: var(--gap); min-height: 36px; padding: 0 10px; border: 0; border-radius: var(--r1); background: transparent; color: var(--t); font: inherit; font-size: var(--text-13); cursor: pointer; text-align: left; }
+.kb-tabs-menu-item:hover, .kb-tabs-menu-item:focus-visible { background: var(--hover); outline: none; }
+/* 触屏页签可点区域 ≥44px:高度已有;宽度补 min-width,单字页签(「空」「月」)本身只有 ~37px 宽,min-width 撑到 44 后内容要居中 */
+@media (pointer: coarse) { .kb-tabs-menu-item { min-height: 44px; } .kb-tabs .tab { min-height: 44px; min-width: 44px; justify-content: center; } }

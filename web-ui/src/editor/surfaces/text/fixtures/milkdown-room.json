@@ -1,0 +1,1097 @@
+{
+ "generatedBy": "node e2e/editor-room-schema.mjs",
+ "topNode": "doc",
+ "nodes": {
+  "doc": {
+   "content": "block+",
+   "group": "",
+   "inline": false,
+   "atom": false,
+   "attrs": {}
+  },
+  "paragraph": {
+   "content": "inline*",
+   "group": "block",
+   "inline": false,
+   "atom": false,
+   "attrs": {}
+  },
+  "heading": {
+   "content": "inline*",
+   "group": "block",
+   "inline": false,
+   "atom": false,
+   "attrs": {
+    "id": {
+     "default": ""
+    },
+    "level": {
+     "default": 1
+    }
+   }
+  },
+  "hardbreak": {
+   "content": "",
+   "group": "inline",
+   "inline": true,
+   "atom": false,
+   "attrs": {
+    "isInline": {
+     "default": false
+    }
+   }
+  },
+  "blockquote": {
+   "content": "block+",
+   "group": "block",
+   "inline": false,
+   "atom": false,
+   "attrs": {}
+  },
+  "code_block": {
+   "content": "text*",
+   "group": "block",
+   "inline": false,
+   "atom": false,
+   "marks": "",
+   "attrs": {
+    "language": {
+     "default": ""
+    }
+   }
+  },
+  "hr": {
+   "content": "",
+   "group": "block",
+   "inline": false,
+   "atom": false,
+   "attrs": {}
+  },
+  "image": {
+   "content": "",
+   "group": "inline",
+   "inline": true,
+   "atom": true,
+   "marks": "",
+   "attrs": {
+    "src": {
+     "default": ""
+    },
+    "alt": {
+     "default": ""
+    },
+    "title": {
+     "default": ""
+    }
+   }
+  },
+  "bullet_list": {
+   "content": "listItem+",
+   "group": "block",
+   "inline": false,
+   "atom": false,
+   "attrs": {
+    "spread": {
+     "default": false
+    }
+   }
+  },
+  "ordered_list": {
+   "content": "listItem+",
+   "group": "block",
+   "inline": false,
+   "atom": false,
+   "attrs": {
+    "order": {
+     "default": 1
+    },
+    "spread": {
+     "default": false
+    }
+   }
+  },
+  "list_item": {
+   "content": "paragraph block*",
+   "group": "listItem",
+   "inline": false,
+   "atom": false,
+   "attrs": {
+    "label": {
+     "default": "•"
+    },
+    "listType": {
+     "default": "bullet"
+    },
+    "spread": {
+     "default": true
+    },
+    "checked": {
+     "default": null
+    }
+   }
+  },
+  "html": {
+   "content": "",
+   "group": "inline",
+   "inline": true,
+   "atom": true,
+   "attrs": {
+    "value": {
+     "default": ""
+    }
+   }
+  },
+  "text": {
+   "content": "",
+   "group": "inline",
+   "inline": false,
+   "atom": false,
+   "attrs": {}
+  },
+  "table": {
+   "content": "table_header_row table_row+",
+   "group": "block",
+   "inline": false,
+   "atom": false,
+   "attrs": {}
+  },
+  "table_header_row": {
+   "content": "(table_header)*",
+   "group": "",
+   "inline": false,
+   "atom": false,
+   "attrs": {}
+  },
+  "table_row": {
+   "content": "(table_cell)*",
+   "group": "",
+   "inline": false,
+   "atom": false,
+   "attrs": {}
+  },
+  "table_header": {
+   "content": "paragraph",
+   "group": "",
+   "inline": false,
+   "atom": false,
+   "attrs": {
+    "colspan": {
+     "default": 1
+    },
+    "rowspan": {
+     "default": 1
+    },
+    "colwidth": {
+     "default": null
+    },
+    "alignment": {
+     "default": "left"
+    }
+   }
+  },
+  "table_cell": {
+   "content": "paragraph",
+   "group": "",
+   "inline": false,
+   "atom": false,
+   "attrs": {
+    "colspan": {
+     "default": 1
+    },
+    "rowspan": {
+     "default": 1
+    },
+    "colwidth": {
+     "default": null
+    },
+    "alignment": {
+     "default": "left"
+    }
+   }
+  },
+  "footnote_definition": {
+   "content": "block+",
+   "group": "block",
+   "inline": false,
+   "atom": false,
+   "attrs": {
+    "label": {
+     "default": ""
+    }
+   }
+  },
+  "footnote_reference": {
+   "content": "",
+   "group": "inline",
+   "inline": true,
+   "atom": true,
+   "attrs": {
+    "label": {
+     "default": ""
+    }
+   }
+  },
+  "math_inline": {
+   "content": "",
+   "group": "inline",
+   "inline": true,
+   "atom": true,
+   "attrs": {
+    "value": {
+     "default": ""
+    }
+   }
+  }
+ },
+ "marks": {
+  "emphasis": {
+   "attrs": {
+    "marker": {
+     "default": "*"
+    }
+   }
+  },
+  "strong": {
+   "attrs": {
+    "marker": {
+     "default": "*"
+    }
+   }
+  },
+  "inlineCode": {
+   "attrs": {}
+  },
+  "link": {
+   "attrs": {
+    "href": {},
+    "title": {
+     "default": null
+    }
+   }
+  },
+  "strike_through": {
+   "attrs": {}
+  },
+  "kb_color": {
+   "attrs": {
+    "prop": {
+     "default": "color"
+    },
+    "key": {
+     "default": "red"
+    }
+   },
+   "excludes": ""
+  }
+ },
+ "sampleDoc": {
+  "type": "doc",
+  "content": [
+   {
+    "type": "heading",
+    "attrs": {
+     "id": "标题一",
+     "level": 1
+    },
+    "content": [
+     {
+      "type": "text",
+      "text": "标题一"
+     }
+    ]
+   },
+   {
+    "type": "heading",
+    "attrs": {
+     "id": "二级-斜体-粗体-删除-代码",
+     "level": 2
+    },
+    "content": [
+     {
+      "type": "text",
+      "text": "二级 "
+     },
+     {
+      "type": "text",
+      "marks": [
+       {
+        "type": "emphasis",
+        "attrs": {
+         "marker": "*"
+        }
+       }
+      ],
+      "text": "斜体"
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "text",
+      "marks": [
+       {
+        "type": "strong",
+        "attrs": {
+         "marker": "*"
+        }
+       }
+      ],
+      "text": "粗体"
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "text",
+      "marks": [
+       {
+        "type": "strike_through"
+       }
+      ],
+      "text": "删除"
+     },
+     {
+      "type": "text",
+      "text": " "
+     },
+     {
+      "type": "text",
+      "marks": [
+       {
+        "type": "inlineCode"
+       }
+      ],
+      "text": "代码"
+     }
+    ]
+   },
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "普通段落,带 "
+     },
+     {
+      "type": "text",
+      "marks": [
+       {
+        "type": "link",
+        "attrs": {
+         "href": "https://example.com",
+         "title": "标题"
+        }
+       }
+      ],
+      "text": "链接"
+     },
+     {
+      "type": "text",
+      "text": " 和 "
+     },
+     {
+      "type": "image",
+      "attrs": {
+       "src": "a.png",
+       "alt": "图片",
+       "title": "图题"
+      }
+     },
+     {
+      "type": "text",
+      "text": " 以及 [[ins_8b10]] 双链。"
+     },
+     {
+      "type": "hardbreak",
+      "attrs": {
+       "isInline": true
+      }
+     },
+     {
+      "type": "text",
+      "text": "第二行软换行，行尾两个空格硬换行"
+     },
+     {
+      "type": "hardbreak",
+      "attrs": {
+       "isInline": false
+      }
+     },
+     {
+      "type": "text",
+      "text": "下一行。"
+     }
+    ]
+   },
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "marks": [
+       {
+        "type": "kb_color",
+        "attrs": {
+         "prop": "color",
+         "key": "red"
+        }
+       }
+      ],
+      "text": "红字"
+     },
+     {
+      "type": "text",
+      "text": " 与 "
+     },
+     {
+      "type": "text",
+      "marks": [
+       {
+        "type": "kb_color",
+        "attrs": {
+         "prop": "background-color",
+         "key": "yellow"
+        }
+       }
+      ],
+      "text": "黄底"
+     },
+     {
+      "type": "text",
+      "text": "，还有 "
+     },
+     {
+      "type": "html",
+      "attrs": {
+       "value": "<kbd>"
+      }
+     },
+     {
+      "type": "text",
+      "text": "Ctrl"
+     },
+     {
+      "type": "html",
+      "attrs": {
+       "value": "</kbd>"
+      }
+     },
+     {
+      "type": "text",
+      "text": " 原样 HTML。"
+     }
+    ]
+   },
+   {
+    "type": "blockquote",
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "引用第一段"
+       }
+      ]
+     },
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "引用第二段"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "bullet_list",
+    "attrs": {
+     "spread": false
+    },
+    "content": [
+     {
+      "type": "list_item",
+      "attrs": {
+       "label": "•",
+       "listType": "bullet",
+       "spread": false,
+       "checked": null
+      },
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "无序一"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "list_item",
+      "attrs": {
+       "label": "•",
+       "listType": "bullet",
+       "spread": false,
+       "checked": null
+      },
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "无序二"
+         }
+        ]
+       },
+       {
+        "type": "bullet_list",
+        "attrs": {
+         "spread": false
+        },
+        "content": [
+         {
+          "type": "list_item",
+          "attrs": {
+           "label": "•",
+           "listType": "bullet",
+           "spread": false,
+           "checked": null
+          },
+          "content": [
+           {
+            "type": "paragraph",
+            "content": [
+             {
+              "type": "text",
+              "text": "嵌套"
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "list_item",
+      "attrs": {
+       "label": "•",
+       "listType": "bullet",
+       "spread": false,
+       "checked": false
+      },
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "待办"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "list_item",
+      "attrs": {
+       "label": "•",
+       "listType": "bullet",
+       "spread": false,
+       "checked": true
+      },
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "已办"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "ordered_list",
+    "attrs": {
+     "order": 3,
+     "spread": false
+    },
+    "content": [
+     {
+      "type": "list_item",
+      "attrs": {
+       "label": "3.",
+       "listType": "ordered",
+       "spread": false,
+       "checked": null
+      },
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "有序三"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "list_item",
+      "attrs": {
+       "label": "4.",
+       "listType": "ordered",
+       "spread": false,
+       "checked": null
+      },
+      "content": [
+       {
+        "type": "paragraph",
+        "content": [
+         {
+          "type": "text",
+          "text": "有序四"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "code_block",
+    "attrs": {
+     "language": "rust"
+    },
+    "content": [
+     {
+      "type": "text",
+      "text": "fn main() {}"
+     }
+    ]
+   },
+   {
+    "type": "hr"
+   },
+   {
+    "type": "table",
+    "content": [
+     {
+      "type": "table_header_row",
+      "content": [
+       {
+        "type": "table_header",
+        "attrs": {
+         "colspan": 1,
+         "rowspan": 1,
+         "colwidth": null,
+         "alignment": "left"
+        },
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "左"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "type": "table_header",
+        "attrs": {
+         "colspan": 1,
+         "rowspan": 1,
+         "colwidth": null,
+         "alignment": "center"
+        },
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "中"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "type": "table_header",
+        "attrs": {
+         "colspan": 1,
+         "rowspan": 1,
+         "colwidth": null,
+         "alignment": "right"
+        },
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "右"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "type": "table_header",
+        "attrs": {
+         "colspan": 1,
+         "rowspan": 1,
+         "colwidth": null,
+         "alignment": null
+        },
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "无"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "table_row",
+      "content": [
+       {
+        "type": "table_cell",
+        "attrs": {
+         "colspan": 1,
+         "rowspan": 1,
+         "colwidth": null,
+         "alignment": "left"
+        },
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "a"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "type": "table_cell",
+        "attrs": {
+         "colspan": 1,
+         "rowspan": 1,
+         "colwidth": null,
+         "alignment": "center"
+        },
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "b"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "type": "table_cell",
+        "attrs": {
+         "colspan": 1,
+         "rowspan": 1,
+         "colwidth": null,
+         "alignment": "right"
+        },
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "c"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "type": "table_cell",
+        "attrs": {
+         "colspan": 1,
+         "rowspan": 1,
+         "colwidth": null,
+         "alignment": null
+        },
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "d"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "type": "table_row",
+      "content": [
+       {
+        "type": "table_cell",
+        "attrs": {
+         "colspan": 1,
+         "rowspan": 1,
+         "colwidth": null,
+         "alignment": "left"
+        },
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "marks": [
+             {
+              "type": "inlineCode"
+             }
+            ],
+            "text": "x|y"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "type": "table_cell",
+        "attrs": {
+         "colspan": 1,
+         "rowspan": 1,
+         "colwidth": null,
+         "alignment": "center"
+        },
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "marks": [
+             {
+              "type": "strong",
+              "attrs": {
+               "marker": "*"
+              }
+             }
+            ],
+            "text": "粗"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "type": "table_cell",
+        "attrs": {
+         "colspan": 1,
+         "rowspan": 1,
+         "colwidth": null,
+         "alignment": "right"
+        },
+        "content": [
+         {
+          "type": "paragraph",
+          "content": [
+           {
+            "type": "text",
+            "text": "2"
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "type": "table_cell",
+        "attrs": {
+         "colspan": 1,
+         "rowspan": 1,
+         "colwidth": null,
+         "alignment": null
+        },
+        "content": [
+         {
+          "type": "paragraph"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "html",
+      "attrs": {
+       "value": "<details>\n<summary>折叠</summary>"
+      }
+     }
+    ]
+   },
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "内部段落"
+     }
+    ]
+   },
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "html",
+      "attrs": {
+       "value": "</details>"
+      }
+     }
+    ]
+   },
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "行内公式 "
+     },
+     {
+      "type": "math_inline",
+      "attrs": {
+       "value": "E=mc^2"
+      }
+     },
+     {
+      "type": "text",
+      "text": " 与价格 $5 到 $9。"
+     }
+    ]
+   },
+   {
+    "type": "code_block",
+    "attrs": {
+     "language": "LaTeX"
+    },
+    "content": [
+     {
+      "type": "text",
+      "text": "\\int_0^1 x\\,dx"
+     }
+    ]
+   },
+   {
+    "type": "paragraph",
+    "content": [
+     {
+      "type": "text",
+      "text": "脚注引用"
+     },
+     {
+      "type": "footnote_reference",
+      "attrs": {
+       "label": "1"
+      }
+     },
+     {
+      "type": "text",
+      "text": "和另一个"
+     },
+     {
+      "type": "footnote_reference",
+      "attrs": {
+       "label": "note"
+      }
+     },
+     {
+      "type": "text",
+      "text": "。"
+     }
+    ]
+   },
+   {
+    "type": "footnote_definition",
+    "attrs": {
+     "label": "1"
+    },
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "第一个脚注。"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "footnote_definition",
+    "attrs": {
+     "label": "note"
+    },
+    "content": [
+     {
+      "type": "paragraph",
+      "content": [
+       {
+        "type": "text",
+        "text": "第二个脚注,"
+       },
+       {
+        "type": "hardbreak",
+        "attrs": {
+         "isInline": true
+        }
+       },
+       {
+        "type": "text",
+        "text": "带续行。"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "paragraph"
+   }
+  ]
+ }
+}

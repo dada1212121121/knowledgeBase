@@ -1,0 +1,29 @@
+[package]
+name = "kb-core"
+description = "领域模型、端口 trait 与纯逻辑(RRF、哈希、标识符拆分、token 估算、脱敏、配置)。禁止依赖 lancedb/fastembed/axum/rusqlite"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+base64 = { workspace = true }
+chrono = { workspace = true }
+chrono-tz = { workspace = true }
+# TOTP:密钥的 base32 文本;HMAC-SHA1 自己按 RFC 2104 写在 totp.rs 里
+data-encoding = "2"
+rand = { workspace = true }
+regex = { workspace = true }
+schemars = { workspace = true }
+sha1 = "0.10"
+sha2 = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+toml = { workspace = true }
+xxhash-rust = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

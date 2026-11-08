@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "updatedAt": "2026-11-03",
+  "scope": "文本阶段+  样本基线（5 个阅读样本 + 3 个编辑态样本）；表格 / 分页 / 幻灯片的阶段闸门随对应阶段收紧。",
+  "method": {
+    "build": "npm run build（vite manifest + 预压缩）",
+    "read": "node e2e/editor-bench.mjs --surface=text：4G / 4× CPU，3 次取中位数；冷开只算阅读路径相对应用壳的增量，不用整站首屏冒充",
+    "edit": "真实 fixture 笔记点「编辑」→ .kb-text-prose 出现；单击事件到首帧约 73 ms（Playwright 的 click 等待不计入）",
+    "longTask": "PerformanceObserver({type:'longtask'})，覆盖打开编辑、改标题、保存三段",
+    "memory": "CDP Performance.getMetrics 的 JSHeapUsedSize；只是 JS 堆，不含 Canvas / WASM / GPU",
+    "chunk": "单独构建 src/editor/surfaces/text/index.ts 的 gzip 体积（实测），不把应用壳算进来"
+  },
+  "text": {
+    "budget": {
+      "coldIncrementMs": 1200,
+      "hotOpenMs": 500,
+      "editMountMs": 300,
+      "longTaskMs": 100,
+      "scrollLongTaskMs": 50,
+      "heapDeltaMb": 32,
+      "textChunkGzipKb": 150,
+      "readStaticJsGzipKb": 150,
+      "readStaticCssGzipKb": 20
+    },
+    "measured": {
+      "coldIncrementMs": 0,
+      "hotOpenMs": 127,
+      "editMountMs": 73,
+      "longTasksMs": [],
+      "readHeapMb": 8,
+      "editHeapMb": 10,
+      "afterSaveHeapMb": 12,
+      "textChunkGzipKb": 57.95,
+      "textChunkCssGzipKb": 0.81,
+      "readStaticJsGzipKb": 26.3,
+      "readStaticCssGzipKb": 3.0,
+      "shellFirstPaintGzipKb": 242.0,
+      "loginInteractiveMs": 1034
+    },
+    "notes": [
+      "冷开增量 0 ms 是阅读路径相对列表页的差值；整站登录首屏仍由 e2e/perf-budget.mjs 守（242.1 / 250 KB，1042 / 2500 ms）。",
+      "长任务为空是这台空闲开发机的单次结果；CI 忙时允许 1~2 条 <100 ms，超过预算仍要查。",
+      "移动端 4× CPU 的内存与滚动长任务尚未单独测量，不在此表里冒充已达标。"
+    ]
+  },
+  "samples": {
+    "note": {
+      "coldMs": 1200,
+      "hotMs": 500,
+      "transferKb": 150,
+      "wasmKb": 0,
+      "heapMb": 80,
+      "longTaskMs": 50
+    },
+    "csv": {
+      "coldMs": 2500,
+      "hotMs": 800,
+      "transferKb": 250,
+      "wasmKb": 0,
+      "heapMb": 150,
+      "longTaskMs": 100
+    },
+    "xlsx": {
+      "coldMs": 3500,
+      "hotMs": 2000,
+      "transferKb": 5632,
+      "wasmKb": 2867,
+      "heapMb": 400,
+      "longTaskMs": 200
+    },
+    "docx": {
+      "coldMs": 1500,
+      "hotMs": 800,
+      "transferKb": 300,
+      "wasmKb": 0,
+      "heapMb": 150,
+      "longTaskMs": 100
+    },
+    "pptx": {
+      "coldMs": 3000,
+      "hotMs": 2000,
+      "transferKb": 5120,
+      "wasmKb": 2355,
+      "heapMb": 300,
+      "longTaskMs": 100
+    },
+    "xlsxEdit": {
+      "coldMs": 3500,
+      "hotMs": 2000,
+      "transferKb": 5632,
+      "wasmKb": 2867,
+      "heapMb": 400,
+      "longTaskMs": 200
+    },
+    "docxEdit": {
+      "coldMs": 4000,
+      "hotMs": 1500,
+      "transferKb": 14848,
+      "wasmKb": 12288,
+      "heapMb": 500,
+      "longTaskMs": 150
+    },
+    "pptxEdit": {
+      "coldMs": 4000,
+      "hotMs": 2000,
+      "transferKb": 5120,
+      "wasmKb": 2355,
+      "heapMb": 500,
+      "longTaskMs": 150
+    }
+  },
+  "samplesNote": "样本预算即的目标值(不是按实测放宽的);冷 = 应用内首次打开,热 = 应用内二次打开;编辑态从点「在线编辑」算起。",
+  "samplesBaseline": {
+    "measuredAt": "2026-11-04",
+    "report": "实测报告",
+    "command": "node e2e/editor-bench.mjs --runs=3",
+    "note": "中位数;冷 / 热为应用内打开(ms),传输为预压缩后的编码字节(KB)。只记录,不当预算用;阶段切换后用同一命令复跑对比。",
+    "note200k": {
+      "coldMs": 575,
+      "hotMs": 309,
+      "transferKb": 25.6
+    },
+    "csv5m": {
+      "coldMs": 678,
+      "hotMs": 683,
+      "transferKb": 5.1
+    },
+    "xlsx50k": {
+      "coldMs": 3229,
+      "hotMs": 962,
+      "transferKb": 2120.8,
+      "wasmKb": 2003.8
+    },
+    "docx20p": {
+      "coldMs": 700,
+      "hotMs": 446,
+      "transferKb": 21.5
+    },
+    "pptx30p": {
+      "coldMs": 1073,
+      "hotMs": 237,
+      "transferKb": 323.5
+    },
+    "xlsxEdit": {
+      "coldMs": 3277,
+      "hotMs": 989,
+      "transferKb": 2131.2,
+      "wasmKb": 2003.8
+    },
+    "docxEdit": {
+      "coldMs": 13924,
+      "hotMs": 4689,
+      "transferKb": 11015.4,
+      "wasmKb": 7902.5,
+      "fontKb": 2342.4
+    },
+    "pptxEdit": {
+      "coldMs": 4340,
+      "hotMs": 697,
+      "transferKb": 3833.3,
+      "wasmKb": 1636.7,
+      "fontKb": 1608.1
+    }
+  }
+}

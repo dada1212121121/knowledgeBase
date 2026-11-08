@@ -1,0 +1,29 @@
+/* knowledgeBase UI tokens —— 逐字复制自 设计稿(由 tokens/build_tokens.py 从
+   设计稿 生成,视觉基线提交 79e5405)。不要手改:改基线后重新生成再复制。 */
+@import "./primitives.css";
+@import "./semantic.css";
+/* 对比度校准:只覆盖 semantic.css 里不达标的文字色(scripts/calibrate-contrast.mjs 生成) */
+@import "./contrast.css";
+@import "./component.css";
+@import "./motion-tokens.css";
+@import "./components.css";
+@import "./layout.css";
+@import "./appearance.css";
+@import "./motion.css";
+/* kb-ui 自己的派生 token 与组件胶水层(手工维护,只读 token) */
+@import "./kb-tokens.css";
+@import "./kb.css";
+@import "./browser.css";
+@import "./dashboard.css";
+@import "./motion-ui.css";
+@import "./motion-pages.css";
+/* 统一外壳:侧栏三态 / 顶栏 / 标签栏 / 抽屉,最后加载以便覆盖旧外壳遗留的同名规则 */
+@import "./shell.css";
+/* 组件包:PageHeader / ResponsiveTable / BatchBar / Field / ActionBar / Sheet / 空状态 / 骨架屏 / Tabs */
+@import "./kit.css";
+/* 排版与间距阶梯、密度两档 */
+@import "./scale.css";
+/* 多设备基础:安全区、软键盘、触屏可点区域、悬停之外的入口、横屏低高度、新特性兜底 */
+@import "./device.css";
+/* 图表:分类色板(--viz-*)与环形图 / 折线图 / 横向条的样式 */
+@import "./charts.css";

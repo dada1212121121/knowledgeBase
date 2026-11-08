@@ -1,0 +1,103 @@
+/**
+ * 附件卡片（编辑器与阅读共用）
+ *
+ * Markdown 里是 `[📎 文件名](地址 "2.3 MB")`；编辑器用行内装饰、阅读用后处理，都给这个链接文字套上 .kb-attach，
+ * 并带上 data-ext（扩展名）/ data-meta（「PDF · 2.3 MB」）。样式只用元素自己 + ::before / ::after，
+ * 两边的 DOM 才能完全一样：
+ *   ┌────────────────────────────────────┐
+ * │ [PDF] 季度报告.pdf │ 左：按类型着色的图标块
+ * │ [ ] PDF · 2.3 MB │ 下：第二行说明
+ *   └────────────────────────────────────┘
+ * 颜色只在 --attach-c 里（按类型），其余全取主题变量，深浅主题自动跟随。
+ */
+.kb-text-prose .kb-attach,
+.kb-md-read-body .kb-attach {
+  --attach-c: var(--m);
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
+  width: min(100%, 400px);
+  margin: 4px 0;
+  padding: 9px 14px 29px 64px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  color: var(--t);
+  font-size: calc(14px * var(--fs));
+  font-weight: 500;
+  line-height: 20px;
+  text-decoration: none;
+  background: var(--surface-2);
+  border: var(--hl) solid var(--b2);
+  border-bottom: var(--hl) solid var(--b2);
+  border-radius: var(--r3);
+  cursor: pointer;
+  transition:
+    transform var(--dur-instant) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+.kb-text-prose a:has(> .kb-attach),
+.kb-md-read-body a.kb-attach {
+  text-decoration: none;
+  border-bottom: var(--hl) solid var(--b2);
+}
+.kb-text-prose a:has(> .kb-attach) {
+  border-bottom: 0;
+}
+.kb-text-prose .kb-attach:hover,
+.kb-md-read-body .kb-attach:hover {
+  background: color-mix(in srgb, var(--attach-c) 7%, var(--surface-2));
+  border-color: color-mix(in srgb, var(--attach-c) 55%, var(--b2));
+}
+.kb-text-prose .kb-attach:active,
+.kb-md-read-body .kb-attach:active {
+  transform: scale(var(--press-scale, 0.97));
+}
+/* 图标块：扩展名写在里面，底色是类型色的淡色，字用类型色 */
+.kb-text-prose .kb-attach::before,
+.kb-md-read-body .kb-attach::before {
+  content: attr(data-ext);
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  width: 42px;
+  height: 42px;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--attach-c);
+  background: color-mix(in srgb, var(--attach-c) 15%, transparent);
+  border-radius: var(--r2);
+  font-family: var(--mono);
+  font-size: calc(11px * var(--fs));
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+/* 第二行：类型 · 大小 */
+.kb-text-prose .kb-attach::after,
+.kb-md-read-body .kb-attach::after {
+  content: attr(data-meta);
+  position: absolute;
+  left: 64px;
+  right: 14px;
+  bottom: 9px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--m);
+  font-size: calc(12px * var(--fs));
+  font-weight: 400;
+  line-height: 18px;
+}
+/* 类型色（图标块 / 悬停边框用）。这几个颜色是文件类型的识别色，不随主题变，所以写死 */
+.kb-attach.is-pdf { --attach-c: #e5484d; } /* tokens-allow */
+.kb-attach.is-doc { --attach-c: #0090ff; } /* tokens-allow */
+.kb-attach.is-sheet { --attach-c: #30a46c; } /* tokens-allow */
+.kb-attach.is-slide { --attach-c: #f76b15; } /* tokens-allow */
+.kb-attach.is-archive { --attach-c: #8b8d98; } /* tokens-allow */
+.kb-attach.is-media { --attach-c: #8e4ec6; } /* tokens-allow */
+.kb-attach.is-image { --attach-c: #12a594; } /* tokens-allow */
+.kb-attach.is-code { --attach-c: #5e6ad2; } /* tokens-allow */

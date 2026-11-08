@@ -1,0 +1,40 @@
+[package]
+name = "kb-service"
+description = "应用服务:Index/Search/Insight/JobQueue/Scheduler/Migration/Evolution/Agent,只依赖 kb-core 的 trait"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+base64 = { workspace = true }
+chrono = { workspace = true }
+flate2 = { workspace = true }
+futures = { workspace = true }
+git2 = { workspace = true }
+globset = { workspace = true }
+ignore = { workspace = true }
+notify = { workspace = true }
+percent-encoding = { workspace = true }
+kb-core = { path = "../kb-core" }
+kb-extract = { path = "../kb-extract" }
+kb-index = { path = "../kb-index" }
+kb-llm = { path = "../kb-llm" }
+pulldown-cmark = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+schemars = { workspace = true }
+sha2 = { workspace = true }
+tokio = { workspace = true }
+toml = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+kb-extract = { path = "../kb-extract" }
+kb-embed = { path = "../kb-embed", features = ["testkit"] }
+kb-testkit = { path = "../kb-testkit" }
+tempfile = { workspace = true }

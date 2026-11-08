@@ -1,0 +1,287 @@
+/* kb-ui 的组件胶水层与布局工具类。
+   规则(设计规范):这里**只允许**引用 token(var(--*)),不写裸色值 / 裸尺寸;
+   页面层只组合这些类与 Kb* 组件,不自己写视觉样式。 */
+
+/* ---- 外壳根容器(等价于原型里 body 的 display:flex;少了它侧栏与主区会竖着堆叠) ---- */
+.kb-app{display:flex;width:100%;min-width:0;height:100vh;overflow:hidden;background:var(--bg);color:var(--t)}
+/* flex 子项默认 min-width:auto,表格/网格会把主区撑宽(1287px vs 设计稿 1200px),
+   统一给外壳与网格子项补 min-width:0。 */
+.kb-app > .main,
+.kb-app .content{min-width:0}
+.kb-grid > *{min-width:0}
+
+/* ---- 布局工具 ---- */
+.kb-page{display:flex;flex-direction:column;gap:var(--gap);min-height:0}
+.kb-grid{display:grid;gap:var(--gap)}
+.kb-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.kb-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kb-grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.kb-grid-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+/* 三栏(浏览器:集合 / 列表 / 详情),窄屏堆叠成单列 */
+.kb-panes{display:grid;grid-template-columns:240px minmax(0,1fr) 480px;gap:var(--gap);align-items:start}
+@media (max-width: 1180px) {
+  .kb-panes{grid-template-columns:200px minmax(0,1fr)}
+}
+@media (max-width: 900px) {
+  .kb-panes{grid-template-columns:minmax(0,1fr)}
+}
+/* 主图 + 侧卡(图表区比侧栏宽) */
+.kb-grid-main-side{grid-template-columns:1.55fr 1fr}
+/* 三卡并排,中间窄(设计稿的“集合 / 队列 / 事件”一行) */
+.kb-grid-triptych{grid-template-columns:1.1fr .8fr 1.1fr}
+.kb-row{display:flex;align-items:center;gap:var(--gap-sm);flex-wrap:wrap;min-width:0}
+.kb-row-between{display:flex;align-items:center;gap:var(--gap-sm);justify-content:space-between;flex-wrap:wrap;min-width:0}
+.kb-stack{display:flex;flex-direction:column;gap:var(--gap-sm);min-width:0}
+.kb-stack-tight{gap:0}
+.kb-scroll{overflow:auto;min-height:0}
+/* 溢出时容器可聚焦(见 useScrollFocus),聚焦环画在里面,免得被 overflow 裁掉 */
+.kb-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.kb-spacer{margin-left:auto}
+.kb-muted{color:var(--m)}
+.kb-mono{font-family:var(--mono)}
+.kb-small{font-size:calc(var(--fs-base-sm) * var(--fs))}
+
+/* ---- 卡片内部结构 ---- */
+.kb-card-body{padding:var(--card-pad)}
+/* 指标卡里的迷你折线是绝对定位的,卡片自身要建立包含块 */
+.card.metric{position:relative}
+.kb-card-rows{display:flex;flex-direction:column}
+.kb-card-row{display:flex;align-items:center;gap:var(--gap-sm);min-height:var(--row-h);padding:0 var(--card-pad-x);border-bottom:var(--hl) solid var(--b)}
+.kb-card-row:last-child{border-bottom:0}
+.kb-card-foot{display:flex;align-items:center;gap:var(--gap-sm);padding:var(--gap-sm) var(--card-pad-x);border-top:var(--hl) solid var(--b)}
+
+/* ---- 表格(与 token 层的 .table 一致,补空态与对齐) ---- */
+.kb-table{width:100%;border-collapse:collapse}
+.kb-table th{font-weight:500;color:var(--m);text-align:left;height:var(--row-h);padding:0 var(--cell-px);border-bottom:var(--hl) solid var(--b);white-space:nowrap}
+.kb-table td{height:var(--row-h);padding:0 var(--cell-px);border-bottom:var(--hl) solid var(--b);vertical-align:middle}
+.kb-table tr:last-child td{border-bottom:0}
+.kb-table .num{text-align:right;font-variant-numeric:tabular-nums}
+.kb-table .clip{max-width:var(--clip-w);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---- 表单 ---- */
+.kb-form{display:grid;grid-template-columns:var(--form-label-w) 1fr;gap:var(--gap-sm) var(--gap);align-items:center}
+.kb-form > label{color:var(--m);font-size:calc(var(--fs-base-sm) * var(--fs))}
+.kb-form-wide{grid-template-columns:1fr}
+.kb-input{width:100%;height:var(--ctl-h);border:var(--hl) solid var(--control-line);border-radius:var(--r1);background:var(--panel2);color:var(--t);padding:0 var(--gap-sm);font:inherit}
+.kb-input:focus{outline:none;box-shadow:var(--ring);border-color:transparent}
+.kb-textarea{width:100%;min-height:calc(var(--ctl-h) * 3);border:var(--hl) solid var(--b2);border-radius:var(--r1);background:var(--panel2);color:var(--t);padding:var(--gap-sm);font:inherit;resize:vertical;line-height:1.6}
+.kb-textarea:focus{outline:none;box-shadow:var(--ring);border-color:transparent}
+.kb-textarea-mono{font-family:var(--mono);font-size:calc(var(--fs-base-sm) * var(--fs))}
+.kb-textarea:disabled,.kb-textarea:read-only{opacity:.7}
+
+/* ---- 拖放区(数据源 / 上传） ---- */
+.kb-drop{border:var(--hl) dashed color-mix(in srgb, var(--accent-hover) 45%, var(--b2));border-radius:var(--r3);background:radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%), rgba(var(--ink), .015);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--gap-sm);text-align:center;padding:var(--gap-xl)}
+.kb-drop.is-over{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, transparent)}
+.kb-drop-orb{width:44px;height:44px;border-radius:var(--r4);display:grid;place-items:center;color:var(--accent-text);background:color-mix(in srgb, var(--accent) 14%, transparent);border:var(--hl) solid color-mix(in srgb, var(--accent-hover) 30%, transparent)}
+
+/* ---- 空态 / 错误 / 加载 ---- */
+.kb-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--gap-sm);text-align:center;padding:var(--gap-xl);color:var(--m)}
+.kb-empty-icon{width:44px;height:44px;border-radius:var(--r4);display:grid;place-items:center;background:var(--panel2);color:var(--m2);border:var(--hl) solid var(--b)}
+.kb-error{color:var(--status-danger-text)}
+.kb-hint{color:var(--m);font-size:calc(var(--fs-base-sm) * var(--fs))}
+
+/* ---- 按钮 / 输入(包装 token 层的 .btn / .inp,补尺寸与状态) ---- */
+.kb-btn{height:var(--ctl-h);padding:0 var(--gap-sm);border:var(--hl) solid var(--b2);border-radius:var(--r1);display:inline-flex;align-items:center;gap:var(--gap-xs);color:var(--t2);background:var(--panel);font-size:calc(var(--fs-base-sm) * var(--fs));white-space:nowrap;cursor:pointer;transition:background var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out)}
+.kb-btn:hover{background:var(--hover)}
+.kb-btn[disabled]{opacity:.55;pointer-events:none}
+.kb-btn.is-primary{background:var(--accent);border-color:transparent;color:var(--on-accent)}
+.kb-btn.is-primary:hover{background:var(--accent-hover)}
+.kb-btn.is-danger{color:var(--status-danger-text);border-color:color-mix(in srgb, var(--status-danger) 40%, var(--b2))}
+.kb-btn.is-sm{height:calc(var(--ctl-h) - 6px);padding:0 var(--gap-xs)}
+
+/* ---- 对话框 / 抽屉 ---- */
+.kb-overlay{position:fixed;inset:0;background:rgba(var(--shade),.55);backdrop-filter:blur(1.5px);z-index:var(--z-overlay,30)}
+.kb-dialog{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(var(--dialog-w,560px),calc(100vw - var(--gap-xl) * 2));max-height:calc(100vh - var(--gap-xl) * 2);display:flex;flex-direction:column;overflow:hidden;background:var(--surface-3);border:var(--hl) solid var(--b2);border-radius:var(--r4);box-shadow:var(--sh3);z-index:var(--z-dialog,31)}
+.kb-drawer{position:fixed;top:0;right:0;bottom:0;width:min(var(--drawer-w,420px),100vw);background:var(--surface-2);border-left:var(--hl) solid var(--b2);box-shadow:var(--sh3);overflow:auto;z-index:var(--z-dialog,31)}
+.kb-dialog-head,.kb-drawer-head{display:flex;align-items:center;gap:var(--gap-sm);padding:var(--card-pad);border-bottom:var(--hl) solid var(--b)}
+.kb-dialog-body,.kb-drawer-body{padding:var(--card-pad)}
+/* 对话框:页头和底部按钮固定,只有正文滚动(原来整张卡片一起滚,内容一长按钮就滚到屏幕外) */
+.kb-dialog > .kb-dialog-head,.kb-dialog > .kb-dialog-foot{flex:none}
+.kb-dialog > .kb-dialog-body{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain}
+.kb-dialog-foot{display:flex;align-items:center;gap:var(--gap-sm);justify-content:flex-end;padding:var(--card-pad);border-top:var(--hl) solid var(--b)}
+
+/* ---- 进度条 ---- */
+.kb-progress{height:var(--progress-h,6px);border-radius:var(--r-pill);background:var(--panel2);overflow:hidden}
+.kb-progress > i{display:block;height:100%;border-radius:inherit;background:var(--accent);transition:width var(--dur-base) var(--ease-out)}
+
+/* ---- 阶段时间线 ---- */
+.kb-timeline{display:flex;flex-direction:column;gap:0;border-left:var(--hl) solid var(--b2);margin-left:var(--gap-xs)}
+.kb-timeline > .kb-step{position:relative;padding:0 0 var(--gap-lg) var(--gap-lg)}
+.kb-timeline > .kb-step::before{content:"";position:absolute;left:calc(var(--gap-xs) * -1 - var(--hl));top:var(--gap-xs);width:var(--gap-sm);height:var(--gap-sm);border-radius:var(--r-pill);background:var(--panel);border:var(--hl) solid var(--m2)}
+.kb-timeline > .kb-step.is-current::before{border-color:var(--accent-hover);background:var(--accent)}
+.kb-timeline > .kb-step.is-done::before{background:var(--g);border-color:var(--g)}
+.kb-timeline > .kb-step.is-failed::before{background:var(--r);border-color:var(--r)}
+
+/* ---- toast ---- */
+.kb-toasts{position:fixed;right:var(--gap-lg);bottom:var(--gap-lg);display:flex;flex-direction:column;gap:var(--gap-sm);z-index:var(--z-toast,40)}
+.kb-toast{min-width:var(--toast-w,260px);max-width:var(--toast-max-w,420px);padding:var(--gap-sm) var(--card-pad-x);border-radius:var(--r2);background:var(--surface-3);border:var(--hl) solid var(--b2);box-shadow:var(--sh2);color:var(--t);display:flex;align-items:center;gap:var(--gap-sm)}
+
+/* ---- 动效:统一走 motion token,并尊重 prefers-reduced-motion ---- */
+.kb-fade-enter-active,.kb-fade-leave-active{transition:opacity var(--dur-base) var(--ease-out)}
+.kb-fade-enter-from,.kb-fade-leave-to{opacity:0}
+.kb-pop-enter-active,.kb-pop-leave-active{transition:opacity var(--dur-base) var(--ease-out),transform var(--dur-base) var(--ease-spring)}
+.kb-pop-enter-from,.kb-pop-leave-to{opacity:0;transform:scale(.98)}
+@media (prefers-reduced-motion: reduce){
+  .kb-btn,.kb-progress > i,.kb-fade-enter-active,.kb-fade-leave-active,.kb-pop-enter-active,.kb-pop-leave-active{transition-duration:0s}
+}
+:root[data-motion=reduce] .kb-btn,:root[data-motion=reduce] .kb-progress > i,
+:root[data-motion=reduce] .kb-fade-enter-active,:root[data-motion=reduce] .kb-fade-leave-active,
+:root[data-motion=reduce] .kb-pop-enter-active,:root[data-motion=reduce] .kb-pop-leave-active{transition-duration:0s}
+
+/* ---- 外观页:主题卡 / 色板 / 布局图(设计规范) ---- */
+.kb-themes{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--gap-sm)}
+.kb-theme{display:flex;flex-direction:column;gap:var(--gap-xs);cursor:pointer}
+.kb-theme-pv{position:relative;height:calc(var(--row-h) * 2.6);border-radius:var(--r2);overflow:hidden;box-shadow:0 0 0 var(--hl) var(--border-default);transition:box-shadow var(--dur-fast) var(--ease-out),transform var(--dur-base) var(--ease-spring)}
+.kb-theme:hover .kb-theme-pv{transform:translateY(calc(var(--gap-xs) * -1))}
+.kb-theme.is-on .kb-theme-pv{box-shadow:0 0 0 1.5px var(--accent),0 0 0 4.5px color-mix(in srgb, var(--accent) 22%, transparent)}
+.kb-theme-name{display:flex;align-items:center;gap:var(--gap-xs);font-size:calc(var(--fs-base-sm) * var(--fs));color:var(--m)}
+.kb-theme.is-on .kb-theme-name{color:var(--t)}
+.kb-mini{position:absolute;inset:0;display:flex;background:var(--bg-canvas)}
+.kb-mini-side{width:28%;background:var(--bg-sidebar);border-right:var(--hl) solid var(--border-subtle);padding:var(--gap-xs);display:flex;flex-direction:column;gap:var(--gap-xs)}
+.kb-mini-side i{display:block;height:var(--gap-xs);border-radius:var(--r-xs);background:var(--text-quaternary);opacity:.6}
+.kb-mini-side i.is-active{background:var(--text-secondary);opacity:1;width:80%}
+.kb-mini-main{flex:1;padding:var(--gap-xs);display:flex;flex-direction:column;gap:var(--gap-xs)}
+.kb-mini-title{height:var(--gap-xs);width:46%;border-radius:var(--r-xs);background:var(--text-primary);opacity:.85}
+.kb-mini-body{flex:1;border-radius:var(--r-xs);background:var(--surface-1);box-shadow:0 0 0 var(--hl) var(--border-default);padding:var(--gap-xs);display:flex;align-items:flex-end;gap:var(--gap-xs)}
+.kb-mini-body u{flex:1;border-radius:var(--r-xs) var(--r-xs) 0 0;background:var(--accent);opacity:.9}
+.kb-mini-body u:nth-child(odd){opacity:.45}
+.kb-swatches{display:flex;align-items:center;gap:var(--gap-sm);flex-wrap:wrap}
+.kb-swatch{width:calc(var(--row-h) - 4px);height:calc(var(--row-h) - 4px);border-radius:var(--r-pill);background:var(--swatch,var(--accent));cursor:pointer;display:grid;place-items:center;color:var(--on-accent);box-shadow:inset 0 0 0 .5px rgba(var(--ink),.25),0 1px 2px rgba(var(--shade),.3);transition:transform var(--spring-dur) var(--ease-spring)}
+.kb-swatch:hover{transform:scale(1.08)}
+.kb-swatch.is-on{box-shadow:0 0 0 2px var(--bg-canvas),0 0 0 3.5px var(--accent)}
+.kb-swatch svg{opacity:0}
+.kb-swatch.is-on svg{opacity:1}
+.kb-lays{display:flex;gap:var(--gap)}
+.kb-lay{display:flex;flex-direction:column;gap:var(--gap-xs);cursor:pointer;width:calc(var(--row-h) * 2.6)}
+.kb-lay-pg{height:calc(var(--row-h) * 1.6);border-radius:var(--r2);background:var(--panel2);box-shadow:0 0 0 var(--hl) var(--border-default);padding:var(--gap-xs);display:flex;gap:var(--gap-xs)}
+.kb-lay.is-on .kb-lay-pg{box-shadow:0 0 0 1.5px var(--accent)}
+.kb-lay-bar{background:var(--accent);border-radius:var(--r-xs);opacity:.85}
+.kb-lay-fill{flex:1;background:rgba(var(--ink),.08);border-radius:var(--r-xs)}
+.kb-lay-name{font-size:calc(var(--fs-base-sm) * var(--fs));color:var(--m)}
+.kb-lay.is-on .kb-lay-name{color:var(--t)}
+.kb-opt{display:flex;align-items:center;gap:var(--gap);min-height:calc(var(--row-h) * 1.4);border-bottom:var(--hl) solid var(--b)}
+.kb-opt:last-child{border-bottom:0}
+.kb-opt-k{width:var(--form-label-w);color:var(--t)}
+.kb-opt-d{flex:1;color:var(--m);font-size:calc(var(--fs-base-sm) * var(--fs))}
+.kb-segx{display:inline-flex;padding:var(--gap-xs);border-radius:var(--r1);background:var(--panel2);box-shadow:inset 0 0 0 var(--hl) var(--b)}
+.kb-segx > i{font-style:normal;padding:0 var(--gap-sm);height:calc(var(--ctl-h) - 6px);display:inline-flex;align-items:center;gap:var(--gap-xs);border-radius:var(--r-xs);cursor:pointer;color:var(--m);font-size:calc(var(--fs-base-sm) * var(--fs))}
+.kb-segx > i.is-on{background:var(--panel);color:var(--t);box-shadow:0 1px 2px rgba(var(--shade),.25)}
+
+/* ---- 柱状图(设计规范;Dashboard 的 7 日活跃度用它) ---- */
+.kb-bars{display:flex;align-items:flex-end;gap:var(--gap-xs);height:calc(var(--row-h) * 5.6)}
+.kb-bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:var(--gap-xs);min-width:0}
+.kb-bar-fill{width:100%;background:var(--accent);border-radius:var(--r-xs) var(--r-xs) 0 0;min-height:var(--gap-xs);transition:height var(--dur-base) var(--ease-out)}
+.kb-bar-label{color:var(--m);font-size:calc(var(--fs-base-sm) * var(--fs))}
+
+/* ---- 状态点 ---- */
+.kb-dot-ok{background:var(--g)}
+.kb-dot-warn{background:var(--y)}
+.kb-dot-bad{background:var(--r)}
+
+/* ---- 设置分区布局(06 / 08 共用) ---- */
+.kb-settings{display:flex;flex:1;min-height:0;gap:0}
+.kb-settings-nav{width:var(--settings-nav-w,180px);border-right:var(--hl) solid var(--b);padding:calc(14px * var(--fs)) calc(8px * var(--fs));display:flex;flex-direction:column;gap:calc(4px * var(--fs));flex:none}
+/* 分区导航项由 <span> 改成了 <button>:去掉按钮的默认外观,保持原来的样子;不用 font 简写,免得盖掉 .ni 的字重 */
+.kb-settings-nav button.ni{appearance:none;border:0;font-family:inherit;font-size:inherit;line-height:inherit;text-align:left;cursor:pointer}
+.kb-settings-nav button.ni:not(.on){background:transparent}
+.kb-settings-nav button.ni:focus-visible{outline:none;box-shadow:var(--ring)}
+.kb-settings-body{flex:1;min-width:0;overflow:auto;padding:calc(18px * var(--fs)) calc(22px * var(--fs));display:flex;flex-direction:column;gap:calc(14px * var(--fs))}
+@media (max-width:1023px){
+  .kb-settings{flex-direction:column}
+  .kb-settings-nav{width:auto;flex-direction:row;overflow-x:auto;border-right:0;border-bottom:var(--hl) solid var(--b)}
+}
+
+/* ---- 响应式(设计规范与设计稿的规则逐条对应):窄屏统一在这里收口,页面不写断点 ----
+   原型的规则写在 `.grid[style*="repeat(5"]` 上(依赖内联样式),这里落到语义类 kb-grid-* 上,所有页面共用。
+     平板 640–1023:所有网格强制 2 列;5 个指标卡 → 2+2+1(最后一张跨 2 列);
+     手机 <640:卡片网格 1 列,但「指标卡」网格(5 / 4 列)保持 2 列。 */
+@media (max-width: 1023px) {
+  .kb-grid-2, .kb-grid-3, .kb-grid-4, .kb-grid-5, .kb-grid-triptych, .kb-grid-main-side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kb-grid-5 > :last-child:nth-child(odd) { grid-column: span 2; }
+  .kb-themes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 639px) {
+  .kb-grid-2, .kb-grid-3, .kb-grid-main-side, .kb-grid-triptych { grid-template-columns: minmax(0, 1fr); }
+  .kb-grid-4, .kb-grid-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kb-themes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kb-lays { flex-wrap: wrap; }
+  .kb-opt { flex-wrap: wrap; }
+  .kb-opt-k { width: 100%; }
+  .kb-bars { height: calc(var(--row-h) * 3.2); }
+  .metric .spk, .kb-grid-4 .spk, .kb-grid-5 .spk { display: none; }
+}
+
+/* ---- 活跃度热力(Dashboard / 外观预览共用) ---- */
+.kb-heat{display:grid;grid-template-columns:repeat(var(--heat-cols,16),minmax(0,1fr));gap:var(--gap-xs)}
+.kb-heat > i{aspect-ratio:1;border-radius:var(--r-xs);background:rgba(var(--ink),.05);transition:background var(--dur-fast) var(--ease-out)}
+.kb-heat > i[data-level="1"]{background:color-mix(in srgb,var(--accent) 28%,transparent)}
+.kb-heat > i[data-level="2"]{background:color-mix(in srgb,var(--accent) 48%,transparent)}
+.kb-heat > i[data-level="3"]{background:color-mix(in srgb,var(--accent) 70%,transparent)}
+.kb-heat > i[data-level="4"]{background:var(--accent)}
+.kb-heat-legend{display:flex;align-items:center;gap:var(--gap-xs);color:var(--m);font-size:calc(var(--fs-base-sm) * var(--fs))}
+.kb-heat-legend > i{width:var(--gap-sm);height:var(--gap-sm);border-radius:var(--r-xs);background:rgba(var(--ink),.05)}
+.kb-heat-legend > i[data-level="1"]{background:color-mix(in srgb,var(--accent) 28%,transparent)}
+.kb-heat-legend > i[data-level="3"]{background:color-mix(in srgb,var(--accent) 70%,transparent)}
+.kb-heat-legend > i[data-level="4"]{background:var(--accent)}
+
+/* ---- 全局拖放遮罩 ---- */
+.kb-drop-overlay{display:grid;place-items:center;background:rgba(var(--shade),.62);backdrop-filter:blur(3px);z-index:var(--z-dialog,31)}
+.kb-drop-panel{width:min(720px,90vw);height:min(420px,70vh);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--gap-sm);text-align:center;border:1.5px dashed color-mix(in srgb, var(--accent-hover) 45%, var(--b2));border-radius:var(--r3);background:radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%), var(--e1, var(--panel));box-shadow:var(--sh3)}
+.kb-drop-orb.is-lg{width:64px;height:64px;border-radius:18px}
+.kb-drop-ovtitle{margin-top:6px;font-size:calc(20px * var(--fs));font-weight:600}
+.kb-drop-ovname{color:var(--accent-text)}
+.kb-drop-tags{gap:8px;margin-top:10px;justify-content:center;flex-wrap:wrap;font-size:calc(12px * var(--fs))}
+@media (max-width:639px){.kb-drop-tags .tag:nth-child(n+3){display:none}}
+
+/* ---- 目录树缩进 ---- */
+.kb-ind-1{padding-left:calc(var(--gap) * 1)}
+.kb-ind-2{padding-left:calc(var(--gap) * 2)}
+.kb-ind-3{padding-left:calc(var(--gap) * 3)}
+.kb-ind-4{padding-left:calc(var(--gap) * 4)}
+.kb-ind-5{padding-left:calc(var(--gap) * 5)}
+.kb-tree-row{display:flex;align-items:center;gap:var(--gap-sm);min-height:calc(var(--row-h) * .8)}
+.kb-strike{text-decoration:line-through;color:var(--m)}
+
+/* ---- 类型分布条 ---- */
+.kb-dist{display:flex;height:var(--gap-sm);border-radius:var(--r-xs);overflow:hidden;background:rgba(var(--ink),.06)}
+.kb-dist > i{display:block;height:100%}
+
+/* 格式预览:块文本、表格、可点选的索引块(只用已有 token) */
+.kb-preview-text{margin:0;color:var(--t);font-size:calc(var(--fs-base-sm) * var(--fs));line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.kb-preview-table{width:100%;border-collapse:collapse;font-size:calc(var(--fs-base-sm) * var(--fs));color:var(--t)}
+.kb-preview-table td{padding:var(--gap-xs) var(--gap-sm);border-bottom:var(--hl) solid var(--b);vertical-align:top}
+.kb-preview-head{font-weight:500;color:var(--t2);background:var(--panel2)}
+.kb-preview-chunk{display:flex;flex-direction:column;gap:var(--gap-xs);width:100%;padding:var(--gap-sm) var(--card-pad-x);border:0;border-bottom:var(--hl) solid var(--b);background:transparent;text-align:left;cursor:pointer;font:inherit;color:inherit;transition:background var(--dur-fast) var(--ease-out)}
+.kb-preview-chunk:last-child{border-bottom:0}
+.kb-preview-chunk:hover{background:var(--hover)}
+.kb-preview-chunk-active{background:var(--hover);box-shadow:inset 2px 0 0 var(--accent)}
+
+/* ---- 通用选项卡导航(任务审计设计稿 / 系统状态设计稿 共用) ---- */
+.tabs{display:flex;align-items:stretch;gap:calc(2px * var(--fs));border-bottom:var(--hl) solid var(--b);padding:0 var(--page-pad);min-height:calc(var(--row-h) + 12px);background:color-mix(in srgb,var(--bg-canvas) 60%,transparent);backdrop-filter:blur(8px)}
+.tab{display:inline-flex;align-items:center;gap:var(--gap-xs);padding:calc(8px * var(--fs)) calc(12px * var(--fs));font-size:calc(13px * var(--fs));color:var(--m);border-bottom:2px solid transparent;margin-bottom:calc(-1px * var(--fs));cursor:pointer;user-select:none;background:transparent;border-top:0;border-left:0;border-right:0;transition:color var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out)}
+.tab:hover{color:var(--t)}
+.tab.on{color:var(--t);border-color:var(--accent);font-weight:500}
+.tabs-actions{margin-left:auto;display:flex;align-items:center;gap:var(--gap-sm)}
+
+/* 手机:KbButton(.kb-btn)与原生 .btn 一样放大到触控尺寸(设计稿:可点元素 ≥44px,小按钮 36px) */
+@media (max-width: 639px) {
+  .kb-btn { min-height: 44px; height: 44px; padding: 0 14px; font-size: calc(14px * var(--fs)); }
+  .kb-btn.is-sm { height: 36px; min-height: 36px; }
+}
+
+/* 手机:表格变卡片列表时,单元格不再带水平内边距(原型 `td{height:auto;padding:0;border:0}`)。
+   用变量控制,所有表格(含各页面自定义的)一起生效,不依赖选择器特异性与加载顺序。 */
+@media (max-width: 639px) {
+  :root { --cell-px: 0px; }
+}
+
+/* 手机上,页签条放进已经有 16px 内边距的 .content 里时,不再叠加自己的 var(--page-pad)(20px):
+   好友 / 分享 / 导入 / 系统状态 / 用量的页签首字原来落在 48px,而任务 / 审计(页签在 .content 外面)是 28px。
+   统一成 28 = 内容左缘 16 + 页签按钮自己的 12px(设计稿)。任务 / 审计的页签不在 .content 里,不受影响 */
+@media (max-width:599px){.content .tabs{padding-left:0;padding-right:0}}
+
+/* 固定在滚动区顶部的控件条(筛选 / 页签 / 工具条):内容在它下面滚,它不动。
+   背景必须不透明:.tabs 自己是半透明加模糊,滚上来的内容会从下面透出来;
+   z-index 比顶栏、抽屉、对话框都低,只盖过页面内容。
+   top 取滚动区上内边距的负值:粘性定位按滚动区的内容盒算,top:0 会停在内边距下面,滚上来的内容从条上面露出来 */
+.kb-sticky,.tabs.kb-sticky{position:sticky;top:calc(-1 * var(--content-pad-t,0px));z-index:4;background:var(--bg);backdrop-filter:none}

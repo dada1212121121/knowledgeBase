@@ -1,0 +1,32 @@
+# 在默认规则之上，仅忽略测试里公开的协议样例与固定假值。
+# 这些值来自 RFC、单测夹具或占位文案，不是可用凭据；不要在这里放宽通用规则。
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "本地构建产物，不属于提交内容"
+paths = ['''^target/''', '''(^|/)node_modules/''', '''(^|/)dist/''']
+
+[[allowlists]]
+description = "RFC 6455 WebSocket 握手样例"
+regexes = ['''dGhlIHNhbXBsZSBub25jZQ==''']
+
+[[allowlists]]
+description = "RFC 6238 TOTP 测试向量"
+regexes = ['''GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ''']
+
+[[allowlists]]
+description = "脱敏规则单测里的假 Authorization / apiKey"
+regexes = ['''abcdefgh12345(678)?''']
+
+[[allowlists]]
+description = "指南生成测试里的假 API Key"
+regexes = ['''kb_ak_0123456789abcdef''']
+
+[[allowlists]]
+description = "浏览器 localStorage 键名，被 generic-api-key 误判"
+regexes = ['''kb\.docx\.roundtrip\.v2''']
+
+[[allowlists]]
+description = "登录单测里的假 challenge 与假 TOTP 码"
+regexes = ['''chal-secret''', '''ABCD-EFGH-J[02]T3''']

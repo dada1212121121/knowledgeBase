@@ -1,0 +1,28 @@
+/* 分享面板各页共用的样式:只用 token(间距阶梯 / 字号阶梯 / 语义色),不写原始颜色和 px 字号。 */
+.kb-share-sub { color: var(--text-secondary); font-size: var(--text-12); }
+.kb-share-error { margin: 0; color: var(--status-danger-text); font-size: var(--text-13); line-height: var(--lh-body); }
+.kb-share-hint { margin: 0; color: var(--text-tertiary); font-size: var(--text-12); line-height: var(--lh-body); }
+.kb-share-warn { margin: 0; color: var(--status-warning-text); font-size: var(--text-12); line-height: var(--lh-body); }
+.kb-share-note { margin: 0; padding: var(--sp-2) var(--sp-3); border-radius: var(--r2); background: rgb(var(--ink), 0.04); color: var(--text-secondary); font-size: var(--text-12); line-height: var(--lh-body); }
+.kb-share-link { border: 0; background: none; color: var(--accent-text, var(--accent)); font: inherit; font-size: var(--text-13); cursor: pointer; padding: 0; text-decoration: underline; }
+.kb-share-link:focus-visible { outline: none; box-shadow: var(--accent-ring); }
+.kb-share-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.kb-share-row { display: flex; align-items: center; gap: var(--sp-3); min-height: var(--list-row-h, 48px); padding: var(--sp-2) 0; min-width: 0; }
+.kb-share-row + .kb-share-row { border-top: var(--hl) solid var(--border-subtle); }
+.kb-share-who { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.kb-share-who b { font-weight: var(--fw-medium); display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; min-width: 0; overflow-wrap: anywhere; }
+.kb-share-who small { color: var(--text-tertiary); font-size: var(--text-12); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kb-share-tag { font-size: var(--text-11); font-weight: var(--fw-regular); padding: 1px 6px; border-radius: var(--r-xs); background: rgb(var(--ink), 0.08); color: var(--text-secondary); white-space: nowrap; }
+.kb-share-fixed { color: var(--text-secondary); font-size: var(--text-13); white-space: nowrap; }
+.kb-share-icon-gap { flex: none; width: 32px; }
+.kb-share-opt { display: flex; align-items: center; gap: var(--sp-3); min-width: 0; }
+.kb-share-opt-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.kb-share-opt-text b { font-weight: var(--fw-medium); font-size: var(--text-13); }
+.kb-share-opt-text small { color: var(--text-tertiary); font-size: var(--text-12); line-height: var(--lh-body); }
+.kb-share-actions { display: flex; gap: var(--sp-2); justify-content: flex-end; flex-wrap: wrap; }
+.kb-share-actions.is-split { justify-content: space-between; }
+@media (pointer: coarse) {
+  .kb-share-link { min-height: 44px; }
+  /* 行内的角色下拉:小按钮的伪元素只能撑到约 42px(它从内边距框往外算),这里直接给够 44 */
+  .kb-share-row .kb-select .btn, .kb-share-opt .kb-select .btn { min-height: 44px; }
+}

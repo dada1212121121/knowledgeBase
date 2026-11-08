@@ -1,0 +1,24 @@
+# 字数统计:编辑器扩展示例(命令 + 工具栏按钮 + 面板)
+# 安装:把整个目录复制到 <KB_HOME>/editor-extensions/kb.word-count/(目录名必须等于 id),
+# 再在 config.toml 里写 [editor] extensions = true 即可。卸载:删掉这个目录(或把开关改回 false)。
+# 详见 README.md 与 docs/EDITOR_EXTENSIONS.md。
+id = "kb.word-count"
+name = "字数统计"
+version = "1.0.0"
+api_version = 1
+description = "统计正文的汉字数、英文词数和段落数;面板随输入实时更新"
+entry = "index.js"
+# 只读当前文档 + 画界面,不申请改文档、联网、剪贴板
+permissions = ["document.read", "ui"]
+
+[[contributes.commands]]
+id = "kb.word-count.show"
+title = "字数统计"
+
+[[contributes.toolbar]]
+id = "kb.word-count.button"
+
+[[contributes.panels]]
+id = "kb.word-count.panel"
+title = "字数统计"
+icon = "Σ"

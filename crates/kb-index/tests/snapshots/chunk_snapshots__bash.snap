@@ -1,0 +1,30 @@
+---
+source: crates/kb-index/tests/chunk_snapshots.rs
+assertion_line: 97
+expression: views
+---
+- key: "#1"
+  start_line: 1
+  end_line: 6
+  symbol: ~
+  header: demo › fixtures/bash.sh
+- key: function usage
+  start_line: 8
+  end_line: 11
+  symbol: function usage
+  header: demo › fixtures/bash.sh › usage()
+- key: function deploy
+  start_line: 13
+  end_line: 22
+  symbol: function deploy
+  header: demo › fixtures/bash.sh › deploy()
+- key: function main
+  start_line: 24
+  end_line: 30
+  symbol: function main
+  header: demo › fixtures/bash.sh › main()
+- key: "#2"
+  start_line: 32
+  end_line: 32
+  symbol: ~
+  header: demo › fixtures/bash.sh

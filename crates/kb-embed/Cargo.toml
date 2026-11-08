@@ -1,0 +1,23 @@
+[package]
+name = "kb-embed"
+description = "Embedder/Reranker 实现:fastembed 工作线程、OpenAI 兼容 HTTP、llama.cpp sidecar、Fake(测试用)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+# 测试专用:导出 FakeEmbedder。release 构建不开启（设计规范）。
+testkit = []
+
+[dependencies]
+async-trait = { workspace = true }
+fastembed = { workspace = true }
+kb-core = { path = "../kb-core" }
+ort = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true }
+xxhash-rust = { workspace = true }

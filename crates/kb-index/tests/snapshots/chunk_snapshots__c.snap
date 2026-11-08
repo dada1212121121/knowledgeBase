@@ -1,0 +1,59 @@
+---
+source: crates/kb-index/tests/chunk_snapshots.rs
+expression: views
+---
+- key: "#1"
+  start_line: 1
+  end_line: 7
+  symbol: ~
+  header: demo › fixtures/c.c
+- key: struct config
+  start_line: 9
+  end_line: 14
+  symbol: struct config
+  header: demo › fixtures/c.c › struct config
+- key: "#2"
+  start_line: 16
+  end_line: 21
+  symbol: ~
+  header: demo › fixtures/c.c
+- key: struct counter
+  start_line: 23
+  end_line: 27
+  symbol: struct counter
+  header: demo › fixtures/c.c › struct counter
+- key: "struct config config_new(const char *name, int port)"
+  start_line: 29
+  end_line: 37
+  symbol: "struct config config_new(const char *name, int port)"
+  header: "demo › fixtures/c.c › struct config config_new(const char *name, int port)"
+- key: "void config_describe(const struct config *cfg, char *out, size_t size)"
+  start_line: 39
+  end_line: 42
+  symbol: "void config_describe(const struct config *cfg, char *out, size_t size)"
+  header: "demo › fixtures/c.c › void config_describe(const struct config *cfg, char *out, size_t size)"
+- key: long fibonacci(int n)
+  start_line: 44
+  end_line: 55
+  symbol: long fibonacci(int n)
+  header: demo › fixtures/c.c › long fibonacci(int n)
+- key: "int parse_port(const char *value, int *out)"
+  start_line: 57
+  end_line: 70
+  symbol: "int parse_port(const char *value, int *out)"
+  header: "demo › fixtures/c.c › int parse_port(const char *value, int *out)"
+- key: "int total(const int *values, size_t count)"
+  start_line: 72
+  end_line: 80
+  symbol: "int total(const int *values, size_t count)"
+  header: "demo › fixtures/c.c › int total(const int *values, size_t count)"
+- key: "static void counter_record(struct counter *counters, size_t capacity, const char…"
+  start_line: 82
+  end_line: 97
+  symbol: "static void counter_record(struct counter *counters, size_t capacity, const char…"
+  header: "demo › fixtures/c.c › static void counter_record(struct counter *counters, size_t capacity, const char…"
+- key: int main(void)
+  start_line: 99
+  end_line: 112
+  symbol: int main(void)
+  header: demo › fixtures/c.c › int main(void)

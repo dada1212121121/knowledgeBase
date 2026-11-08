@@ -1,0 +1,400 @@
+---
+source: crates/kb-index/tests/markdown_fixture.rs
+expression: views
+---
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md)
+  start_line: 1
+  end_line: 8
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 0. 章节总览(评审导航)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 0. 章节总览(评审导航)
+  start_line: 9
+  end_line: 27
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 0. 章节总览(评审导航) #2"
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 0. 章节总览(评审导航)
+  start_line: 28
+  end_line: 37
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 0. 章节总览(评审导航) #3"
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 0. 章节总览(评审导航)
+  start_line: 39
+  end_line: 45
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 1. 设计目标与约束
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 1. 设计目标与约束
+  start_line: 47
+  end_line: 48
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 1. 设计目标与约束 › 1.1 功能目标
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 1. 设计目标与约束 › 1.1 功能目标
+  start_line: 49
+  end_line: 57
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 1. 设计目标与约束 › 1.2 非功能目标 (本设计的三条硬约束)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 1. 设计目标与约束 › 1.2 非功能目标 (本设计的三条硬约束)
+  start_line: 58
+  end_line: 64
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 1. 设计目标与约束 › 1.3 运行约束
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 1. 设计目标与约束 › 1.3 运行约束
+  start_line: 65
+  end_line: 71
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 2. 架构总览
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 2. 架构总览
+  start_line: 72
+  end_line: 73
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 2. 架构总览 › 2.1 分层架构 (自上而下)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 2. 架构总览 › 2.1 分层架构 (自上而下)
+  start_line: 74
+  end_line: 109
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 2. 架构总览 › 2.2 为什么这样分层能\"好维护\""
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 2. 架构总览 › 2.2 为什么这样分层能\"好维护\""
+  start_line: 110
+  end_line: 116
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters)
+  start_line: 117
+  end_line: 120
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.1 Embedder — 向量化(可切换模型)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.1 Embedder — 向量化(可切换模型)
+  start_line: 121
+  end_line: 139
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.2 VectorStore — 向量存储
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.2 VectorStore — 向量存储
+  start_line: 140
+  end_line: 153
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.3 KeywordIndex — 关键词/BM25 检索
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.3 KeywordIndex — 关键词/BM25 检索
+  start_line: 154
+  end_line: 164
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.4 Chunker — 分块策略
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.4 Chunker — 分块策略
+  start_line: 165
+  end_line: 176
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.5 Loader — 内容来源
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.5 Loader — 内容来源
+  start_line: 177
+  end_line: 186
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.6 Reranker — 可选重排
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.6 Reranker — 可选重排
+  start_line: 187
+  end_line: 195
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.7 EvolutionTrigger — 自进化触发器
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.7 EvolutionTrigger — 自进化触发器
+  start_line: 196
+  end_line: 204
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.8 注册表 (让\"插拔\"落地)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 3. 插拔式组件设计 (Ports & Adapters) › 3.8 注册表 (让\"插拔\"落地)"
+  start_line: 205
+  end_line: 216
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 4. 核心数据流
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 4. 核心数据流
+  start_line: 217
+  end_line: 218
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 4. 核心数据流 › 4.1 索引流程
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 4. 核心数据流 › 4.1 索引流程
+  start_line: 219
+  end_line: 228
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 4. 核心数据流 › 4.2 检索流程 (hybrid)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 4. 核心数据流 › 4.2 检索流程 (hybrid)
+  start_line: 229
+  end_line: 238
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 4. 核心数据流 › 4.3 自进化流程
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 4. 核心数据流 › 4.3 自进化流程
+  start_line: 239
+  end_line: 247
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 5. 接口设计
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 5. 接口设计
+  start_line: 248
+  end_line: 249
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 5. 接口设计 › 5.1 MCP 工具 (给 AI 工具用)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 5. 接口设计 › 5.1 MCP 工具 (给 AI 工具用)
+  start_line: 250
+  end_line: 258
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 5. 接口设计 › 5.2 REST + WS API (给 Web UI 用)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 5. 接口设计 › 5.2 REST + WS API (给 Web UI 用)
+  start_line: 259
+  end_line: 274
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 6. 隔离与存储模型
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 6. 隔离与存储模型
+  start_line: 275
+  end_line: 292
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 7. Web 管理界面设计
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 7. Web 管理界面设计
+  start_line: 293
+  end_line: 294
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 7. Web 管理界面设计 › 7.1 技术选型(已定)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 7. Web 管理界面设计 › 7.1 技术选型(已定)
+  start_line: 295
+  end_line: 299
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 7. Web 管理界面设计 › 7.2 页面
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 7. Web 管理界面设计 › 7.2 页面
+  start_line: 300
+  end_line: 310
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 8. 技术选型与理由(汇总，供评估)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 8. 技术选型与理由(汇总，供评估)
+  start_line: 311
+  end_line: 327
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 9. 目录结构(代码组织，体现可维护性)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 9. 目录结构(代码组织，体现可维护性)
+  start_line: 328
+  end_line: 359
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 10. 风险与评估点
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 10. 风险与评估点
+  start_line: 360
+  end_line: 371
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 11. 待你决策的清单
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 11. 待你决策的清单
+  start_line: 372
+  end_line: 383
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 12. 进程模型(已定: 守护进程 + 瘦 MCP 客户端)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 12. 进程模型(已定: 守护进程 + 瘦 MCP 客户端)"
+  start_line: 384
+  end_line: 385
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 12. 进程模型(已定: 守护进程 + 瘦 MCP 客户端) › 12.1 拓扑"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 12. 进程模型(已定: 守护进程 + 瘦 MCP 客户端) › 12.1 拓扑"
+  start_line: 386
+  end_line: 410
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 12. 进程模型(已定: 守护进程 + 瘦 MCP 客户端) › 12.2 职责划分"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 12. 进程模型(已定: 守护进程 + 瘦 MCP 客户端) › 12.2 职责划分"
+  start_line: 411
+  end_line: 415
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 12. 进程模型(已定: 守护进程 + 瘦 MCP 客户端) › 12.3 收益"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 12. 进程模型(已定: 守护进程 + 瘦 MCP 客户端) › 12.3 收益"
+  start_line: 416
+  end_line: 420
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 12. 进程模型(已定: 守护进程 + 瘦 MCP 客户端) › 12.4 代价与应对"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 12. 进程模型(已定: 守护进程 + 瘦 MCP 客户端) › 12.4 代价与应对"
+  start_line: 421
+  end_line: 426
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 13. 图示
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 13. 图示
+  start_line: 427
+  end_line: 428
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 13. 图示 › 13.1 组件依赖(编译期单向,保证可维护)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 13. 图示 › 13.1 组件依赖(编译期单向,保证可维护)"
+  start_line: 429
+  end_line: 440
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 13. 图示 › 13.2 索引数据流(时序)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 13. 图示 › 13.2 索引数据流(时序)
+  start_line: 441
+  end_line: 462
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 13. 图示 › 13.3 检索数据流(时序,hybrid)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 13. 图示 › 13.3 检索数据流(时序,hybrid)"
+  start_line: 463
+  end_line: 485
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案)
+  start_line: 486
+  end_line: 489
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.1 双哈希增量索引 (来源: Notion \"Page State\")"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.1 双哈希增量索引 (来源: Notion \"Page State\")"
+  start_line: 490
+  end_line: 504
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.2 双路径索引管道 (来源: Notion offline/online dual-path)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.2 双路径索引管道 (来源: Notion offline/online dual-path)"
+  start_line: 505
+  end_line: 515
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.3 insights 的时间有效性与版本 (来源: Zep temporal validity)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.3 insights 的时间有效性与版本 (来源: Zep temporal validity)"
+  start_line: 516
+  end_line: 531
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.4 统一 Record 数据模型 (来源: Notion \"everything is a block\")"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.4 统一 Record 数据模型 (来源: Notion \"everything is a block\")"
+  start_line: 532
+  end_line: 549
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.5 轻量关系层(务实版\"图\") (来源: Mem0/Zep 向量 vs 图权衡)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.5 轻量关系层(务实版\"图\") (来源: Mem0/Zep 向量 vs 图权衡)"
+  start_line: 550
+  end_line: 555
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.6 异步\"巩固\"任务 (来源: Letta 分层记忆 / Anthropic \"Dreaming\")"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.6 异步\"巩固\"任务 (来源: Letta 分层记忆 / Anthropic \"Dreaming\")"
+  start_line: 556
+  end_line: 562
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.7 检索质量可观测: 黄金查询集 + hit@k (来源: 多方案一致建议 benchmark hit@k)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.7 检索质量可观测: 黄金查询集 + hit@k (来源: 多方案一致建议 benchmark hit@k)"
+  start_line: 563
+  end_line: 567
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.8 明确不采纳(避免过度设计)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.8 明确不采纳(避免过度设计)
+  start_line: 568
+  end_line: 578
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.9 对既有章节的影响
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 14. 演进优化(借鉴 Notion / Mem0 / Zep / Letta 等成熟方案) › 14.9 对既有章节的影响
+  start_line: 579
+  end_line: 586
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 15. Web 鉴权(已定,参考 codeg 的 session 方式)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 15. Web 鉴权(已定,参考 codeg 的 session 方式)"
+  start_line: 587
+  end_line: 590
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 15. Web 鉴权(已定,参考 codeg 的 session 方式) › 15.1 模型"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 15. Web 鉴权(已定,参考 codeg 的 session 方式) › 15.1 模型"
+  start_line: 591
+  end_line: 598
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 15. Web 鉴权(已定,参考 codeg 的 session 方式) › 15.2 相关 trait(保持插拔)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 15. Web 鉴权(已定,参考 codeg 的 session 方式) › 15.2 相关 trait(保持插拔)"
+  start_line: 599
+  end_line: 613
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 16. 结构化查看与编辑(Web 管理界面重点能力)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 16. 结构化查看与编辑(Web 管理界面重点能力)
+  start_line: 614
+  end_line: 617
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 16. 结构化查看与编辑(Web 管理界面重点能力) › 16.1 结构化查看
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 16. 结构化查看与编辑(Web 管理界面重点能力) › 16.1 结构化查看
+  start_line: 618
+  end_line: 624
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 16. 结构化查看与编辑(Web 管理界面重点能力) › 16.2 良好编辑
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 16. 结构化查看与编辑(Web 管理界面重点能力) › 16.2 良好编辑
+  start_line: 625
+  end_line: 631
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 16. 结构化查看与编辑(Web 管理界面重点能力) › 16.3 对应 API(补充接口设计)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 16. 结构化查看与编辑(Web 管理界面重点能力) › 16.3 对应 API(补充接口设计)
+  start_line: 632
+  end_line: 643
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 17. 跨模型自动重嵌入迁移(已定: 支持)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 17. 跨模型自动重嵌入迁移(已定: 支持)"
+  start_line: 644
+  end_line: 655
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 18. 项目式自动进化(强化)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 18. 项目式自动进化(强化)
+  start_line: 656
+  end_line: 659
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 18. 项目式自动进化(强化) › 18.1 每个项目独立的进化回路
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 18. 项目式自动进化(强化) › 18.1 每个项目独立的进化回路
+  start_line: 660
+  end_line: 665
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 18. 项目式自动进化(强化) › 18.2 项目生命周期
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 18. 项目式自动进化(强化) › 18.2 项目生命周期
+  start_line: 666
+  end_line: 674
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 18. 项目式自动进化(强化) › 18.3 Dashboard 的项目视角
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 18. 项目式自动进化(强化) › 18.3 Dashboard 的项目视角
+  start_line: 675
+  end_line: 680
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 19. 借鉴 codeg 的插拔式增强
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 19. 借鉴 codeg 的插拔式增强
+  start_line: 681
+  end_line: 686
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 19. 借鉴 codeg 的插拔式增强 › 19.1 Skills 式运行时目录插拔(轻量扩展,无需改代码)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 19. 借鉴 codeg 的插拔式增强 › 19.1 Skills 式运行时目录插拔(轻量扩展,无需改代码)"
+  start_line: 687
+  end_line: 696
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 19. 借鉴 codeg 的插拔式增强 › 19.2 单核心多形态部署(核心不变,外壳可换)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 19. 借鉴 codeg 的插拔式增强 › 19.2 单核心多形态部署(核心不变,外壳可换)"
+  start_line: 697
+  end_line: 703
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 19. 借鉴 codeg 的插拔式增强 › 19.3 配置热重载(提升为一等能力)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 19. 借鉴 codeg 的插拔式增强 › 19.3 配置热重载(提升为一等能力)
+  start_line: 704
+  end_line: 709
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 19. 借鉴 codeg 的插拔式增强 › 19.4 对既有章节的影响
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 19. 借鉴 codeg 的插拔式增强 › 19.4 对既有章节的影响
+  start_line: 710
+  end_line: 716
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门)
+  start_line: 717
+  end_line: 721
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.1 两层进化并存
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.1 两层进化并存
+  start_line: 722
+  end_line: 731
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.2 L2b 全自动提炼管道(草稿 → AI 审核 → 入库)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.2 L2b 全自动提炼管道(草稿 → AI 审核 → 入库)
+  start_line: 732
+  end_line: 748
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.3 新增可插拔组件(符合插拔式设计)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.3 新增可插拔组件(符合插拔式设计)
+  start_line: 749
+  end_line: 768
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.4 草稿状态机(扩展状态机的 Status)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.4 草稿状态机(扩展状态机的 Status)
+  start_line: 769
+  end_line: 778
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.5 质量与安全防线(防止自动进化污染库)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.5 质量与安全防线(防止自动进化污染库)
+  start_line: 779
+  end_line: 786
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.6 项目维度(衔接项目维度)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.6 项目维度(衔接项目维度)
+  start_line: 787
+  end_line: 790
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.7 对既有章节的影响
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 20. 开发过程中的自动进化(双层 + AI 审核闸门) › 20.7 对既有章节的影响
+  start_line: 791
+  end_line: 798
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 21. 自动进化导读线(一条主线串起全文)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 21. 自动进化导读线(一条主线串起全文)
+  start_line: 799
+  end_line: 802
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 21. 自动进化导读线(一条主线串起全文) › 21.1 一句话概括
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 21. 自动进化导读线(一条主线串起全文) › 21.1 一句话概括
+  start_line: 803
+  end_line: 805
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 21. 自动进化导读线(一条主线串起全文) › 21.2 进化闭环全景图
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 21. 自动进化导读线(一条主线串起全文) › 21.2 进化闭环全景图
+  start_line: 806
+  end_line: 841
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 21. 自动进化导读线(一条主线串起全文) › 21.3 顺读路径(按\"发生顺序\"读)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 21. 自动进化导读线(一条主线串起全文) › 21.3 顺读路径(按\"发生顺序\"读)"
+  start_line: 842
+  end_line: 854
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 21. 自动进化导读线(一条主线串起全文) › 21.4 一张\"谁触发谁\"的责任表"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 21. 自动进化导读线(一条主线串起全文) › 21.4 一张\"谁触发谁\"的责任表"
+  start_line: 855
+  end_line: 868
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 21. 自动进化导读线(一条主线串起全文) › 21.5 评审聚焦建议
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 21. 自动进化导读线(一条主线串起全文) › 21.5 评审聚焦建议
+  start_line: 869
+  end_line: 875
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG)
+  start_line: 876
+  end_line: 880
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG) › 22.1 能力清单与优先级
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG) › 22.1 能力清单与优先级
+  start_line: 881
+  end_line: 894
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG) › 22.2 第一梯队(默认启用,证据最硬)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG) › 22.2 第一梯队(默认启用,证据最硬)"
+  start_line: 895
+  end_line: 918
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG) › 22.3 第二梯队(进阶,可选开关)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG) › 22.3 第二梯队(进阶,可选开关)"
+  start_line: 919
+  end_line: 933
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG) › 22.4 第三梯队(锦上添花)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG) › 22.4 第三梯队(锦上添花)
+  start_line: 934
+  end_line: 943
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG) › 22.5 检索链整合(更新检索链)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG) › 22.5 检索链整合(更新检索链)
+  start_line: 944
+  end_line: 955
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG) › 22.6 对既有章节的影响
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 22. 智能化检索能力(借鉴 Anthropic / Sourcegraph Cody / 前沿 RAG) › 22.6 对既有章节的影响
+  start_line: 956
+  end_line: 964
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库)
+  start_line: 965
+  end_line: 969
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库) › 23.1 统一能力层(Capability Registry)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库) › 23.1 统一能力层(Capability Registry)
+  start_line: 970
+  end_line: 991
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库) › 23.2 Web AI 管家(会话式 Agent)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库) › 23.2 Web AI 管家(会话式 Agent)
+  start_line: 992
+  end_line: 1000
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库) › 23.3 写操作的安全闸门(全能但可控)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库) › 23.3 写操作的安全闸门(全能但可控)
+  start_line: 1001
+  end_line: 1014
+- key: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库) › 23.4 治理能力清单(让\"对话优化知识库\"闭环)"
+  title: "自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库) › 23.4 治理能力清单(让\"对话优化知识库\"闭环)"
+  start_line: 1015
+  end_line: 1027
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库) › 23.5 架构位置(保持分层不乱)
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库) › 23.5 架构位置(保持分层不乱)
+  start_line: 1028
+  end_line: 1050
+- key: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库) › 23.6 对既有章节的影响
+  title: 自进化本地知识库 — 架构设计文档 (ARCHITECTURE.md) › 23. 统一能力层 + Web AI 管家(对话式优化知识库) › 23.6 对既有章节的影响
+  start_line: 1051
+  end_line: 1061

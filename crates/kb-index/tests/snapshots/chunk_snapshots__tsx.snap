@@ -1,0 +1,39 @@
+---
+source: crates/kb-index/tests/chunk_snapshots.rs
+expression: views
+---
+- key: "#1"
+  start_line: 1
+  end_line: 2
+  symbol: ~
+  header: demo › fixtures/tsx.tsx
+- key: interface CounterProps
+  start_line: 4
+  end_line: 8
+  symbol: interface CounterProps
+  header: demo › fixtures/tsx.tsx › interface CounterProps
+- key: function Counter
+  start_line: 10
+  end_line: 29
+  symbol: function Counter
+  header: "demo › fixtures/tsx.tsx › function Counter({ initial = 0, step = 1, label }: CounterProps)"
+- key: interface ListProps
+  start_line: 31
+  end_line: 34
+  symbol: interface ListProps
+  header: demo › fixtures/tsx.tsx › interface ListProps<T>
+- key: function List
+  start_line: 36
+  end_line: 47
+  symbol: function List
+  header: "demo › fixtures/tsx.tsx › function List<T>({ items, render }: ListProps<T>)"
+- key: Badge
+  start_line: 49
+  end_line: 53
+  symbol: Badge
+  header: "demo › fixtures/tsx.tsx › const Badge = ({ text }: { text: string }) => ("
+- key: export default Counter;
+  start_line: 55
+  end_line: 55
+  symbol: export default Counter;
+  header: demo › fixtures/tsx.tsx › export default Counter;

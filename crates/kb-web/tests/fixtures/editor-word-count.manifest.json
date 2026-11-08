@@ -1,0 +1,18 @@
+{
+  "id": "kb.word-count",
+  "name": "字数统计",
+  "version": "1.0.0",
+  "api_version": 1,
+  "description": "统计正文的汉字数、英文词数和段落数;面板随输入实时更新",
+  "entry": "index.js",
+  "permissions": ["document.read", "ui"],
+  "contributes": {
+    "commands": [{ "id": "kb.word-count.show", "title": "字数统计" }],
+    "toolbar": [{ "id": "kb.word-count.button" }],
+    "slash": [],
+    "panels": [{ "id": "kb.word-count.panel", "title": "字数统计", "icon": "Σ" }],
+    "codecs": [],
+    "surfaces": [],
+    "ai_tools": []
+  }
+}

@@ -1,0 +1,61 @@
+/* 评论串的样式:只用 token(间距阶梯 / 字号阶梯 / 语义色),不写原始颜色和 px 字号。
+   评论区有两处用:文档正文下面(共享给我 / 公开分享页)和知识库页右侧的属性抽屉(只有 320 宽),所以都以「窄」为准。 */
+.kb-cmt { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; padding-top: var(--sp-4); border-top: var(--hl) solid var(--border-subtle); }
+.kb-cmt.is-panel { padding-top: 0; border-top: 0; }
+.kb-cmt-title { margin: 0; font-size: var(--text-15); font-weight: var(--fw-title); display: flex; align-items: center; gap: var(--sp-2); }
+.kb-cmt-count { font-size: var(--text-12); font-weight: var(--fw-regular); color: var(--text-secondary); padding: 0 var(--sp-2); border-radius: var(--r-pill); background: rgb(var(--ink), 0.08); }
+
+.kb-cmt-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-4); }
+.kb-cmt-thread { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.kb-cmt-replies { list-style: none; margin: 0; padding: 0 0 0 var(--sp-4); border-left: var(--hl) solid var(--border-subtle); display: flex; flex-direction: column; gap: var(--sp-3); margin-left: var(--sp-3); }
+.kb-cmt-replies > li { min-width: 0; }
+.kb-cmt-orphan { margin: 0; color: var(--text-tertiary); font-size: var(--text-12); line-height: var(--lh-body); }
+
+.kb-cmt-item { display: flex; gap: var(--sp-2); min-width: 0; }
+.kb-cmt-main { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; flex: 1; }
+.kb-cmt-head { display: flex; align-items: baseline; gap: var(--sp-2); font-size: var(--text-13); min-width: 0; flex-wrap: wrap; }
+.kb-cmt-name { font-weight: var(--fw-medium); overflow-wrap: anywhere; }
+.kb-cmt-time { color: var(--text-tertiary); font-size: var(--text-12); white-space: nowrap; }
+.kb-cmt-anchor { font-size: var(--text-11); padding: 0 var(--sp-1); border-radius: var(--r-xs); background: var(--accent-soft); color: var(--accent-text, var(--accent)); white-space: nowrap; }
+.kb-cmt-body { margin: 0; font-size: var(--text-14); line-height: var(--lh-body); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.kb-cmt-empty, .kb-cmt-hint { margin: 0; color: var(--text-tertiary); font-size: var(--text-13); line-height: var(--lh-body); }
+
+/* 文字按钮(回复…):视觉只有一行字,可点区域用伪元素撑到 44px,触屏也好点,又不把评论撑得很松 */
+.kb-cmt-act { position: relative; display: inline-flex; align-items: center; min-height: var(--sp-5); padding: 0 var(--sp-1); border: 0; background: none; color: var(--text-secondary); font: inherit; font-size: var(--text-12); cursor: pointer; border-radius: var(--r-xs); }
+.kb-cmt-act::before { content: ""; position: absolute; inset: -10px -6px; }
+.kb-cmt-act:hover { color: var(--text-primary); text-decoration: underline; }
+.kb-cmt-act:focus-visible { outline: none; box-shadow: var(--accent-ring); }
+.kb-cmt-tools { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+
+.kb-cmt-form { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.kb-cmt-form .kb-textarea { width: 100%; min-height: calc(var(--field-h) * 2); box-sizing: border-box; }
+.kb-cmt-thread .kb-cmt-form { margin-left: var(--sp-3); }
+.kb-cmt-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+.kb-cmt-actions small { color: var(--text-tertiary); font-size: var(--text-12); }
+.kb-cmt-actions small.is-over, .kb-cmt-error { color: var(--status-danger-text); }
+.kb-cmt-btns { display: inline-flex; gap: var(--sp-2); margin-left: auto; }
+.kb-cmt-error { margin: 0; font-size: var(--text-13); line-height: var(--lh-body); }
+
+/* @提及:高亮 + 候选浮层 */
+.kb-cmt-mention { color: var(--accent-text); font-weight: 500; }
+.kb-cmt-form { position: relative; }
+.kb-cmt-mentions { position: absolute; left: 0; right: 0; bottom: 100%; z-index: 3; margin: 0 0 var(--sp-1); padding: var(--sp-1); list-style: none; display: flex; flex-direction: column; gap: 2px; background: var(--surface-3); border: var(--hl) solid var(--b2); border-radius: var(--r2); box-shadow: var(--sh2); max-height: 240px; overflow-y: auto; }
+.kb-cmt-mention-opt { display: flex; align-items: center; gap: var(--sp-2); min-height: 44px; width: 100%; padding: 0 var(--sp-2); border: 0; border-radius: var(--r-xs); background: none; color: var(--text-primary); font: inherit; font-size: var(--text-14); text-align: left; cursor: pointer; }
+.kb-cmt-mention-opt:hover, .kb-cmt-mention-opt.is-on { background: var(--hover); }
+.kb-cmt-mention-opt small { margin-left: auto; color: var(--text-secondary); font-size: var(--text-12); }
+.kb-cmt-resolved { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; color: var(--text-secondary); font-size: var(--text-12); }
+.kb-cmt-filter { display: flex; gap: var(--sp-1); margin-bottom: var(--sp-2); }
+.kb-cmt-thread.is-resolved .kb-cmt-body { color: var(--text-secondary); }
+.kb-cmt-thread.is-target { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: var(--r2); }
+
+/* 选区批注的引用卡片:左侧一条强调色竖线 + 摘录;可点(定位到正文),找不到原文时变灰并标出来 */
+.kb-cmt-quote { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); width: 100%; margin: 0; padding: var(--sp-1) var(--sp-2); text-align: left; color: var(--text-secondary); background: var(--surface-2); border: 0; border-left: 3px solid var(--status-warning); border-radius: var(--r-xs); font: inherit; font-size: var(--text-12); line-height: var(--lh-body); cursor: pointer; }
+button.kb-cmt-quote:hover { background: var(--hover); color: var(--text-primary); }
+.kb-cmt-quote.is-lost { cursor: default; border-left-color: var(--border-subtle); }
+.kb-cmt-quote-text { min-width: 0; overflow-wrap: anywhere; }
+.kb-cmt-quote-lost { font-size: var(--text-11); color: var(--text-tertiary); white-space: nowrap; }
+.kb-cmt-pending { display: flex; align-items: flex-start; gap: var(--sp-2); padding: var(--sp-2); background: var(--surface-2); border: var(--hl) solid var(--border-subtle); border-left: 3px solid var(--status-warning); border-radius: var(--r-xs); font-size: var(--text-12); }
+.kb-cmt-pending-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
+.kb-cmt-pending-label { color: var(--text-tertiary); font-size: var(--text-11); }
+.kb-cmt-pending-text { overflow-wrap: anywhere; color: var(--text-secondary); line-height: var(--lh-body); }

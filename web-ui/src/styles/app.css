@@ -1,0 +1,92 @@
+/* 全局基础样式:字体、底色、数字特性都来自 token 层(与原型 body 规则一致)。 */
+
+/* 外壳是左右分栏(token 层的 .side 240px + .main 自适应):
+   #app 必须是 flex 容器且撑满视口,否则侧栏与主区会竖着堆叠(整页错位的根因)。 */
+html,
+body,
+#app {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* 与 token 层的 body 规则保持一致:字号 13px×--fs、行高 20px。
+   行高不能用 1.45(18.85px),否则每个页面的文字基线都和设计稿差 1px。 */
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--t);
+  font-family: var(--sans);
+  font-size: calc(13px * var(--fs));
+  line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum", "cv11";
+}
+
+/* 导航与卡片里的 RouterLink 渲染成 <a>:设计稿里它们是无下划线的 div。
+   不重置的话每个页面的侧栏文字与计数都带下划线(又丑又和设计稿不一致)。 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 原生控件默认不继承字体(会回落到系统字体,字宽/字重和全站不一致)。
+   按钮、输入框统一继承正文字体;可点击的 .btn/.tab/.ni 给手型光标并去掉选中文字。 */
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+}
+button {
+  color: inherit;
+}
+.btn,
+.tab,
+.ni,
+.seg i,
+.tb,
+.kb-menu-item {
+  cursor: pointer;
+  user-select: none;
+}
+.btn[disabled],
+.btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* 交互反馈:悬停 / 键盘焦点 / 按下。全站控件统一走这里,页面不再各写各的。 */
+.btn:hover:not(:disabled):not(.pri),
+.seg i:not(.on):hover,
+.ni:not(.on):hover {
+  background-color: var(--hover);
+}
+.btn:hover:not(:disabled):not(.pri) {
+  border-color: var(--b3);
+  color: var(--t);
+}
+.btn.pri:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.btn:focus-visible,
+.tab:focus-visible,
+.ni:focus-visible,
+.seg i:focus-visible,
+a:focus-visible,
+button:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.btn:disabled {
+  cursor: not-allowed;
+}

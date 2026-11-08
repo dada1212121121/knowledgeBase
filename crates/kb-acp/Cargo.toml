@@ -1,0 +1,20 @@
+[package]
+name = "kb-acp"
+description = "ACP(Agent Client Protocol)客户端:把外部代理当子进程拉起,走 stdio JSON-RPC"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+agent-client-protocol = { workspace = true }
+kb-core = { path = "../kb-core" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

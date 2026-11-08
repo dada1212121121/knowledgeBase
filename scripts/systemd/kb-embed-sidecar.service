@@ -1,0 +1,24 @@
+# 核显嵌入 sidecar(放到 /etc/systemd/system/kb-embed-sidecar.service,systemctl enable --now)。
+# 路径按这台机器的 /opt/kb 布局;llama.cpp(b12034,Vulkan)与 bge-m3-Q8_0.gguf 的来历见 。
+[Unit]
+Description=knowledgeBase GPU embedding sidecar (llama.cpp Vulkan, bge-m3 Q8_0, 127.0.0.1:18081)
+Before=kbd.service
+After=network.target
+
+[Service]
+# 嵌入走独立的 systemd 服务而不是守护进程自己拉起的 sidecar:守护进程启动时会立刻做一次嵌入预热(warm_embedder),
+# 而内置 sidecar 要等监听端口绑定之后才起,http 后端会因此启动即退出(2026-11-05 实测)。独立服务在 kbd 之前就绪,
+# 也让 kbd 重启不必重新加载模型,模型进程崩了由 systemd 拉起。命令行与 kb-embed 的 SidecarSpec::args 一致。
+Environment=HOME=/root
+ExecStart=/srv/kb/bin/llama-b12034/llama-server -m /srv/kb/models/gguf/bge-m3-Q8_0.gguf --embedding --pooling cls -ngl 99 -c 16384 -b 8192 -ub 8192 --host 127.0.0.1 --port 18081
+# 等到 /health 通了才算启动完成,排在它后面的 kbd 才不会撞上“模型还在加载”
+ExecStartPost=/bin/bash -c 'for i in $(seq 1 80); do curl -sf http://127.0.0.1:18081/health >/dev/null && exit 0; sleep 1; done; exit 1'
+Restart=always
+RestartSec=2
+# 让路给同机业务容器(和 kbd 一样)
+Nice=10
+CPUWeight=50
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

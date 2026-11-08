@@ -1,0 +1,332 @@
+/* 交互动效层(参考 uilab 的节奏):全部走 motion token(--dur-* / --ease-* / --stagger / --spring-dur),
+   外观里选「减少」或系统开启减弱动态效果时时长为 0,直接到最终状态。
+   原则:只动 transform / opacity(clip-path 仅用于图表擦出),静止时的样子与设计稿完全一致。 */
+
+@keyframes kb-grow-x{from{transform:scaleX(0)}}
+@keyframes kb-grow-y{from{transform:scaleY(0)}}
+@keyframes kb-wipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes kb-cell-in{from{opacity:0;transform:scale(.4)}}
+@keyframes kb-rise{from{opacity:0;transform:translateY(6px)}}
+@keyframes kb-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+@keyframes kb-spin{to{transform:rotate(360deg)}}
+@keyframes kb-check{from{stroke-dashoffset:18}to{stroke-dashoffset:0}}
+
+/* ---- 柱图:进入视口后一根接一根长出来 ---- */
+.kb-chart .barg{transform-box:fill-box;transform-origin:50% 100%;animation:kb-grow-y calc(var(--dur-page) * 1.4) var(--ease-spring) both;animation-delay:calc(var(--i,0) * var(--stagger) * 2);animation-play-state:paused}
+.kb-chart.is-in .barg{animation-play-state:running}
+.kb-bars .kb-bar-fill{transform-origin:50% 100%;animation:kb-grow-y calc(var(--dur-page) * 1.2) var(--ease-out) both;animation-play-state:paused}
+.kb-bars.is-in .kb-bar-fill{animation-play-state:running}
+
+/* ---- 迷你折线:从左到右擦出 ---- */
+.spk{animation:kb-wipe calc(var(--dur-page) * 2) var(--ease-mac) both;animation-play-state:paused}
+.spk.is-in{animation-play-state:running}
+
+/* ---- 热力格:逐列淡入放大 ---- */
+.kb-heat > i{animation:kb-cell-in calc(var(--dur-base) * 1.4) var(--ease-out) both;animation-delay:calc(var(--i,0) * var(--stagger) * 2);animation-play-state:paused}
+.kb-heat.is-in > i{animation-play-state:running}
+
+/* ---- 分段占比条(仪表盘「行数占比」):一段接一段从左端长出来,段间细缝保留 ---- */
+.share i{transform-origin:0 50%;animation:kb-grow-x calc(var(--dur-page) * 1.6) var(--ease-out) both;animation-delay:calc(var(--i,0) * var(--dur-base) * .6)}
+
+
+/* ---- 进度条:挂载时从 0 长到值;数据变化时宽度平滑过渡 ---- */
+.bar i{transform-origin:0 50%;animation:kb-grow-x calc(var(--dur-page) * 1.5) var(--ease-out) both;transition:width var(--dur-slow) var(--ease-out),background-color var(--dur-base) var(--ease-out)}
+.kb-progress > i{transition:width var(--dur-slow) var(--ease-out)}
+
+/* ---- 数字滚动:沿用父级的数字字形(不强制等宽,否则与设计稿字距不一致) ---- */
+.kb-countup{font:inherit;letter-spacing:inherit}
+/* 数字更新后闪一下:强调色 + 上浮一点再落回(只在值变化时加 .is-bump;首次从 0 滚起不闪)。减弱动效时令牌为 0 */
+.kb-countup.is-bump{display:inline-block;animation:kb-num-bump calc(var(--dur-slow) * 2) var(--ease-out)}
+@keyframes kb-num-bump{from{color:var(--accent-text);transform:translateY(calc(var(--lift) * 1.5)) scale(calc(1 + (var(--overshoot-scale) - 1) * 3.5))}}
+
+/* ---- 骨架屏(uilab app-skeleton) ---- */
+.kb-skel{display:flex;flex-direction:column;gap:var(--gap-sm);padding:var(--card-py) var(--card-px)}
+.kb-skel-line{display:block;border-radius:var(--r1)}
+@keyframes kb-skel-in{from{opacity:0}}
+.kb-skel{animation:kb-skel-in var(--dur-base) var(--ease-out) both;animation-delay:120ms}
+
+/* ---- 表格:行悬停过渡、首次入场升起 ---- */
+.kb-table tbody tr td{transition:background-color var(--dur-fast) var(--ease-out)}
+.kb-table tbody.stagger > tr{animation:kb-rise var(--dur-slow) var(--ease-mac) both;animation-delay:calc(var(--i,0) * var(--stagger))}
+
+/* ---- 通用:可点击卡片的悬停 / 按下 ---- */
+.card{transition:border-color var(--dur-base) var(--ease-out),box-shadow var(--dur-base) var(--ease-out),transform var(--dur-base) var(--ease-mac)}
+
+/* ---- 错误抖动(uilab field-error):给元素加 .kb-shake,换 key 可重放 ---- */
+.kb-shake{animation:kb-shake calc(var(--dur-base) * 2) var(--ease-out)}
+.kb-input.is-error,.inp.is-error{border-color:var(--status-danger)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--status-danger) 18%,transparent)}
+
+/* ---- 折叠(grid 0fr→1fr:高度动画不触发布局抖动):侧栏项目树 / 浏览器树 ---- */
+.kb-collapse{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows var(--dur-slow) var(--ease-mac),opacity var(--dur-base) var(--ease-out)}
+.kb-collapse.is-open{grid-template-rows:1fr;opacity:1}
+.kb-collapse > div{overflow:hidden;min-height:0}
+
+/* ---- 按钮上的小转圈 / 对勾(保存、复制等状态切换用) ---- */
+.kb-spinner{display:inline-block;width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(var(--ink),.2);border-top-color:currentColor;animation:kb-spin .7s linear infinite}
+.kb-tick path{stroke-dasharray:18;animation:kb-check var(--dur-base) var(--ease-out) both}
+
+@media (prefers-reduced-motion:reduce){
+  .kb-spinner{animation-duration:2s}
+}
+
+/* =====================================================================
+   弹出菜单(KbSelect;移植自 uilab「按钮弹出菜单」的节奏)
+   ===================================================================== */
+.kb-select{position:relative;display:inline-flex}
+.kb-select .btn.is-open{border-color:var(--accent);color:var(--t)}
+.kb-select-icon{color:var(--m)}
+.kb-select-caret{color:var(--m);transition:transform var(--dur-base) var(--ease-mac)}
+.kb-select-caret.is-open{transform:rotate(180deg)}
+.kb-select-plain{border-color:transparent;background:transparent;box-shadow:none;color:var(--m);padding:0 4px}
+
+/* 和按钮一样大、叠在按钮上的层:缩放它,菜单就从按钮中心长出来 */
+.kb-pop-layer{--pop-gap:6px;position:fixed;z-index:var(--z-popover,60);pointer-events:none;opacity:0;visibility:hidden;transform:scale(.6);
+  transition:opacity calc(var(--dur-fast) * .86) var(--ease-in),transform calc(var(--dur-fast) * .86) var(--ease-in),visibility 0s linear calc(var(--dur-fast) * .86)}
+.kb-pop-layer[data-open=true]{opacity:1;visibility:visible;transform:none;
+  transition:opacity var(--dur-base) var(--ease-out),transform var(--dur-base) var(--ease-out),visibility 0s}
+.kb-pop-panel{position:absolute;top:calc(100% + var(--pop-gap));right:0;min-width:100%;padding:4px;display:flex;flex-direction:column;gap:1px;
+  background:var(--surface-3);border:var(--hl) solid var(--b2);border-radius:var(--r3);pointer-events:auto;outline:none;max-height:min(320px,60vh);overflow:auto;
+  box-shadow:0 18px 36px -14px rgba(var(--shade),.65),0 2px 6px rgba(var(--shade),.3)}
+.kb-pop-layer[data-align=start] .kb-pop-panel{right:auto;left:0}
+.kb-pop-layer[data-side=top] .kb-pop-panel{top:auto;bottom:calc(100% + var(--pop-gap))}
+[data-tone=light] .kb-pop-panel{background:var(--surface-2)}
+
+.kb-pop-item{--wait:calc(var(--dur-fast) * .64 + var(--order,0) * var(--stagger) * 3.6);display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:28px;padding:0 8px;border:0;border-radius:var(--r2);background:transparent;color:var(--t2);font:inherit;font-size:calc(13px * var(--fs));white-space:nowrap;cursor:pointer;text-align:left;outline:none;
+  opacity:0;transform:translateY(var(--shift,8px));
+  transition:opacity calc(var(--dur-fast) * .6) var(--ease-in),transform 0s linear var(--dur-fast),background-color var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out)}
+.kb-pop-item{--order:var(--i,0)}
+.kb-pop-layer[data-side=top] .kb-pop-item{--order:var(--ri,0);--shift:-8px}
+.kb-pop-layer[data-open=true] .kb-pop-item{opacity:1;transform:none;
+  transition:opacity var(--dur-base) var(--ease-out) var(--wait),transform var(--dur-base) var(--ease-out) var(--wait),background-color var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out)}
+.kb-pop-item:hover,.kb-pop-item:focus-visible{background:rgba(var(--ink),.07);color:var(--t)}
+.kb-pop-item:active{background:rgba(var(--ink),.12)}
+.kb-pop-item.is-on{color:var(--t)}
+.kb-pop-item.is-on svg{color:var(--accent-text)}
+
+/* =====================================================================
+   对话框 / 抽屉 / Toast(进出场参考 uilab「确认弹窗」:卡片带回弹长出,收起更快)
+   ===================================================================== */
+.kb-dlg-wrap,.kb-drw-wrap{position:fixed;inset:0;z-index:var(--z-dialog,31)}
+.kb-dlg-wrap{display:grid;place-items:center;padding:var(--gap-xl)}
+/* 确认框要压在已经打开的对话框 / 底部弹层之上:确认宿主在应用启动时就挂在 body 里,DOM 顺序比后开的对话框靠前,
+   z-index 相同的话会被盖在下面——按钮点不到、promise 永远不 resolve(例如在用户详情对话框里点「重置两步验证」「停用账号」,
+   或在恢复码对话框里想离开页面) */
+.kb-confirm-wrap{z-index:calc(var(--z-dialog,31) + 1)}
+.kb-dlg-scrim{position:absolute;inset:0;background:rgba(var(--shade),.55);backdrop-filter:blur(2px)}
+.kb-dlg-wrap > .kb-dialog{position:relative;left:auto;top:auto;transform:none;max-height:calc(100vh - var(--gap-xl) * 2);outline:none;box-shadow:var(--sh3)}
+.kb-drw-wrap > .kb-drawer{outline:none}
+
+.kb-dlg-enter-active .kb-dlg-scrim,.kb-drw-enter-active .kb-dlg-scrim{transition:opacity var(--dur-base) var(--ease-out),backdrop-filter var(--dur-base) var(--ease-out)}
+.kb-dlg-leave-active .kb-dlg-scrim,.kb-drw-leave-active .kb-dlg-scrim{transition:opacity var(--dur-fast) var(--ease-in),backdrop-filter var(--dur-fast) var(--ease-in)}
+.kb-dlg-enter-from .kb-dlg-scrim,.kb-dlg-leave-to .kb-dlg-scrim,.kb-drw-enter-from .kb-dlg-scrim,.kb-drw-leave-to .kb-dlg-scrim{opacity:0;backdrop-filter:blur(0)}
+.kb-dlg-wrap.kb-dlg-enter-active > .kb-dialog{transition:opacity calc(var(--dur-fast) * 1.1) var(--ease-out),transform var(--spring-dur) var(--ease-spring),height var(--dur-base) var(--ease-mac)}
+.kb-dlg-wrap.kb-dlg-leave-active > .kb-dialog{transition:opacity var(--dur-fast) var(--ease-in),transform var(--dur-fast) var(--ease-in)}
+.kb-dlg-wrap.kb-dlg-enter-from > .kb-dialog{opacity:0;transform:scale(.9)}
+.kb-dlg-wrap.kb-dlg-leave-to > .kb-dialog{opacity:0;transform:scale(.97)}
+
+.kb-drw-enter-active .kb-drawer{transition:transform var(--spring-dur) var(--ease-spring-soft)}
+.kb-drw-leave-active .kb-drawer{transition:transform var(--dur-base) var(--ease-in)}
+.kb-drw-enter-from .kb-drawer,.kb-drw-leave-to .kb-drawer{transform:translateX(104%)}
+
+/* Toast */
+.kb-toasts{position:fixed;top:var(--gap-lg);right:var(--gap-lg);width:min(360px,calc(100vw - var(--gap-lg) * 2));z-index:var(--z-toast,40);pointer-events:none}
+.kb-toast-list{display:flex;flex-direction:column;gap:var(--gap-sm);position:relative}
+.kb-toast{position:relative;overflow:hidden;pointer-events:auto;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 14px 10px 10px;border-radius:var(--r3);
+  background:color-mix(in srgb,var(--surface-3) 88%,transparent);backdrop-filter:blur(16px) saturate(1.4);box-shadow:var(--sh2),inset 0 0 0 var(--hl) var(--b2);font-size:calc(13px * var(--fs))}
+.kb-toast-icon{width:22px;height:22px;flex:none;border-radius:50%;display:grid;place-items:center;color:var(--g);background:color-mix(in srgb,var(--status-success) 16%,transparent)}
+.kb-toast.is-warning .kb-toast-icon{color:var(--y);background:color-mix(in srgb,var(--status-warning) 16%,transparent)}
+.kb-toast.is-danger .kb-toast-icon{color:var(--r);background:color-mix(in srgb,var(--status-danger) 16%,transparent)}
+.kb-toast-text{min-width:0;overflow-wrap:anywhere}
+.kb-toast-timer{position:absolute;left:0;right:0;bottom:0;height:2px;background:currentColor;opacity:.35;transform-origin:0 50%;color:var(--g);animation:kb-countdown linear forwards}
+.kb-toast.is-warning .kb-toast-timer{color:var(--y)}
+.kb-toast.is-danger .kb-toast-timer{color:var(--r)}
+.kb-toast:hover .kb-toast-timer{animation-play-state:paused}
+@keyframes kb-countdown{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.kb-toast-enter-active{transition:opacity var(--dur-base) var(--ease-out),transform var(--spring-dur) var(--ease-spring)}
+.kb-toast-leave-active{transition:opacity var(--dur-fast) var(--ease-in),transform var(--dur-fast) var(--ease-in);position:absolute;left:0;right:0}
+.kb-toast-move{transition:transform var(--dur-slow) var(--ease-mac)}
+.kb-toast-enter-from{opacity:0;transform:translateX(28px) scale(.97)}
+.kb-toast-leave-to{opacity:0;transform:translateX(32px) scale(.98)}
+@media (max-width:639px){.kb-toasts{top:auto;bottom:calc(64px + var(--gap));left:var(--gap);right:var(--gap);width:auto}.kb-toast-enter-from,.kb-toast-leave-to{transform:translateY(16px)}}
+
+/* ---- 确认弹窗:问 → 忙 → 就地变成「✓ 已完成」 ---- */
+/* 确认框要能盖在别的对话框 / 底部弹层上(例如分享面板里「重置链接」):Teleport 的内容插在它的锚点之前,
+   DOM 顺序在后面挂载的弹层之下,同一个 z-index 会被压住,所以单独抬高一档 */
+.kb-confirm-wrap{z-index:calc(var(--z-dialog,31) + 1)}
+.kb-dlg-wrap > .kb-confirm{width:min(300px,calc(100vw - var(--gap-xl) * 2));padding:0;overflow:hidden;transition:height var(--dur-base) var(--ease-mac);border-radius:var(--r4)}
+.kb-confirm-layer{display:flex;flex-direction:column;gap:var(--gap);padding:var(--gap-lg) var(--gap-lg) var(--gap);transition:opacity var(--dur-fast) var(--ease-out)}
+.kb-confirm-done{position:absolute;inset:0;align-items:center;justify-content:center;gap:var(--gap-sm);opacity:0;pointer-events:none;padding:var(--gap-lg)}
+.kb-confirm.is-done .kb-confirm-ask{opacity:0;pointer-events:none}
+.kb-confirm.is-done .kb-confirm-done{opacity:1;transition-delay:calc(var(--dur-fast) * .6)}
+.kb-confirm-text{display:flex;flex-direction:column;gap:var(--gap-xs)}
+.kb-confirm-title{font-size:calc(14px * var(--fs));font-weight:600;letter-spacing:-.01em}
+.kb-confirm-msg{color:var(--m);font-size:calc(13px * var(--fs));line-height:1.55}
+.kb-confirm-err{color:var(--status-danger-text);font-size:calc(12px * var(--fs))}
+.kb-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap-sm)}
+.kb-confirm-btn{justify-content:center;height:calc(var(--ctl-h) + 2px)}
+.btn.is-danger{background:color-mix(in srgb,var(--status-danger) 90%,black);border-color:transparent;color:#fff}
+.btn.is-danger:hover:not(:disabled){filter:brightness(1.1)}
+.kb-confirm-tick{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--on-accent);background:var(--accent);transform:scale(.4);opacity:0;transition:transform var(--spring-dur) var(--ease-spring),opacity var(--dur-fast) var(--ease-out)}
+.kb-confirm-tick.is-danger{background:var(--g);color:#fff}
+.kb-confirm.is-done .kb-confirm-tick{transform:scale(1);opacity:1;transition-delay:calc(var(--dur-fast) * .7)}
+.kb-confirm-done-text{font-weight:500;opacity:0;transform:translateY(4px);transition:opacity var(--dur-base) var(--ease-out),transform var(--dur-base) var(--ease-out)}
+.kb-confirm.is-done .kb-confirm-done-text{opacity:1;transform:none;transition-delay:calc(var(--dur-base) * 1.1)}
+
+/* =====================================================================
+   滑动的选中指示:分段控件的胶囊、页签的下划线(位置由 useSlider 量出)
+   ===================================================================== */
+.kb-seg{position:relative;isolation:isolate}
+.kb-seg > i{position:relative;z-index:1;cursor:pointer;transition:color var(--dur-base) var(--ease-out)}
+/* 键盘焦点环:分段控件的每一项是 roving tabindex 的 <i role=tab>,聚焦时原来没有任何视觉变化,键盘用户看不出焦点在哪。
+   用页签同一套内描边的焦点环(.kb-tab:focus-visible),不用 outline —— 控件有圆角和滑块,内描边不会被裁掉。
+   roving tabindex 下拿到焦点的恰恰是选中项,而有滑块时 .is-ready > i.on 会清掉它的阴影,所以第二个选择器和它同特异性才压得住 */
+.kb-seg > i:focus-visible, .kb-seg.is-ready > i.on:focus-visible{outline:none;box-shadow:inset var(--ring)}
+/* 有滑块时,选中项自己不再画底色(底色由滑块负责);无 JS / 滑块没量出来时仍回落到原来的 .on 底色 */
+.kb-seg.is-ready > i.on{background:transparent;box-shadow:none}
+.kb-seg-thumb{position:absolute;z-index:0;left:0;top:0;width:var(--sl-w,0);height:var(--sl-h,0);transform:translate(var(--sl-x,0),var(--sl-y,0));
+  border-radius:calc(var(--r2) - 2px);background:linear-gradient(180deg,rgba(var(--ink),.09),rgba(var(--ink),.05));box-shadow:inset 0 0 0 .5px rgba(var(--ink),.1),0 1px 2px rgba(var(--shade),.4);pointer-events:none}
+[data-tone=light] .kb-seg-thumb{background:var(--surface-2);box-shadow:0 0 0 .5px rgba(var(--shade),.1),0 1px 2px rgba(var(--shade),.08)}
+.kb-seg.is-ready .kb-seg-thumb{transition:transform var(--spring-dur) var(--ease-spring),width var(--spring-dur) var(--ease-spring),opacity var(--dur-fast) var(--ease-out)}
+/* 没量出来(opacity:0)时,原有的 .on 底色继续生效 */
+.kb-seg:not(.is-ready) > i.on{background:linear-gradient(180deg,rgba(var(--ink),.09),rgba(var(--ink),.05));box-shadow:inset 0 0 0 .5px rgba(var(--ink),.1),0 1px 2px rgba(var(--shade),.4)}
+
+.kb-tabs{position:relative}
+.kb-tabs .tab.on{border-color:transparent}
+.kb-tab-bar{position:absolute;left:0;top:0;width:var(--sl-w,0);height:2px;transform:translate(var(--sl-x,0),calc(var(--sl-y,0px) + var(--sl-h,0px) - 2px));background:var(--accent);border-radius:1px;pointer-events:none}
+.kb-tabs.is-ready .kb-tab-bar{transition:transform var(--spring-dur) var(--ease-spring),width var(--spring-dur) var(--ease-spring),opacity var(--dur-fast) var(--ease-out)}
+.kb-tabs .tab{transition:color var(--dur-base) var(--ease-out)}
+
+/* ---- 侧栏:选中高亮是一块会滑动的底;项目子项用 grid 行高折叠展开 ---- */
+.side{position:relative}
+.kb-nav-pill{position:absolute;z-index:0;left:0;top:0;width:var(--sl-w,0);height:var(--sl-h,0);transform:translate(var(--sl-x,0),var(--sl-y,0));border-radius:var(--r1);pointer-events:none;
+  background:linear-gradient(180deg,rgba(var(--ink),.06),rgba(var(--ink),.035));box-shadow:inset 0 0 0 var(--hl) rgba(var(--ink),.06),var(--hi)}
+[data-tone=light] .kb-nav-pill{background:var(--surface-2);box-shadow:0 0 0 .5px rgba(var(--shade),.08),0 1px 2px rgba(var(--shade),.05)}
+.side.has-pill .kb-nav-pill{transition:transform var(--spring-dur) var(--ease-spring),width var(--spring-dur) var(--ease-spring),height var(--dur-base) var(--ease-mac),opacity var(--dur-fast) var(--ease-out)}
+.side.has-pill .ni.on{background:transparent;box-shadow:none}
+.side .ni{position:relative;z-index:1}
+.side .kb-collapse{margin:0;transition:grid-template-rows var(--dur-slow) var(--ease-mac),opacity var(--dur-base) var(--ease-out),margin-top var(--dur-slow) var(--ease-mac)}
+.side .kb-collapse:not(.is-open){margin-top:-1px}
+.kb-collapse-inner{display:flex;flex-direction:column;gap:1px;min-height:0;overflow:hidden}
+.kb-collapse-inner > .ni{flex:none}
+/* 收成图标轨(平板)时不显示子项 */
+@media (max-width:1023px){.side .kb-collapse{display:none}}
+
+/* Vue <Transition> 只读「根元素」的过渡时长来决定何时摘掉 *-active 类。
+   子元素(遮罩 / 卡片 / 抽屉)的动画时长比根长,不在根上占位的话会被提前掐断。
+   这里在根上声明与最长子动画等长的占位过渡(不改变任何可见属性)。 */
+.kb-dlg-enter-active,.kb-drw-enter-active{transition:opacity var(--spring-dur) linear}
+.kb-dlg-leave-active,.kb-drw-leave-active{transition:opacity var(--dur-base) linear}
+
+/* =====================================================================
+   复制按钮:图标翻转 + 气泡(uilab「复制按钮反馈」)
+   ===================================================================== */
+.kb-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.kb-copy{position:relative;display:inline-flex}
+.kb-flip{position:relative;display:inline-grid;width:14px;height:14px;perspective:60px}
+.kb-flip-face{grid-area:1/1;display:grid;place-items:center;backface-visibility:hidden;transition:transform calc(var(--dur-base) * 1.2) var(--ease-in-out)}
+.kb-flip-back{transform:rotateY(180deg);color:var(--g)}
+.kb-flip.is-flipped .kb-flip-face:first-child{transform:rotateY(-180deg)}
+.kb-flip.is-flipped .kb-flip-back{transform:rotateY(0)}
+.kb-copy.is-fail .kb-flip-back{color:var(--r)}
+.kb-copy-bubble{position:absolute;left:50%;bottom:calc(100% + 9px);display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:var(--r2);white-space:nowrap;pointer-events:none;
+  background:var(--surface-3);box-shadow:var(--sh2),inset 0 0 0 var(--hl) var(--b2);font-size:calc(12px * var(--fs));font-weight:600;color:var(--t);
+  opacity:0;transform:translate(-50%,4px) scale(.88);transition:opacity var(--dur-fast) var(--ease-in),transform var(--dur-fast) var(--ease-in)}
+.kb-copy-bubble svg{color:var(--g)}
+.kb-copy-bubble.is-fail svg{color:var(--r)}
+.kb-copy-bubble::after{content:"";position:absolute;left:50%;top:100%;width:8px;height:8px;background:inherit;transform:translate(-50%,-4px) rotate(45deg);border-radius:0 0 2px 0}
+.kb-copy-bubble.is-open{opacity:1;transform:translate(-50%,0) scale(1);transition:opacity var(--dur-base) var(--ease-out),transform var(--spring-dur) var(--ease-spring)}
+
+/* =====================================================================
+   提交按钮:忙转圈 → 文字向上滚成「✓ 已保存」
+   ===================================================================== */
+.kb-submit{position:relative;overflow:hidden}
+.kb-roll{position:relative;display:inline-block;overflow:hidden;height:1.35em;line-height:1.35em;vertical-align:middle;transition:width var(--dur-slow) var(--ease-mac),opacity var(--dur-fast) var(--ease-out)}
+.kb-roll-line{position:absolute;left:0;right:0;top:0;display:flex;justify-content:center;white-space:nowrap;transition:transform var(--dur-slow) var(--ease-mac),opacity var(--dur-base) var(--ease-out)}
+.kb-roll-text{display:inline-flex;align-items:center;gap:5px;width:max-content}
+.kb-roll-b{transform:translateY(130%);opacity:0}
+.kb-submit.is-done .kb-roll-a{transform:translateY(-130%);opacity:0}
+.kb-submit.is-done .kb-roll-b{transform:none;opacity:1}
+.kb-submit-spin{position:absolute;left:50%;top:50%;margin:-6px 0 0 -6px;opacity:0;transition:opacity var(--dur-fast) var(--ease-out)}
+.kb-submit.is-busy .kb-roll{opacity:0}
+.kb-submit.is-busy .kb-submit-spin{opacity:1}
+.kb-submit:disabled{cursor:progress}
+.kb-submit.is-idle:disabled{cursor:not-allowed}
+
+/* =====================================================================
+   命令面板(⌘K):遮罩淡入,面板从上方 12px 带回弹落下;收起更快;列表项依次升起
+   ===================================================================== */
+.pal-ov{transition:opacity var(--dur-base) var(--ease-out),backdrop-filter var(--dur-base) var(--ease-out)}
+.pal{transition:opacity var(--dur-fast) var(--ease-out),transform var(--spring-dur) var(--ease-spring)}
+.kb-pal-enter-active,.kb-pal-leave-active{transition:opacity var(--spring-dur) linear}
+.kb-pal-leave-active{transition-duration:var(--dur-fast)}
+.kb-pal-enter-from .pal-ov,.kb-pal-leave-to .pal-ov{opacity:0;backdrop-filter:blur(0)}
+.kb-pal-enter-from .pal{opacity:0;transform:translateY(-12px) scale(.98)}
+.kb-pal-leave-active .pal{transition:opacity var(--dur-fast) var(--ease-in),transform var(--dur-fast) var(--ease-in)}
+.kb-pal-leave-to .pal{opacity:0;transform:translateY(-6px) scale(.985)}
+.kb-pal-enter-active .pal .ni{animation:kb-rise var(--dur-slow) var(--ease-mac) both;animation-delay:calc(var(--dur-fast) * .6 + var(--i,0) * var(--stagger) * 1.2)}
+.pal .ni{cursor:pointer}
+.pal .ni:not(.on):hover{background:var(--hover)}
+
+/* =====================================================================
+   空状态:图标环轻轻升起,文案随后淡入;带「下一步」按钮
+   ===================================================================== */
+.kb-empty{animation:kb-rise var(--dur-slow) var(--ease-mac) both}
+.kb-empty-icon{animation:kb-cell-in var(--dur-slow) var(--ease-spring) both;animation-delay:calc(var(--dur-fast) * .6)}
+.kb-empty .kb-row{margin-top:var(--gap-xs)}
+.kb-span-all{grid-column:1 / -1}
+/* 图表空态:不画一排无意义的横线,中间放一句话 */
+.kb-chart{position:relative}
+.kb-chart-empty{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;color:var(--m);font-size:calc(13px * var(--fs))}
+.kb-chart.is-empty .barg{opacity:.25}
+.kb-bars{position:relative}
+.kb-bars.is-empty .kb-bar-fill{opacity:.25}
+
+/* 空态文案:长路径 / 长句在窄屏上必须能断行,不能撑出卡片 */
+.kb-empty{min-width:0;max-width:100%}
+.kb-empty > *{max-width:100%;overflow-wrap:anywhere}
+
+/* 手机:对话框是贴底的 sheet(原型 `.dlg` 在 ≤700px 的规则);必须晚于上面的 .kb-dlg-wrap > .kb-dialog 基础规则 */
+@media (max-width:599px){
+  .kb-dlg-wrap:not(.kb-confirm-wrap){padding:0;place-items:end stretch}
+  .kb-dlg-wrap > .kb-dialog{
+    width:100%;
+    max-height:min(90vh, calc(100vh - 44px));
+    max-height:min(90dvh, calc(100dvh - 44px - var(--kbd-inset, 0px)));
+    border-radius:var(--r4) var(--r4) 0 0;
+    padding-bottom:max(0px, env(safe-area-inset-bottom));
+  }
+  .kb-dlg-wrap.kb-dlg-enter-from > .kb-dialog,.kb-dlg-wrap.kb-dlg-leave-to > .kb-dialog{
+    opacity:0;
+    transform:translateY(100%);
+  }
+}
+
+/* 确认弹窗要盖在已经打开的对话框 / 底部弹层上面:它们共用同一个 z-index,同级时后挂载的在上,
+   而确认宿主在外壳里挂得最早,会被「删除好友」这类从对话框里发起的确认压在后面,按钮点不到。 */
+.kb-confirm-wrap{z-index:calc(var(--z-dialog,31) + 1)}
+
+/* =====================================================================
+   Vue <Transition> 通用进出场(编辑器 / 文档页里 v-if 出现的面板用)
+   全部走 motion token:动效偏好「减少」时时长为 0,等于没有动画
+   ===================================================================== */
+/* 弹出层(下拉、选择器、浮层):从触发处轻轻长出来;收起更快,不让人等。原点用 --origin 指定,默认左上 */
+.kb-menu-enter-active{transition:opacity var(--dur-base) var(--ease-out),transform var(--dur-base) var(--ease-out);transform-origin:var(--origin,top left)}
+.kb-menu-leave-active{transition:opacity var(--dur-instant) var(--ease-in),transform var(--dur-instant) var(--ease-in);transform-origin:var(--origin,top left)}
+.kb-menu-enter-from,.kb-menu-leave-to{opacity:0;transform:translateY(-4px) scale(.96)}
+/* 折叠展开(输入条、提示条):grid 0fr↔1fr 让高度平滑变化,下面的内容跟着滑而不是一帧跳开。
+   外层是 grid、里层 overflow:hidden 只在动画期间生效(平时不裁剪,里面有下拉也不会被切) */
+.kb-fold{display:grid;grid-template-rows:1fr}
+.kb-fold > .kb-fold-inner{min-height:0}
+.kb-fold-enter-active,.kb-fold-leave-active{transition:grid-template-rows var(--dur-slow) var(--ease-mac),opacity var(--dur-base) var(--ease-out)}
+.kb-fold-leave-active{transition-duration:var(--dur-base),var(--dur-fast)}
+.kb-fold-enter-from,.kb-fold-leave-to{grid-template-rows:0fr;opacity:0}
+.kb-fold-enter-active > .kb-fold-inner,.kb-fold-leave-active > .kb-fold-inner{overflow:hidden}
+/* 淡入(整块内容替换:换笔记、阅读⇄编辑);离场不做,新内容直接盖上去 */
+.kb-fade-enter-active{transition:opacity var(--dur-base) var(--ease-out)}
+.kb-fade-enter-from{opacity:0}
+/* 离场的那一两帧里元素还留在 DOM 里(Vue 等下一帧才摘):不让它继续占版面,否则新旧内容会同时在流里叠一帧、页面突然翻倍高 */
+.kb-fade-leave-active{transition:none;display:none}
+/* 内容进场上浮一点点(换了一篇笔记) */
+.kb-rise-enter-active{transition:opacity var(--dur-base) var(--ease-out),transform var(--dur-slow) var(--ease-mac)}
+.kb-rise-enter-from{opacity:0;transform:translateY(6px)}
+.kb-rise-leave-active{transition:none;display:none}

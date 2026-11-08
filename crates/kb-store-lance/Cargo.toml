@@ -1,0 +1,22 @@
+[package]
+name = "kb-store-lance"
+description = "VectorStore 的 LanceDB 实现(唯一引入 lancedb/arrow 的 crate)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+arrow-array = { workspace = true }
+arrow-schema = { workspace = true }
+async-trait = { workspace = true }
+futures = { workspace = true }
+kb-core = { path = "../kb-core" }
+lance = { workspace = true }
+lancedb = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

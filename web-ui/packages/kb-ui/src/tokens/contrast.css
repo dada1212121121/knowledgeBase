@@ -1,0 +1,8 @@
+/* 对比度校准:正文 ≥ 7:1,次要文字 ≥ 4.5:1,弱化(图标 / 分隔符 / 占位符)≥ 3:1,状态与强调文字 ≥ 4.5:1。
+   由 scripts/calibrate-contrast.mjs 生成,npm run lint 里的 check-contrast 守着;不要手改。semantic.css 里这些值原样保留,这里只覆盖不达标的。 */
+:root[data-theme=dark],[data-theme=dark],:root:not([data-theme]){--text-secondary:#a7a7ad;--text-tertiary:#84848b;--text-quaternary:#69696e;--control-line:#69696e}
+:root[data-theme=oled],[data-theme=oled]{--text-tertiary:#818189;--text-quaternary:#66666b;--control-line:#66666b}
+:root[data-theme=slate],[data-theme=slate]{--text-secondary:#a7b2c5;--text-tertiary:#838ea4;--text-quaternary:#687187;--status-danger-text:#f07373;--control-line:#687187}
+:root[data-theme=light],[data-theme=light]{--text-quaternary:#8b8b93;--status-success-text:#22734a;--status-warning-text:#81630f;--status-danger-text:#b43333;--status-info-text:#1e6a98;--control-line:#8b8b93}
+:root[data-theme=paper],[data-theme=paper]{--text-secondary:#524c46;--text-tertiary:#70685f;--text-quaternary:#8c8479;--status-success-text:#206e46;--status-warning-text:#7b5f0e;--status-danger-text:#ac3131;--status-info-text:#1c6591;--control-line:#8c8479}
+:root{--p-indigo-text-d:#8a93df;--p-indigo-text-l:#4954b9;--p-blue-text-d:#5e98f8;--p-blue-text-l:#0855d1;--p-violet-text-d:#a784f8;--p-violet-text-l:#6d3bd7;--p-teal-text-l:#0c6965;--p-green-text-l:#0f7235;--p-amber-text-l:#875b09;--p-orange-text-d:#f9771c;--p-orange-text-l:#a14606;--p-rose-text-d:#ee629e;--p-rose-text-l:#b1145b}

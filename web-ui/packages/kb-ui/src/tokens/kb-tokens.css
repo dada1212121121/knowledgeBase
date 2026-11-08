@@ -1,0 +1,28 @@
+/* kb-ui 的**派生 token**(手工维护,不属于自动生成的 component.css)。
+   只做两件事:把 4px 栅格拆成常用的间距档位,以及给组件胶水层起几个语义别名。
+   所有值都从已有的 L1/L2 token 派生,密度 / 圆角 / 字号切换时自动跟随。 */
+:root{
+  /* 间距档位(4px 栅格,设计规范) */
+  --gap-xs:calc(var(--gap) / 3);
+  --gap-sm:calc(var(--gap) * 2 / 3);
+  --gap-lg:calc(var(--gap) * 4 / 3);
+  --gap-xl:calc(var(--gap) * 2);
+
+  /* 卡片内边距与表单宽度 */
+  --card-pad-x:var(--card-px);
+  --card-pad:var(--card-py) var(--card-px);
+  /* 表格单元格左右内边距:设计稿的 td/th 是 12px(不随卡片内边距变化) */
+  --cell-px:12px;
+  --form-label-w:180px;
+  --clip-w:320px;
+
+  /* 小号文字(设计规范:12px 基准,随 --fs 缩放) */
+  --fs-base-sm:12px;
+  --fs-base-lg:14px;
+
+  /* 字体与通用悬停底色:编辑器已经全部改用语义 token,但 L2 里没有字体和中性悬停这两个角色。
+     这里补成可读名字,避免业务样式再引用 components.css 里给 mockup 留的 --sans / --mono / --hover。 */
+  --font-sans:var(--p-font-sans);
+  --font-mono:var(--p-font-mono);
+  --surface-hover:rgba(var(--ink),.04);
+}

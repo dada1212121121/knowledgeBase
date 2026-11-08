@@ -1,0 +1,74 @@
+---
+source: crates/kb-index/tests/chunk_snapshots.rs
+expression: views
+---
+- key: "#1"
+  start_line: 1
+  end_line: 3
+  symbol: ~
+  header: demo › fixtures/typescript.ts
+- key: interface Config
+  start_line: 5
+  end_line: 9
+  symbol: interface Config
+  header: demo › fixtures/typescript.ts › interface Config
+- key: type Status
+  start_line: 11
+  end_line: 11
+  symbol: type Status
+  header: "demo › fixtures/typescript.ts › type Status = \"idle\" | \"running\" | \"stopped\";"
+- key: interface Startable
+  start_line: 13
+  end_line: 17
+  symbol: interface Startable
+  header: demo › fixtures/typescript.ts › interface Startable
+- key: class Service
+  start_line: 19
+  end_line: 53
+  symbol: class Service
+  header: demo › fixtures/typescript.ts › class Service implements Startable
+- key: function fibonacci
+  start_line: 55
+  end_line: 64
+  symbol: function fibonacci
+  header: "demo › fixtures/typescript.ts › function fibonacci(n: number): number"
+- key: function parsePort
+  start_line: 66
+  end_line: 69
+  symbol: function parsePort
+  header: "demo › fixtures/typescript.ts › function parsePort(value: string): number | null"
+- key: total
+  start_line: 71
+  end_line: 72
+  symbol: total
+  header: "demo › fixtures/typescript.ts › const total = (values: readonly number[]): number =>"
+- key: defaultConfig
+  start_line: 74
+  end_line: 74
+  symbol: defaultConfig
+  header: "demo › fixtures/typescript.ts › const defaultConfig: Config = { name: \"demo\", port: 7878 };"
+- key: function loadConfig
+  start_line: 76
+  end_line: 80
+  symbol: function loadConfig
+  header: "demo › fixtures/typescript.ts › async function loadConfig(path: string): Promise<Config>"
+- key: function run
+  start_line: 82
+  end_line: 89
+  symbol: function run
+  header: "demo › fixtures/typescript.ts › function run(config: Config = defaultConfig): number"
+- key: export enum Mode
+  start_line: 91
+  end_line: 94
+  symbol: export enum Mode
+  header: demo › fixtures/typescript.ts › export enum Mode
+- key: class Registry
+  start_line: 96
+  end_line: 115
+  symbol: class Registry
+  header: demo › fixtures/typescript.ts › class Registry<T>
+- key: function withMode
+  start_line: 117
+  end_line: 119
+  symbol: function withMode
+  header: "demo › fixtures/typescript.ts › function withMode<T>(mode: Mode, value: T): { mode: Mode; value: T }"

@@ -1,0 +1,22 @@
+{
+  "name": "kb-office-worker",
+  "private": true,
+  "version": "0.1.0",
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "description": "办公文档多人协同的服务端副本:和浏览器同一版本的 betteroffice 引擎,无界面运行",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "src/index.mjs",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "check:licenses": "node scripts/check-licenses.mjs"
+  },
+  "dependencies": {
+    "@betteroffice/agents": "0.3.0",
+    "@betteroffice/docx": "0.5.1",
+    "@betteroffice/pptx": "0.5.1",
+    "@betteroffice/xlsx": "0.5.1"
+  }
+}

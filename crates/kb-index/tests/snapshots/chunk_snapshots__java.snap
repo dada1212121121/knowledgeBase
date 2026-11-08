@@ -1,0 +1,14 @@
+---
+source: crates/kb-index/tests/chunk_snapshots.rs
+expression: views
+---
+- key: "#1"
+  start_line: 1
+  end_line: 5
+  symbol: ~
+  header: demo › fixtures/java.java
+- key: class Main
+  start_line: 7
+  end_line: 116
+  symbol: class Main
+  header: demo › fixtures/java.java › public class Main

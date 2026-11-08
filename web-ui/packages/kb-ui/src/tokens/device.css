@@ -1,0 +1,122 @@
+/* 多设备基础:安全区、软键盘、触屏可点区域、悬停之外的入口、横屏低高度、新特性兜底。
+   依据设计规范。手工维护,只读 token。 */
+
+/* ---------- 安全区(viewport-fit=cover 之后,刘海 / 圆角 / 底部横条不能遮内容) ---------- */
+:root {
+  /* 顶部安全区默认 0:普通浏览器标签页里,页面在地址栏下面,不会碰到刘海 / 状态栏。
+     部分安卓浏览器(真机截图:状态栏 ≈46px)会把状态栏高度报成 safe-area-inset-top,照单全收就会在每个页面顶部白白空出一截。
+     只有页面真的铺到状态栏下面时才让出:已安装的独立窗口 / 全屏(见下面两条) */
+  --safe-top: 0px;
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  /* 软键盘占用高度(px):由 useVisualViewport 写入;只在「布局视口没跟着缩」的环境(iOS)里不为 0 */
+  --kbd-inset: 0px;
+  /* 编辑器贴在键盘上沿的格式工具栏的高度(px):菜单面板和往上展开的下拉菜单坐在它上面 */
+  --kbd-bar: 0px;
+  /* 压在内容底部的东西的总高度(px)= 工具栏 + 打开着的菜单底部面板:光标滚动和正文底部留白据此让位。都由编辑器写 */
+  --kbd-reserve: 0px;
+}
+/* 独立窗口 / 全屏:CSS 能直接识别的走媒体查询,不用等脚本 */
+@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: window-controls-overlay) {
+  :root { --safe-top: env(safe-area-inset-top, 0px); }
+}
+/* iOS「添加到主屏幕」的 display-mode 不一定命中:useStandalone 会把状态写到 <html data-display-mode> */
+:root[data-display-mode="standalone"] { --safe-top: env(safe-area-inset-top, 0px); }
+.kb-app {
+  box-sizing: border-box;
+  padding: var(--safe-top) var(--safe-right) var(--kbd-inset) var(--safe-left);
+  /* 页面里 position:fixed 的元素(保存条等)据此对齐内容区 */
+  --shell-left: 0px;
+}
+/* 没有标签栏时,底部横条也要让出(标签栏自己已经带了 safe-bottom) */
+.kb-app:not([data-tabbar]) { padding-bottom: calc(var(--kbd-inset) + var(--safe-bottom)); }
+/* 固定在屏幕边缘的东西:提示条、后台上传浮标 */
+.kb-toasts { top: calc(var(--gap-lg) + var(--safe-top)); right: calc(var(--gap-lg) + var(--safe-right)); }
+.upi { bottom: calc(16px + var(--safe-bottom) + var(--kbd-inset)); }
+
+/* 软键盘弹出时:底部标签栏让位(键盘上面不该再顶着一排导航),底部固定的东西贴在键盘上沿 */
+html[data-kbd="open"] .kb-tabbar { display: none; }
+.kb-sheet-wrap, .kb-drw-wrap { padding-bottom: var(--kbd-inset); }
+/* 居中的对话框四周本来留 --gap-xl:键盘弹出时只在底部多让出键盘的高度。
+   (原先直接写成 var(--kbd-inset),没键盘时把底部留白清成 0,对话框整体比屏幕中心低了 12px) */
+.kb-dlg-wrap { padding-bottom: calc(var(--gap-xl) + var(--kbd-inset)); }
+/* 手机上的对话框是贴底的 sheet(motion-ui.css 把留白清成 0):贴着屏幕底,只让出键盘 */
+@media (max-width: 639px) {
+  .kb-dlg-wrap:not(.kb-confirm-wrap) { padding-bottom: var(--kbd-inset); }
+}
+.kb-sheet { max-height: min(90vh, calc(100vh - 44px)); max-height: min(90dvh, calc(100dvh - 44px - var(--kbd-inset))); }
+
+/* ---------- 触屏:可点区域不小于 44px（设计规范）,按输入方式判断,不按屏幕宽度 ---------- */
+@media (pointer: coarse) {
+  .btn, .tab, .seg i, .segx i, .kb-select .btn, .ni { min-height: 44px; }
+  /* min-width:两个字的小按钮(取消 / 跳过 / 关闭)宽度只有 ~42px,伪元素只在上下外扩,横向不够 44 */
+  /* justify-content:center —— min-width 把只有一个图标的按钮(分享 / 更多操作)撑到 44px,内容还靠左,图标偏离中心 7px */
+  .btn.sm { min-height: 36px; min-width: 44px; position: relative; justify-content: center; }
+  /* 小按钮视觉 36px,用伪元素把可点区域撑到 44px。伪元素的 inset 从内边距框算起(不含 1px 边框),
+     上下各 4px 实际只有 42px,所以取 5px(retina 上边框 0.5px 时是 45px) */
+  .btn.sm::before { content: ""; position: absolute; inset: -5px 0; }
+  .seg i, .segx i { min-width: 44px; }
+  /* 分段控件:2px 内边距 + 44 的项 = 48,和同一行的按钮(44)差 4px。
+     项收到 40(视觉),可点区域用伪元素补到 44 —— 容器正好 44,与外框贴齐的观感和桌面一致 */
+  .seg i { min-height: 40px; position: relative; }
+  .seg i::before { content: ""; position: absolute; inset: -2px 0; }
+  /* 开关本体 28×16:可点区域靠 ::before 外扩到 44×44(旋钮用的是 ::after,::before 空着;绝对定位不占布局)。
+     只向上下和左边外扩:开关通常贴着容器右缘,向右外扩会让容器多出横向滚动 */
+  .sw::before { content: ""; position: absolute; inset: -14px 0 -14px -16px; }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  textarea, select {
+    /* 输入框字号 ≥16px:iOS 聚焦时小于 16px 会自动放大页面 */
+    font-size: max(16px, 1em) !important;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), select { min-height: 44px; }
+  /* 复选框 / 单选框本体小,可点区域靠外面的 label 或这层外扩 */
+  input[type="checkbox"], input[type="radio"] { min-width: 22px; min-height: 22px; }
+}
+
+/* ---------- 悬停之外的入口（设计规范）:触屏没有 :hover,「悬停才出现」的操作要常驻可见 ---------- */
+@media (hover: none) {
+  .kb-tags .kb-chip-x { display: inline !important; opacity: 1; }
+  .kb-tags .kb-tag-input { opacity: 1; }
+  /* 组件自己的 scoped 样式特异性更高(带 data-v 属性),这里要 !important 才压得住 */
+  .kb-agent-session-edit, .kb-agent-session-del { opacity: 1 !important; }
+}
+
+/* ---------- 横屏低高度(手机横屏,高 <500):顶栏和导航压缩,弹层不超过屏幕（设计规范） ---------- */
+@media (max-height: 499px) and (orientation: landscape) {
+  :root { --topbar-h: 40px; --nav-item-h: 32px; }
+  .kb-nav-brand { height: var(--topbar-h); }
+  .kb-nav-group { padding-top: 6px; }
+  .kb-nav-search { display: none; }
+  .kb-ph-title { font-size: var(--text-16); }
+  .kb-ph-desc { display: none; }
+  .kb-sheet { max-height: calc(100vh - 8px); max-height: calc(100dvh - 8px - var(--kbd-inset)); }
+  .kb-dlg-wrap > .kb-dialog { max-height: calc(100vh - 16px); max-height: calc(100dvh - 16px); }
+  /* 编辑器工具栏:一行可横向滑动,不占掉半个屏幕 */
+  .kb-doc-toolbar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .kb-doc-toolbar::-webkit-scrollbar { display: none; }
+  .kb-doc-toolbar > * { flex: none; }
+}
+@media (max-height: 499px) and (orientation: landscape) and (pointer: coarse) {
+  :root { --nav-item-h: 44px; }
+}
+
+/* ---------- 新特性兜底(设计规范:功能检测,不判断浏览器) ---------- */
+/* 手机上表格变卡片时隐藏表头行:原先靠 tr:has(th),不支持 :has 的浏览器会留下一行空表头 */
+@media (max-width: 639px) {
+  thead tr { display: none !important; }
+}
+/* backdrop-filter 在 Safari 17 及以前要带前缀;不支持毛玻璃的浏览器退成不透明底色 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .kb-actionbar { background: var(--bg); }
+  .kb-agent-widget { background: var(--surface-1); }
+}
+/* 不支持 color-mix 的浏览器(Safari 16.0–16.1):半透明主色底退成纯色的低透明度写法 */
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+  :root { --accent-soft: rgba(94, 106, 210, 0.16); --accent-soft-border: rgba(94, 106, 210, 0.32); }
+  .kb-rt-card.is-selected { background: var(--accent-soft); }
+}
+/* 不支持 dvh 的浏览器:上面每个 100dvh 前面都先写了 100vh;这里补外壳本身 */
+@supports not (height: 100dvh) {
+  .kb-app { height: 100vh; }
+}

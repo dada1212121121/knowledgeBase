@@ -1,0 +1,64 @@
+---
+source: crates/kb-index/tests/chunk_snapshots.rs
+expression: views
+---
+- key: "#1"
+  start_line: 1
+  end_line: 7
+  symbol: ~
+  header: demo › fixtures/python.py
+- key: class Config
+  start_line: 10
+  end_line: 26
+  symbol: class Config
+  header: "demo › fixtures/python.py › class Config:"
+- key: class Service
+  start_line: 29
+  end_line: 53
+  symbol: class Service
+  header: "demo › fixtures/python.py › class Service:"
+- key: def fibonacci
+  start_line: 56
+  end_line: 61
+  symbol: def fibonacci
+  header: "demo › fixtures/python.py › def fibonacci(n: int) -> int:"
+- key: def parse_port
+  start_line: 64
+  end_line: 69
+  symbol: def parse_port
+  header: "demo › fixtures/python.py › def parse_port(value: str) -> int | None:"
+- key: def total
+  start_line: 72
+  end_line: 77
+  symbol: def total
+  header: "demo › fixtures/python.py › def total(values: Iterable[int]) -> int:"
+- key: def load_config
+  start_line: 80
+  end_line: 83
+  symbol: def load_config
+  header: "demo › fixtures/python.py › def load_config(path: str) -> Config:"
+- key: def _unused
+  start_line: 86
+  end_line: 88
+  symbol: def _unused
+  header: "demo › fixtures/python.py › def _unused() -> None:"
+- key: def run
+  start_line: 91
+  end_line: 98
+  symbol: def run
+  header: "demo › fixtures/python.py › def run(config: Config) -> int:"
+- key: "#2"
+  start_line: 101
+  end_line: 102
+  symbol: ~
+  header: demo › fixtures/python.py
+- key: def retry
+  start_line: 105
+  end_line: 120
+  symbol: def retry
+  header: "demo › fixtures/python.py › def retry(times: int):"
+- key: def flaky
+  start_line: 123
+  end_line: 128
+  symbol: def flaky
+  header: "demo › fixtures/python.py › def flaky(value: int) -> int:"

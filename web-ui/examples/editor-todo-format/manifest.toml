@@ -1,0 +1,21 @@
+# 待办清单格式:编辑器扩展示例(新格式 = Codec + 内容面)
+# 注册 .kbtodo:Codec 把磁盘上的 JSON 翻译成「待办清单」文本、保存时再翻译回去,内容面把清单画成可勾选的列表。
+# 安装:把整个目录复制到 <KB_HOME>/editor-extensions/kb.todo-format/(目录名必须等于 id),
+# 再在 config.toml 里写 [editor] extensions = true 即可。卸载:删掉这个目录(或把开关改回 false)。
+# 详见 README.md 与 docs/EDITOR_EXTENSIONS.md。
+id = "kb.todo-format"
+name = "待办清单格式"
+version = "1.0.0"
+api_version = 1
+description = "把 .kbtodo 文件当待办清单打开:勾选、改字、增删条目,保存回原来的 JSON 格式"
+entry = "index.js"
+# document.read + document.write:Codec 要读字节、保存时写回(第一次保存要用户确认);ui:内容面要画界面
+permissions = ["document.read", "document.write", "ui"]
+
+[[contributes.codecs]]
+id = "kb.todo-format.codec"
+extensions = ["kbtodo"]
+
+[[contributes.surfaces]]
+id = "kb.todo-format.surface"
+extensions = ["kbtodo"]

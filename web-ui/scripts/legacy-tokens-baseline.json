@@ -1,0 +1,4 @@
+{
+  "allowed": 1103,
+  "note": "UI-6 起旧别名只减不增;src/editor 与 editorTheme.ts 已清零"
+}

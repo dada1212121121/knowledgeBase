@@ -1,0 +1,94 @@
+---
+source: crates/kb-index/tests/chunk_snapshots.rs
+expression: views
+---
+- key: "#1"
+  start_line: 1
+  end_line: 8
+  symbol: ~
+  header: demo › fixtures/go.go
+- key: type Config struct
+  start_line: 10
+  end_line: 15
+  symbol: type Config struct
+  header: demo › fixtures/go.go › type Config struct
+- key: type Status int
+  start_line: 17
+  end_line: 18
+  symbol: type Status int
+  header: demo › fixtures/go.go › type Status int
+- key: "#2"
+  start_line: 20
+  end_line: 27
+  symbol: ~
+  header: demo › fixtures/go.go
+- key: type Startable interface
+  start_line: 29
+  end_line: 34
+  symbol: type Startable interface
+  header: demo › fixtures/go.go › type Startable interface
+- key: func NewConfig
+  start_line: 36
+  end_line: 39
+  symbol: func NewConfig
+  header: "demo › fixtures/go.go › func NewConfig(name string, port int) Config"
+- key: func Describe
+  start_line: 41
+  end_line: 44
+  symbol: func Describe
+  header: demo › fixtures/go.go › func (c Config) Describe() string
+- key: type Service struct
+  start_line: 46
+  end_line: 51
+  symbol: type Service struct
+  header: demo › fixtures/go.go › type Service struct
+- key: func NewService
+  start_line: 53
+  end_line: 60
+  symbol: func NewService
+  header: demo › fixtures/go.go › func NewService(config Config) *Service
+- key: func Start
+  start_line: 62
+  end_line: 66
+  symbol: func Start
+  header: demo › fixtures/go.go › func (s *Service) Start() Status
+- key: func Stop
+  start_line: 68
+  end_line: 72
+  symbol: func Stop
+  header: demo › fixtures/go.go › func (s *Service) Stop() Status
+- key: func IsRunning
+  start_line: 74
+  end_line: 77
+  symbol: func IsRunning
+  header: demo › fixtures/go.go › func (s *Service) IsRunning() bool
+- key: func Record
+  start_line: 79
+  end_line: 82
+  symbol: func Record
+  header: demo › fixtures/go.go › func (s *Service) Record(key string)
+- key: func Count
+  start_line: 84
+  end_line: 87
+  symbol: func Count
+  header: demo › fixtures/go.go › func (s *Service) Count(key string) int
+- key: func Fibonacci
+  start_line: 89
+  end_line: 96
+  symbol: func Fibonacci
+  header: demo › fixtures/go.go › func Fibonacci(n int) int
+- key: func ParsePort
+  start_line: 98
+  end_line: 101
+  symbol: func ParsePort
+  header: "demo › fixtures/go.go › func ParsePort(value string) (int, error)"
+- key: func Total
+  start_line: 103
+  end_line: 110
+  symbol: func Total
+  header: "demo › fixtures/go.go › func Total(values []int) int"
+- key: func Run
+  start_line: 112
+  end_line: 120
+  symbol: func Run
+  header: demo › fixtures/go.go › func Run(config Config) int

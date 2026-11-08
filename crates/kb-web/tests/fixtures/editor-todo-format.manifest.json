@@ -1,0 +1,18 @@
+{
+  "id": "kb.todo-format",
+  "name": "待办清单格式",
+  "version": "1.0.0",
+  "api_version": 1,
+  "description": "把 .kbtodo 文件当待办清单打开:勾选、改字、增删条目,保存回原来的 JSON 格式",
+  "entry": "index.js",
+  "permissions": ["document.read", "document.write", "ui"],
+  "contributes": {
+    "commands": [],
+    "toolbar": [],
+    "slash": [],
+    "panels": [],
+    "codecs": [{ "id": "kb.todo-format.codec", "extensions": ["kbtodo"] }],
+    "surfaces": [{ "id": "kb.todo-format.surface", "extensions": ["kbtodo"] }],
+    "ai_tools": []
+  }
+}

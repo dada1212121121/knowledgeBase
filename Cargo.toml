@@ -1,0 +1,131 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/kb-core",
+    "crates/kb-meta",
+    "crates/kb-store-lance",
+    "crates/kb-embed",
+    "crates/kb-index",
+    "crates/kb-extract",
+    "crates/kb-llm",
+    "crates/kb-service",
+    "crates/kb-capability",
+    "crates/kb-web",
+    "crates/kb-mail",
+    "crates/kb-collab",
+    "crates/kb-mcp",
+    "crates/kb-testkit",
+    "crates/kb-acp",
+    "crates/kb-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+# lancedb 0.40 要求 1.91.0;实际工具链锁 1.99.1(见 rust-toolchain.toml)
+rust-version = "1.91"
+license = "PolyForm-Noncommercial-1.0.0"
+publish = false
+
+# workspace 依赖版本以 ARCHITECTURE.md 的依赖表为准,不要随意升级。
+[workspace.dependencies]
+# 头像:只解码这四种常见格式(不开 svg / tiff / exr / avif 等默认特性,攻击面小,也不拉多余依赖)
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp", "gif"] }
+# 存储 / 检索
+# 0.40.0 不开 remote 时无法编译;只用本地 API,不调用 remote
+lancedb = { version = "=0.40.0", default-features = false, features = ["remote"] }
+# 只为了构造带容量上限的共享 Session(lancedb 的 `ConnectBuilder::session` 要它);版本必须和 lancedb 用的一致
+lance = { version = "=13.0.0", default-features = false }
+arrow-array = "58"
+arrow-schema = "58"
+rusqlite = { version = "0.40.2", features = ["bundled"] }
+# 模型
+fastembed = "=7.1.2"
+# 与 fastembed 用同一个版本、同样的最小特性(Cargo 会合并成一份),只为了自己建 ONNX 环境:见 kb-embed 的 shared_environment
+ort = { version = "=2.0.0-rc.15", default-features = false, features = ["std", "api-24"] }
+# MCP
+rmcp = { version = "=3.5.1", features = ["server", "transport-io", "macros", "transport-streamable-http-server"] }
+# ACP(Agent Client Protocol):把外部编码代理当子进程接入
+agent-client-protocol = { version = "3.5", features = ["process"] }
+schemars = "1.2"
+# 分块
+tree-sitter = "0.27"
+tree-sitter-rust = "0.24"
+tree-sitter-python = "0.25"
+tree-sitter-javascript = "0.25"
+tree-sitter-typescript = "0.23"
+tree-sitter-go = "0.25"
+tree-sitter-java = "0.23"
+tree-sitter-c = "0.24"
+tree-sitter-cpp = "0.23"
+tree-sitter-bash = "0.25"
+tree-sitter-php = "0.24"
+tree-sitter-ruby = "0.23"
+tree-sitter-swift = "0.7"
+pulldown-cmark = "0.13"
+percent-encoding = "2"
+ignore = "0.4"
+globset = "0.4"
+# Web
+axum = { version = "0.8", features = ["ws", "macros"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["trace", "cors", "compression-gzip"] }
+rust-embed = { version = "8", features = ["include-exclude"] }
+argon2 = "0.6"
+hyper = { version = "1", features = ["client", "http1"] }
+hyper-util = { version = "0.1", features = ["tokio"] }
+http-body-util = "0.1"
+reqwest = { version = "0.12", features = ["json", "stream"] }
+# 进化
+notify = "8.2"
+git2 = { version = "0.21", default-features = false }
+# 压缩包(zip 解包;只用 deflate 解压,已在依赖树中)
+flate2 = "1"
+# 多格式抽取:OOXML 的 XML 解析
+quick-xml = "0.41"
+# CSV / TSV 的编码识别(GBK / GB18030 / UTF-16):已经是间接依赖(reqwest、pdf-extract 在用),这里显式声明
+encoding_rs = "0.8"
+# 基础
+tokio = { version = "1", features = ["full"] }
+tokio-util = "0.7"
+futures = "0.3"
+async-trait = "0.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.9"
+xxhash-rust = { version = "0.8", features = ["xxh3"] }
+uuid = { version = "1.28", features = ["v7", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+# IANA 时区(站点 `[site] timezone`,默认 Asia/Shanghai):chrono 只认识本地偏移,处理不了名字与夏令时
+chrono-tz = "0.10"
+regex = "1"
+sha2 = "0.10"
+rand = "0.9"
+base64 = "0.22"
+thiserror = "2"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "registry"] }
+tracing-appender = "0.2"
+clap = { version = "4", features = ["derive", "env"] }
+dirs = "6"
+# 外部资料
+scraper = "0.27"
+html2text = "0.17"
+pdf-extract = "0.12"
+# 测试
+tempfile = "3"
+insta = { version = "1.49", features = ["yaml"] }
+assert_cmd = "2"
+
+[profile.dev]
+debug = "line-tables-only"
+
+# lance/arrow 在 opt-level 0 下慢得无法测试
+[profile.dev.package."*"]
+opt-level = 1
+
+[profile.release]
+lto = "thin"
+codegen-units = 16
+strip = "symbols"

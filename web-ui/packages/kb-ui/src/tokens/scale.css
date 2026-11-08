@@ -1,0 +1,65 @@
+/* 排版与间距阶梯、密度两档。手工维护,新代码一律用这里的 token(设计规范)。
+   字号阶梯（设计规范）:12 / 13 / 14 / 15 / 16 / 20 / 24 / 32,全部乘以用户的字号偏好 --fs;
+   另有 11 作为「微型」档,只用于角标、标签栏文字、分组标题这类一两个字的标签,正文不用。
+   中文行高 1.6–1.75;标题字重 600,正文 400,强调 500,全站不用 700;等宽字体只用于代码、路径、ID。
+   间距阶梯:4 / 8 / 12 / 16 / 24 / 32。 */
+:root {
+  --text-11: calc(11px * var(--fs));
+  --text-12: calc(12px * var(--fs));
+  --text-13: calc(13px * var(--fs));
+  --text-14: calc(14px * var(--fs));
+  --text-15: calc(15px * var(--fs));
+  --text-16: calc(16px * var(--fs));
+  --text-20: calc(20px * var(--fs));
+  --text-24: calc(24px * var(--fs));
+  --text-32: calc(32px * var(--fs));
+
+  --lh-tight: 1.35;  /* 标题、徽章、单行控件 */
+  --lh-body: 1.65;   /* 正文(中文 1.6–1.75 的中值) */
+  --lh-loose: 1.75;  /* 长文阅读(文档正文) */
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-title: 600;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+}
+
+/* ---------- 密度两档:舒适(默认)/ 紧凑,按用户记住(prefs.ui.density → <html data-ui-density>) ----------
+   只影响用 token 的新组件(列表行、导航项、表单控件、卡片内边距);旧页面的 data-density 三档保持原样, 逐页迁移后并入。 */
+:root,
+:root[data-ui-density=comfortable] {
+  --list-row-h: 48px;
+  --nav-item-h: 36px;
+  --field-h: 40px;
+  /* 视觉基线规范:卡片内边距 16(原来是 20,和走 --card-py/px 的那批卡片 12/16 对不上) */
+  --card-pad-ui: 16px;
+}
+:root[data-ui-density=compact] {
+  --list-row-h: 36px;
+  --nav-item-h: 32px;
+  --field-h: 32px;
+  --card-pad-ui: 12px;
+}
+/* 手机的卡片内边距是 16（设计规范）。
+   选择器特异性要和上面的 :root[data-ui-density=…] 一样((0,2,0)),放在它们后面才压得住:
+   页面一直带着 data-ui-density="comfortable",原来写成 :root 只有 (0,1,0),这条规则从来没生效过,手机上的卡片一直是 20 */
+@media (max-width: 599px) {
+  :root[data-ui-density] { --card-pad-ui: 16px; }
+}
+/* 触屏上可点区域不小于 44px（设计规范）:紧凑档也不例外 */
+@media (pointer: coarse) {
+  /* 选择器特异性要和上面的 :root[data-ui-density=…] 一样((0,2,0)),放在后面才压得住;写成 :root 会被舒适档的值盖掉 */
+  :root[data-ui-density] { --nav-item-h: 44px; --field-h: 44px; }
+  :root[data-ui-density=comfortable] { --list-row-h: 48px; }
+  :root[data-ui-density=compact] { --list-row-h: 44px; }
+}
+
+/* 次要文字 ≥ 4.5:1 的落实:旧外壳里用「最弱」档(--m2,弱化档只保证 3:1)写的计数、分组标题、页脚文字,
+   这些是有信息的文字,改用 --m(见 contrast.css 的校准值) */
+.ni .cnt, .sec, .foot { color: var(--m); }

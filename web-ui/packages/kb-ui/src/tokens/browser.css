@@ -1,0 +1,521 @@
+/* 03 浏览器 / 编辑器 + 通用下拉、分页、过滤输入、标签编辑、Markdown 源码编辑器。
+   只引用 token(var(--*)),窄屏规则也收在这里;页面里不写断点和裸尺寸。 */
+
+/* ---- 三栏分割:树 / 列表 / 详情 ---- */
+.kb-split{flex:1;display:flex;min-height:0;min-width:0}
+.kb-split-tree{width:230px;flex:none;border-right:var(--hl) solid var(--b);padding:10px 6px;overflow:auto}
+.kb-split-list{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;border-right:var(--hl) solid var(--b)}
+.kb-split-detail{width:440px;flex:none;display:flex;flex-direction:column;padding:14px 16px;gap:12px;overflow:hidden;min-height:0}
+.kb-split-detail > .kb-fill{flex:1;min-height:0}
+.kb-split-detail > .kb-scroll-y{overflow:auto;min-height:0}
+.kb-split-bar{padding:10px 12px;border-bottom:var(--hl) solid var(--b)}
+.kb-split-body{flex:1;min-height:0;overflow:auto}
+.kb-split-empty{flex:1;display:grid;place-items:center}
+/* 读取中的骨架屏:在居中的占位格里撑开一个阅读宽度,而不是缩成零宽 */
+.kb-split-empty > .kb-doc-skel{width:min(640px,100%);padding:var(--gap)}
+.kb-sidebar-body > .kb-sidebar-pad{padding:var(--gap-sm) var(--gap-xs)}
+
+/* ---- 树 ---- */
+/* touch-action:manipulation 去掉老安卓浏览器点击前的延迟,连点两下也不会被当成缩放 */
+.kb-tree-item{padding-left:calc(8px + var(--depth,0) * 14px);cursor:pointer;justify-content:space-between;user-select:none;touch-action:manipulation}
+.kb-tree-item:hover{background:var(--hover)}
+.kb-tree-item:focus-visible{outline:none;box-shadow:var(--ring)}
+.kb-tree-label{gap:4px;min-width:0;align-self:stretch}
+.kb-tree-actions{flex:none;display:inline-flex;align-items:center}
+@media (hover:hover){.kb-tree-actions{opacity:0}.kb-tree-item:hover .kb-tree-actions,.kb-tree-item:focus-within .kb-tree-actions,.kb-tree-item.on .kb-tree-actions{opacity:1}}
+/* 箭头的可点区域:宽 28、高撑满整行。左右负边距让图标仍停在原来的位置、文字也不右移(图标 12px,居中后左边距 8px) */
+.kb-tree-caret{display:inline-flex;flex:none;align-items:center;justify-content:center;align-self:stretch;width:28px;margin:0 -8px;cursor:pointer}
+.kb-tree-caret svg{transition:transform var(--dur-fast) var(--ease-out)}
+.kb-tree-caret:hover{color:var(--t)}
+/* 旋转放在图标上而不是整个可点区域上,否则展开时变大的点击区会跟着转 */
+.kb-tree-caret.is-open svg{transform:rotate(90deg)}
+.kb-tree-caret.is-leaf{visibility:hidden}
+/* 展开后等数据的占位 / 没有可展开的内容:缩进对齐到子项文字 */
+.kb-tree-wait{padding:4px 8px 4px 34px}
+.kb-tree-empty{padding:6px 8px 6px 34px;color:var(--m);font-size:calc(12px * var(--fs))}
+
+/* ---- 表格:可选 impulse/行 ---- */
+.kb-table tbody tr.is-clickable{cursor:pointer}
+.kb-table tbody tr.is-clickable:hover td{background:var(--table-row-hover)}
+.kb-table tbody tr.is-clickable:focus-visible{outline:none}
+.kb-table tbody tr.is-clickable:focus-visible td{background:var(--table-row-hover)}
+.kb-table tbody tr.sel td{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.kb-table tbody tr.sel td:first-child{box-shadow:inset 2px 0 0 var(--ac)}
+.kb-table .clip{max-width:var(--clip-w)}
+.kb-table-compact th,.kb-table-compact td{padding:0 var(--cell-px)}
+
+/* ---- 分页 ---- */
+.kb-pager{margin-top:auto;height:38px;flex:none;padding:0 12px;border-top:var(--hl) solid var(--b);font-size:calc(12px * var(--fs))}
+.kb-pager-ctrl{margin-left:auto;gap:8px}
+.kb-pager .btn[disabled]{opacity:.45;pointer-events:none}
+.kb-pager .btn.is-current{border-color:var(--ac);color:var(--t)}
+
+/* ---- 下拉 ---- */
+
+/* ---- 过滤输入 + 条件 chip ---- */
+.kb-filter{flex:1;height:28px;min-width:0;cursor:text;overflow:hidden}
+.kb-filter-input{flex:0 1 auto;field-sizing:content;min-width:calc(var(--gap) * 4);max-width:100%;border:0;outline:0;background:transparent;color:var(--t);font:inherit;padding:0}
+.kb-filter-input::placeholder{color:var(--m)}
+.kb-filter:focus-within{box-shadow:var(--ring);border-color:transparent}
+.kb-chip{height:18px;white-space:nowrap;cursor:pointer;font:inherit;font-size:calc(11px * var(--fs));line-height:18px}
+.kb-chip-x{margin-left:4px;padding:0;border:0;background:transparent;color:inherit;opacity:.6;cursor:pointer;font:inherit}
+.kb-chip:hover .kb-chip-x,.kb-chip-x:hover{opacity:1}
+
+/* ---- 标签编辑 ---- */
+.kb-tags{flex-wrap:wrap;gap:8px}
+.kb-tag-input{width:calc(var(--gap) * 5);height:20px;padding:0 4px;border:0;border-bottom:var(--hl) dashed var(--b2);background:transparent;color:var(--t);font:inherit;font-size:calc(12px * var(--fs));outline:0;transition:width var(--dur-base) var(--ease-out)}
+.kb-tag-input:focus{width:calc(var(--gap) * 9);border-bottom-color:var(--ac)}
+.kb-tag-input::placeholder{color:var(--m2)}
+
+/* ---- 详情头部 ---- */
+.kb-detail-title{width:100%;box-sizing:border-box;padding:2px 4px;margin:0 0 8px 0;min-height:calc(1.35em + 4px);height:auto;border:0;box-shadow:inset 0 0 0 var(--hl) transparent;border-radius:var(--r1);background:transparent;color:var(--t);font:600 calc(17px * var(--fs))/1.35 var(--sans);letter-spacing:-.018em;outline:0;word-break:break-word;white-space:normal;transition:border-color var(--dur-fast) var(--ease-out),background-color var(--dur-fast) var(--ease-out)}
+.kb-detail-title:hover{box-shadow:inset 0 0 0 var(--hl) var(--b2)}
+.kb-detail-title:focus{box-shadow:var(--ring);background:rgba(var(--shade),.18)}
+.kb-detail-title:read-only{pointer-events:none}
+.kb-meta{display:grid;grid-template-columns:72px 1fr;gap:6px 10px;font-size:calc(12px * var(--fs));align-items:center;margin-bottom:12px}
+.kb-meta > .m{align-self:start}
+.kb-conf{display:flex;align-items:center;gap:8px}
+.kb-conf .bar{width:120px}
+.tabs-flush{padding:0;min-height:0;background:transparent;backdrop-filter:none}
+.tabs-flush .tab{padding:10px 12px;font-weight:500}
+/* 详情页签不换行(与设计稿一致);放不下时横向滑动而不是把最后一个页签裁掉,手机上触控尺寸更高 */
+.tabs-flush{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.tabs-flush::-webkit-scrollbar{display:none}
+.tabs-flush .tab{white-space:nowrap;flex:none}
+@media (max-width:639px){.tabs-flush .tab{padding:12px 12px}}
+.kb-chain{display:flex;flex-direction:column;gap:6px;border-left:var(--hl) solid var(--b2);margin-left:4px;padding-left:12px;font-size:calc(12px * var(--fs))}
+.kb-chain-item{position:relative;display:flex;gap:4px;align-items:baseline}
+.kb-chain-item::before{content:"";position:absolute;left:-16px;top:calc(50% - 3px);width:7px;height:7px;border-radius:50%;background:var(--chain-tone,var(--m))}
+.kb-chain-item.is-warn{--chain-tone:var(--y)}
+.kb-chain-item.is-ok{--chain-tone:var(--g)}
+.kb-chain-item.is-bad{--chain-tone:var(--r)}
+.kb-chain-item.is-link{cursor:pointer}
+.kb-chain-item.is-link:hover{color:var(--t)}
+.kb-detail-head{flex-wrap:nowrap}
+.kb-detail-actions{margin-left:auto}
+.kb-back{display:none}
+
+/* ---- Markdown 源码编辑器 ---- */
+.kb-md{position:relative;flex:1;display:flex;min-height:calc(var(--row-h) * 6);padding:0;overflow:auto;white-space:normal;font-size:calc(13px * var(--fs));line-height:1.7;transition:border-color var(--dur-base) var(--ease-out),box-shadow var(--dur-base) var(--ease-out)}
+.kb-md:not(.is-readonly){border-color:var(--b3)}
+.kb-md:not(.is-readonly):focus-within{border-color:var(--ac)}
+.kb-md-stack{flex:1;min-width:0;display:grid}
+.kb-md-layer,.kb-md-input{grid-area:1 / 1;display:block;width:100%;min-width:0;margin:0;padding:10px 12px;border:0;font:inherit;line-height:inherit;letter-spacing:inherit;white-space:pre-wrap;word-break:break-word;overflow:hidden;tab-size:2}
+.kb-md-layer{pointer-events:none;color:var(--t2)}
+.kb-md-input{outline:0;resize:none;background:transparent;color:transparent;caret-color:var(--t)}
+.kb-md-input::selection{background:color-mix(in srgb,var(--accent) 35%,transparent)}
+.kb-md-preview{flex:1;min-height:calc(var(--row-h) * 6);overflow:auto}
+
+/* ---- 窄屏:列表 → 详情 的单列切换(平板竖屏 / 手机) ---- */
+@media (max-width:1279px){
+  .kb-split-tree{display:none}
+}
+@media (max-width:1023px){
+  .kb-split-detail{width:340px}
+}
+@media (max-width:1023px) and (orientation:portrait),(max-width:639px){
+  .kb-split:not(.is-detail) .pane-list{display:flex!important}
+  .kb-split.is-detail .pane-list{display:none!important}
+  .kb-split:not(.is-detail) .pane-detail{display:none!important}
+  .kb-split.is-detail .pane-detail{display:flex!important;width:100%!important;flex:1}
+  .kb-back{display:flex;align-items:center;gap:6px;min-height:var(--ctl-h);color:var(--ac2);cursor:pointer}
+}
+
+/* ---- 页面里用到的工具类 ---- */
+.kb-split-note{padding:var(--gap-sm) var(--gap)}
+.kb-tags-pad{padding:0 8px;gap:4px}
+.kb-tags-pad .tag{cursor:pointer;font-family:inherit}
+.kb-recent{cursor:pointer;user-select:none}
+.kb-recent:hover{background:var(--hover)}
+.kb-recent:focus-visible{outline:none;box-shadow:var(--ring)}
+.kb-chain-label{font-size:calc(12px * var(--fs))}
+.kb-detail-title-static{pointer-events:auto;height:auto;min-height:calc(1.35em + 4px);line-height:1.45;margin:0 0 10px 0;padding:0;word-break:break-word;white-space:normal}
+
+.kb-list-table .clip{max-width:200px}
+.kb-list-table .kb-table th,.kb-list-table .kb-table td{padding:0 var(--cell-px)}
+.kb-split-tree > .sec:first-child{padding-top:2px}
+.kb-recent{min-width:0}
+.kb-recent-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kb-tags:not(:hover):not(:focus-within) .kb-chip-x{display:none}
+.kb-tags .kb-tag-input{opacity:0;transition:opacity var(--dur-fast) var(--ease-out),width var(--dur-base) var(--ease-out)}
+.kb-tags:hover .kb-tag-input,.kb-tags:focus-within .kb-tag-input{opacity:1}
+.kb-ghost{border:0;background:transparent;box-shadow:none;color:var(--m2);padding:0 6px}
+.kb-ghost:hover{color:var(--status-danger-text);background:var(--hover)}
+.tabs-flush .tab{gap:4px}
+.kb-tab-count{color:inherit}
+.btn.is-idle{opacity:.55}
+
+/* ---- 堆叠柱图容器 / 气泡 ---- */
+.kb-chart{position:relative;padding:8px 16px 4px}
+.kb-chart-svg{display:block;margin-bottom:5px}
+.kb-chart-hit{outline:none;cursor:default}
+.kb-chart-hit:focus-visible{stroke:var(--ac);stroke-width:1}
+.kb-chart .barg rect{transition:opacity var(--dur-fast) var(--ease-out)}
+.kb-chart:hover .barg:not(.is-active) rect{opacity:.55}
+.kb-chart-cursor{transition:opacity var(--dur-fast) var(--ease-out)}
+.kb-chart-tip{top:0;padding:6px 10px;pointer-events:none;transition:left var(--dur-base) var(--ease-out)}
+.kb-chart-tip-title{margin-bottom:4px}
+
+/* 开关:可聚焦 / 禁用 */
+.sw{cursor:pointer}
+.sw:focus-visible{outline:none;box-shadow:var(--ring)}
+.sw.is-disabled{opacity:.5;cursor:progress}
+
+/* 进化链:时间戳不换行(设计稿里是 10-21 00:39 一行) */
+.kb-chain-item > .mono{white-space:nowrap;flex:none}
+
+/* 手机:详情元数据的标签列加宽到 80px */
+@media (max-width:639px){.kb-meta{grid-template-columns:80px 1fr}}
+
+/* ---- 预览与编辑区域弹性扩容 & 专注模式 ---- */
+.kb-split.is-tree-collapsed .kb-split-tree{display:none!important}
+.kb-split.is-detail-collapsed .kb-split-detail{display:none!important}
+.kb-split.is-detail-collapsed .pane-viewer{border-right:0}
+.kb-split.is-edit-expanded .pane-list:not(.pane-viewer){display:none!important}
+.kb-split.is-edit-expanded .kb-split-detail{flex:1!important;width:auto!important;max-width:none!important}
+.kb-split.is-zen{position:fixed!important;inset:0!important;z-index:var(--z-dialog,31)!important;background:var(--bg)!important;width:100vw!important;height:100vh!important}
+.kb-tree-rail-toggle{width:28px;flex:none;display:flex;flex-direction:column;align-items:center;padding:12px 4px;border-right:var(--hl) solid var(--b);background:var(--bg-sidebar);cursor:pointer;color:var(--m);transition:color var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out)}
+.kb-tree-rail-toggle:hover{background:var(--hover);color:var(--t)}
+.kb-tree-head-row{display:flex;align-items:center;justify-content:space-between;padding-right:6px}
+.kb-tree-collapse-btn{padding:2px 4px}
+.kb-tree-collapse-icon{transform:rotate(90deg)}
+.kb-tree-expand-icon{transform:rotate(-90deg)}
+.kb-editor-split{display:flex;flex:1;min-height:0;gap:14px;width:100%}
+.kb-editor-split-pane{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
+.kb-editor-split-pane .kb-textarea{flex:1;min-height:0;height:100%}
+.kb-editor-split-pane textarea{height:100%!important;min-height:420px}
+.kb-editor-split-pane .kb-md{height:100%;min-height:420px}
+.kb-editor-split-pane .kb-md-preview{height:100%;min-height:420px;border:var(--hl) solid var(--b2);border-radius:var(--r2);padding:14px 16px;background:var(--surface-1)}
+.kb-md-editor-host{flex:1;min-height:520px;width:100%;display:flex}
+/* 统一外壳的根节点是 flex 子项:父级只有 min-height 时百分比高度拿不到,给根节点本身兜住高度 */
+.kb-md-editor-host > .kb-editor-host{min-height:520px}
+
+.kb-md-rendered-wrap{flex:1;min-height:0;overflow:auto;padding:18px 24px;background:var(--surface-1);border:var(--hl) solid var(--b2);border-radius:var(--r2)}
+.kb-workspace-preview{min-height:100%;font-size:calc(13px * var(--fs));line-height:1.7}
+
+/* ---- 双栏工作台: VS Code / Obsidian 级双栏工作台架构 ---- */
+.kb-workbench-dual{display:flex;flex:1;min-height:0;min-width:0;overflow:hidden;position:relative}
+/* 专注模式:把左侧「集合树 + 文件列表」整列收起,正文独占整屏。
+   以前只给工作台加了 is-zen 类却没有对应样式,菜单里点「专注模式」什么都不变(等于没接上)。
+   收宽度用 display 而不是 0 宽度,resizer 一起藏掉,免得留一条不能拖的 6px 间隙 */
+.kb-workbench-dual.is-zen > .kb-sidebar{display:none}
+.kb-workbench-dual.is-zen > .kb-resizer{display:none}
+.kb-sidebar{width:var(--sidebar-w,280px);flex:none;display:flex;flex-direction:column;min-height:0;border-right:var(--hl) solid var(--b);background:var(--bg-sidebar,var(--surface-1));overflow:hidden;transition:width var(--dur-fast) var(--ease-out)}
+.kb-sidebar.is-collapsed{width:0!important;border-right:0;display:none}
+.kb-resizer{width:6px;margin-left:-3px;margin-right:-3px;cursor:col-resize;flex:none;z-index:10;position:relative;background:transparent;transition:background var(--dur-fast) var(--ease-out)}
+.kb-resizer:hover,.kb-resizer.is-active{background:var(--ac)}
+
+.kb-sidebar-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 6px;gap:8px;flex:none}
+.kb-sidebar-title{font-weight:600;font-size:calc(13px * var(--fs));color:var(--t);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 集合名放不下时带省略号收缩(侧栏展开后目录栏变窄,以前是被硬切掉半个字)。只作用在侧栏标题上的 KbSelect,不改共用组件 */
+.kb-select.kb-sidebar-title{min-width:0;flex:0 1 auto}
+.kb-select.kb-sidebar-title > .btn{max-width:100%;min-width:0}
+.kb-select.kb-sidebar-title > .btn > span:not(.kb-select-icon){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kb-sidebar-ctrls{display:flex;align-items:center;gap:4px;flex:none}
+/* 目录栏窄(<320):「新建」只留加号,把宽度让给集合名(默认 280 时集合名只剩个图标,看着像排版坏了);
+   按钮仍有 aria-label / title,读屏与悬停都不丢信息。触屏的 44px 最小宽度来自 .kb-workbench-dual .btn.sm */
+.kb-sidebar.is-tight .kb-sidebar-ctrls .kb-new-btn>span{display:none}
+.kb-sidebar.is-tight .kb-sidebar-ctrls .kb-new-btn{padding:0;justify-content:center;min-width:24px}
+/* 触屏仍然是 44:省宽度不能省到点不准 */
+@media (pointer:coarse){.kb-sidebar.is-tight .kb-sidebar-ctrls .kb-new-btn{min-width:44px}}
+
+.kb-sidebar-search-row{display:flex;align-items:center;gap:6px;padding:0 10px 6px;flex:none}
+.kb-sidebar-search-wrap{position:relative;flex:1;display:flex;align-items:center}
+.kb-sidebar-search-icon{position:absolute;left:8px;color:var(--m);pointer-events:none}
+.kb-sidebar-search-input{width:100%;height:28px;border-radius:var(--r1);border:var(--hl) solid var(--control-line);background:var(--bg);color:var(--t);padding:0 24px 0 26px;font-size:calc(12px * var(--fs));outline:none;box-sizing:border-box}
+.kb-sidebar-search-input:focus{border-color:var(--ac);box-shadow:var(--ring)}
+.kb-sidebar-search-clear{position:absolute;right:6px;border:0;background:transparent;color:var(--m);cursor:pointer;padding:2px 4px;font-size:calc(11px * var(--fs));line-height:1}
+.kb-sidebar-search-clear:hover{color:var(--t)}
+
+.kb-sidebar-pills{display:flex;align-items:center;gap:4px;padding:2px 10px 6px;flex-wrap:wrap;flex:none}
+.kb-sidebar-pill{border:var(--hl) solid var(--b2);border-radius:var(--r1);background:transparent;padding:2px 6px;font-size:calc(11px * var(--fs));color:var(--m);cursor:pointer;transition:color var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out),background var(--dur-fast) var(--ease-out)}
+.kb-sidebar-pill:hover{color:var(--t);border-color:var(--b3)}
+.kb-sidebar-pill.is-active{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--t);border-color:var(--ac);font-weight:500}
+
+.kb-sidebar-chips{display:flex;align-items:center;gap:4px;padding:0 10px 6px;flex-wrap:wrap;flex:none}
+
+.kb-sidebar-pager{padding:6px 10px;border-top:var(--hl) solid var(--b2);flex:none;display:flex;align-items:center;justify-content:space-between;gap:6px;background:var(--surface-1)}
+.kb-sidebar-pager-info{font-size:calc(12px * var(--fs));color:var(--m);white-space:nowrap}
+.kb-sidebar-pager-btns{display:flex;align-items:center;gap:4px}
+/* 没写完的新笔记入口:一行,主按钮撑满,右边一个小叉丢弃;触屏 44px 高 */
+.kb-resume{display:flex;align-items:stretch;gap:4px;margin:0 10px 6px;min-height:32px;border:var(--hl) solid var(--accent-soft-border);border-radius:var(--r1);background:var(--accent-soft)}
+.kb-resume-main,.kb-resume-x{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:var(--accent-text);font:inherit;font-size:calc(12px * var(--fs));cursor:pointer}
+.kb-resume-main{flex:1;min-width:0;padding:0 10px;text-align:left}
+.kb-resume-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kb-resume-x{flex:none;justify-content:center;width:32px;color:var(--m)}
+.kb-resume-x:hover{color:var(--t)}
+.kb-resume-main:focus-visible,.kb-resume-x:focus-visible{outline:none;box-shadow:var(--ring);border-radius:var(--r1)}
+@media (pointer:coarse){.kb-resume{min-height:44px}.kb-resume-x{width:44px}}
+/* 树很长时这条要一直看得见:展开子目录后,它是回到列表的唯一入口 */
+.kb-tree-switch-hint{position:sticky;bottom:0;z-index:1;padding:6px 8px 4px;margin-top:6px;background:var(--bg-sidebar,var(--surface-1))}
+
+.kb-sidebar-nav-tabs{display:flex;border-bottom:var(--hl) solid var(--b2);padding:0 10px;gap:8px;flex:none}
+.kb-sidebar-tab-btn{border:0;background:transparent;padding:6px 4px;font-size:calc(12px * var(--fs));color:var(--m);cursor:pointer;border-bottom:2px solid transparent;transition:color var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out)}
+.kb-sidebar-tab-btn:hover{color:var(--t)}
+.kb-sidebar-tab-btn.is-active{color:var(--t);border-bottom-color:var(--ac);font-weight:600}
+
+.kb-sidebar-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:6px 8px;display:flex;flex-direction:column;gap:2px}
+.kb-sidebar-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--r1);cursor:pointer;user-select:none;transition:background var(--dur-fast) var(--ease-out);font-size:calc(12px * var(--fs));color:var(--t2);text-decoration:none}
+.kb-sidebar-item:hover{background:var(--hover);color:var(--t)}
+.kb-sidebar-item.is-active{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--t);font-weight:500}
+.kb-sidebar-item-title{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden}
+.kb-sidebar-item-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.kb-sidebar-item-dir{font-size:calc(10px * var(--fs));color:var(--m);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2}
+.kb-sidebar-item-meta{font-size:calc(11px * var(--fs));color:var(--m);font-family:var(--mono);flex:none}
+
+.kb-sidebar-footer{padding:8px 10px;border-top:var(--hl) solid var(--b2);flex:none;display:flex;align-items:center;justify-content:space-between;font-size:calc(11px * var(--fs));color:var(--m)}
+
+.kb-workspace-main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.kb-workspace-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:var(--hl) solid var(--b);min-height:var(--ctl-h);gap:12px;flex:none}
+.kb-workspace-bar-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.kb-workspace-bar-right{display:flex;align-items:center;gap:8px;flex:none}
+
+.kb-doc-title-heading{font-weight:600;font-size:calc(15px * var(--fs));color:var(--t);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0;line-height:1.3}
+
+.kb-workspace-body{flex:1;min-height:0;overflow:hidden;display:flex;position:relative}
+.kb-workspace-content{flex:1;min-width:0;min-height:0;overflow-y:auto;display:flex;flex-direction:column}
+
+.kb-workspace-reader{max-width:920px;width:100%;margin:0 auto;padding:28px 40px 64px;box-sizing:border-box;flex:1}
+.kb-workspace-reader-inner{background:transparent;border:0;border-radius:0;padding:0;min-height:100%;box-shadow:none}
+
+.kb-inspector-panel{width:320px;flex:none;border-left:var(--hl) solid var(--b);display:flex;flex-direction:column;min-height:0;background:var(--surface-1);transition:transform var(--dur-fast) var(--ease-out)}
+.kb-inspector-panel-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:var(--hl) solid var(--b2);font-weight:600;font-size:calc(13px * var(--fs))}
+
+.kb-viewmode-switch{display:inline-flex;border:var(--hl) solid var(--b);border-radius:var(--r1);padding:1px;background:var(--surface-2);gap:1px}
+.kb-viewmode-btn{border:0;background:transparent;padding:3px 8px;font-size:calc(12px * var(--fs));border-radius:var(--r1);cursor:pointer;color:var(--m);display:inline-flex;align-items:center;gap:4px;transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out)}
+.kb-viewmode-btn:hover{color:var(--t)}
+.kb-viewmode-btn.is-active{background:var(--surface-1);color:var(--t);font-weight:600}
+
+/* ---- 浏览器工作台·单栏(<600,手机):列表 / 详情整屏二选一 ----
+   版面由媒体查询决定,不靠 Browser.vue 加的类:窗口一变,浏览器先按新宽度排版,页面脚本的 resize 回调要晚一拍。
+   如果这里按类名,中间那一帧会拿旧类名排新宽度(例如平板的两栏塞进 390 宽,正文被挤成 150px 的窄条),
+   浏览器的滚动锚定会在那一帧里把阅读位置挪走,最后回不来。 */
+.kb-back-btn{display:inline-flex;align-items:center;gap:4px;flex:none}
+.kb-back-icon{transform:rotate(90deg)}
+@media (max-width:599px){
+  .kb-workbench-dual .kb-sidebar{width:100%!important;border-right:0;display:flex}
+  .kb-workbench-dual .kb-resizer{display:none}
+  .kb-workbench-dual.is-detail .kb-sidebar{display:none}
+  .kb-workbench-dual:not(.is-detail) .kb-workspace-main{display:none}
+  .kb-workbench-dual .kb-workspace-bar{flex-wrap:wrap;padding:8px 12px;gap:8px}
+  .kb-workbench-dual .kb-workspace-bar-left{flex:1 1 100%}
+  .kb-workbench-dual .kb-workspace-bar-right{flex:1 1 100%;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .kb-workbench-dual .kb-workspace-bar-right::-webkit-scrollbar{display:none}
+  .kb-workbench-dual .kb-workspace-bar-right > *{flex:none}
+  .kb-workbench-dual .kb-workspace-reader{padding:14px 12px 40px}
+}
+
+.kb-workspace-bar-left > :not(.kb-doc-title-heading){flex:none;white-space:nowrap}
+.kb-workspace-bar-left .kb-doc-title-heading{flex:1 1 0;min-width:0}
+
+/* 查看器里命中句的高亮(CSS Custom Highlight API;docx / pptx / 阅读视图共用) */
+::highlight(kb-hit){background-color:color-mix(in srgb,var(--accent) 38%,transparent);color:inherit}
+/* 从检索结果点进来:文档里所有命中的词(和 kb-hit 同色,已经过对比度检查) */
+::highlight(kb-query){background-color:color-mix(in srgb,var(--accent) 38%,transparent);color:inherit}
+/* 静态语法高亮(笔记本代码单元格、压缩包文本预览):类名来自 @lezer/highlight 的 classHighlighter */
+.kb-tok .tok-keyword,.kb-tok .tok-operatorKeyword,.kb-tok .tok-controlKeyword,.kb-tok .tok-modifier{color:var(--code-kw)}
+.kb-tok .tok-string,.kb-tok .tok-string2,.kb-tok .tok-regexp{color:var(--code-str)}
+.kb-tok .tok-number,.kb-tok .tok-bool,.kb-tok .tok-atom,.kb-tok .tok-null{color:var(--code-num)}
+.kb-tok .tok-variableName2,.kb-tok .tok-propertyName,.kb-tok .tok-attributeName,.kb-tok .tok-labelName{color:var(--code-fn)}
+.kb-tok .tok-typeName,.kb-tok .tok-className,.kb-tok .tok-namespace{color:var(--code-type)}
+.kb-tok .tok-tagName,.kb-tok .tok-angleBracket{color:var(--code-tag)}
+.kb-tok .tok-operator,.kb-tok .tok-punctuation,.kb-tok .tok-bracket{color:var(--code-op)}
+.kb-tok .tok-comment,.kb-tok .tok-lineComment,.kb-tok .tok-blockComment,.kb-tok .tok-meta{color:var(--code-com);font-style:italic}
+.kb-tok .tok-heading{color:var(--code-kw);font-weight:600}
+.kb-tok .tok-link,.kb-tok .tok-url{color:var(--ac2)}
+
+/* ---- 文档页(语雀式):顶栏面包屑、保存状态、元信息 ---- */
+.kb-crumb{display:inline-flex;align-items:center;gap:6px;min-width:0;overflow:hidden;color:var(--m);font-size:calc(13px * var(--fs));white-space:nowrap}
+.kb-crumb-part{overflow:hidden;text-overflow:ellipsis}
+.kb-crumb-sep{color:var(--m2)}
+.kb-save-state{flex:none;font-size:calc(12px * var(--fs));color:var(--m);white-space:nowrap}
+.kb-save-state.is-dirty{color:var(--status-warning-text,var(--y))}
+.kb-save-state.is-dirty::before{content:'';display:inline-block;width:6px;height:6px;margin-right:6px;border-radius:50%;background:currentColor;vertical-align:middle}
+.kb-save-state.is-saved{color:var(--status-success-text,var(--g))}
+.kb-doc-kind{display:inline-flex;align-items:center;height:20px;padding:0 8px;color:var(--ac2);background:var(--accent-soft);border-radius:var(--r-pill);font-size:calc(12px * var(--fs))}
+.kb-doc-tag{color:var(--t2)}
+.kb-doc-path{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 文档页自己管边距与限宽:工作区内容容器不再加内边距 */
+.kb-workspace-content > .kb-dp{flex:none}
+@media (max-width:599px){
+  .kb-wide-only{display:none!important}
+}
+@media (max-width:599px){
+  /* 窄屏:顶栏单行(返回 + 面包屑 + 操作),操作区可横向滑动 */
+  .kb-workbench-dual .kb-workspace-bar{flex-wrap:nowrap}
+  .kb-workbench-dual .kb-workspace-bar-left{flex:1 1 auto;min-width:0}
+  .kb-workbench-dual .kb-workspace-bar-right{flex:0 1 auto;min-width:0}
+}
+@media (max-width:520px){
+  .kb-workbench-dual .kb-workspace-bar-left .kb-crumb-part:first-child,
+  .kb-workbench-dual .kb-workspace-bar-left .kb-crumb-sep{display:none}
+}
+
+/* ======== 文档工作台(语雀式三段):浏览器页双栏模式下,全局导航收成图标栏,顶栏与页脚让给文档 ======== */
+.kb-rail-only{display:none}
+.kb-preview-notice{padding:var(--gap-lg) var(--page-pad);font-size:calc(13px * var(--fs));line-height:1.6;overflow-wrap:anywhere}
+/* (旧版靠 :has(.kb-workbench-dual) 把 .side / .top / .foot 收成图标栏的规则已删:统一外壳按路由 meta.chrome 决定,见 stores/nav.ts 与 shell.css) */
+
+/* ---- 文档顶栏 ---- */
+.kb-workbench-dual .kb-workspace-bar{height:52px;min-height:52px;padding:0 16px 0 20px;gap:12px;background:var(--bg)}
+.kb-workbench-dual .kb-workspace-bar-left{gap:8px}
+.kb-workbench-dual .kb-workspace-bar-right{gap:6px}
+.kb-crumb{font-size:calc(13px * var(--fs))}
+.kb-crumb-col{max-width:220px}
+.kb-crumb-leaf{color:var(--t);font-weight:500;min-width:0;max-width:420px}
+.kb-more{position:relative;flex:none}
+.kb-more-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:70;min-width:208px;padding:4px;display:flex;flex-direction:column;background:var(--surface-3);border:var(--hl) solid var(--b2);border-radius:var(--r2);box-shadow:var(--sh3)}
+.kb-more-item{display:flex;align-items:center;gap:8px;padding:7px 10px;text-align:left;color:var(--t);background:transparent;border:0;border-radius:var(--r1);font-size:calc(13px * var(--fs));cursor:pointer;white-space:nowrap}
+.kb-more-item:hover{background:var(--hover)}
+/* 触屏:菜单项是一整行按钮,直接加高到 44px(原来 34px) */
+@media (pointer:coarse){.kb-more-item{min-height:44px}}
+.kb-more-item.is-danger{color:var(--status-danger-text,var(--r))}
+.kb-more-hint{margin-left:auto;font-size:calc(12px * var(--fs))}
+.kb-more-check{margin-left:auto;color:var(--ac2)}
+.kb-more-sep{height:var(--hl);margin:4px 6px;background:var(--b2)}
+
+/* ---- 左侧目录栏(语雀式:知识库名 + 新建 / 搜索 / 类型 / 两行列表项) ---- */
+.kb-workbench-dual .kb-sidebar{background:var(--bg-sidebar,var(--surface-1))}
+.kb-workbench-dual .kb-sidebar-head{height:52px;padding:0 10px 0 12px;align-items:center;border-bottom:var(--hl) solid var(--b)}
+.kb-workbench-dual .kb-sidebar-title{font-size:calc(14px * var(--fs));font-weight:600;min-width:0}
+.kb-new-btn{gap:4px}
+.kb-workbench-dual .kb-sidebar-search-row{padding:10px 10px 6px}
+.kb-workbench-dual .kb-sidebar-search-input{height:32px;border-radius:var(--r2);background:var(--surface-2);border-color:transparent}
+.kb-workbench-dual .kb-sidebar-search-input:focus{background:var(--input-bg);border-color:var(--ac)}
+.kb-workbench-dual .kb-sidebar-pills{gap:2px;padding:0 10px 8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.kb-workbench-dual .kb-sidebar-pill{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border:0;border-radius:var(--r-pill);font-size:calc(12px * var(--fs));color:var(--t2);white-space:nowrap}
+.kb-workbench-dual .kb-sidebar-pill:hover{background:var(--hover);color:var(--t)}
+.kb-workbench-dual .kb-sidebar-pill.is-active{background:var(--accent-soft);color:var(--ac2);font-weight:500}
+.kb-pill-count{font-family:var(--mono);font-size:calc(11px * var(--fs));color:var(--m)}
+/* 选中药丸底是淡强调色:计数再叠 opacity:.8 会掉到 3:1(axe color-contrast);要弱化只能靠字号,不能靠透明度 */
+.kb-sidebar-pill.is-active .kb-pill-count{color:inherit}
+.kb-workbench-dual .kb-sidebar-nav-tabs{padding:0 12px;gap:14px}
+.kb-workbench-dual .kb-sidebar-tab-btn{padding:8px 0;font-size:calc(13px * var(--fs))}
+.kb-workbench-dual .kb-sidebar-body{padding:6px 6px 10px;gap:1px}
+.kb-workbench-dual .kb-sidebar-item{align-items:flex-start;gap:10px;padding:8px 10px;border-radius:var(--r2)}
+.kb-workbench-dual .kb-sidebar-item.is-active{background:var(--accent-soft)}
+.kb-workbench-dual .kb-sidebar-item.is-active .kb-sidebar-item-name{color:var(--t)}
+.kb-workbench-dual .kb-sidebar-item-title{gap:3px}
+.kb-workbench-dual .kb-sidebar-item-name{font-size:calc(14px * var(--fs));font-weight:500;color:var(--t);line-height:1.45}
+.kb-workbench-dual .kb-sidebar-item-dir{font-family:var(--sans);font-size:calc(12px * var(--fs));color:var(--m);line-height:1.4}
+/* 选中行底是淡强调色,次要文字 --m 压上去只有 4.1:1(axe color-contrast);选中行里的辅助文字升一档用 --t2 */
+.kb-sidebar-item.is-active .kb-sidebar-item-dir,.kb-sidebar-item.is-active .kb-sidebar-item-meta,.kb-sidebar-item.is-selected .kb-sidebar-item-dir,.kb-sidebar-item.is-selected .kb-sidebar-item-meta{color:var(--t2)}
+.kb-item-dot{margin:0 5px;color:var(--m2)}
+.kb-item-icon{flex:none;width:28px;height:28px;display:grid;place-items:center;border-radius:var(--r1);background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--ac2)}
+.kb-item-icon svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linejoin:round;stroke-linecap:round}
+.kb-workbench-dual .kb-item-fmt{flex:none;min-width:28px;height:28px;padding:0 3px;font-size:calc(9px * var(--fs));border-radius:var(--r1)}
+.kb-workbench-dual .kb-sidebar-pager{padding:6px 10px;background:transparent}
+/* 列表行:两行文字本身 ~39px,上下各 8px 就是 55px,已经远超触屏要求的 44px(原来 11px,一行 61px) */
+@media (pointer:coarse){.kb-workbench-dual .kb-sidebar-item{padding:8px 12px}.kb-workbench-dual .kb-sidebar-pill{height:32px}}
+
+/* ---- 打印 / 存为 PDF:只留标题与正文 ---- */
+@media print{
+  .kb-app .side,.kb-app .top,.kb-app .mbar,.kb-app .tabbar,.kb-app .foot,.kb-sidebar,.kb-resizer,.kb-workspace-bar,.kb-inspector-panel,.kb-dp-toc,.kb-dp-toc-btn,.kb-dp-draft,.kb-toast-stack,.kb-fab,.kb-assistant{display:none!important}
+  html,body,#app,.kb-app,.main,.body-row,.kb-workbench-dual,.kb-workspace-main,.kb-workspace-body,.kb-workspace-content{display:block!important;height:auto!important;overflow:visible!important;background:#fff!important;color:#111!important} /* tokens-allow */
+  .kb-dp{display:block!important;max-width:none!important;padding:0!important}
+  .kb-prose .milkdown .ProseMirror{color:#111!important} /* tokens-allow */
+}
+/* 顶栏面包屑在窄屏只留标题;左栏搜索框占满一行,排序 / 状态只显示图标 */
+.kb-workbench-dual .kb-workspace-bar-left{min-width:0;overflow:hidden}
+.kb-workbench-dual .kb-crumb{min-width:0;flex:1 1 auto}
+.kb-workbench-dual .kb-crumb-leaf{overflow:hidden;text-overflow:ellipsis}
+@media (max-width:1023px){
+  .kb-workbench-dual .kb-crumb-part:not(.kb-crumb-leaf),.kb-workbench-dual .kb-crumb-sep{display:none}
+  .kb-workbench-dual .kb-workspace-bar{padding:0 10px}
+}
+.kb-workbench-dual .kb-sidebar-search-wrap{min-width:0}
+.kb-workbench-dual .kb-sidebar-search-row .kb-select .btn{padding:0 6px}
+/* 只有桌面 / 平板的窄侧栏放不下文字才收成纯图标;手机上这一行是整屏宽,排序和筛选要带字(视觉基线规范) */
+@media (min-width:601px){.kb-workbench-dual .kb-sidebar-search-row .kb-select .btn > :not(.kb-select-icon){display:none}}
+/* 触屏:搜索框已经是 44px 高,排序 / 筛选两个选择框原来视觉上只有 36px(靠伪元素把可点区域撑到 44),三个控件高低不一;
+   直接做成 44px,和搜索框同高 */
+@media (pointer:coarse){.kb-workbench-dual .kb-sidebar-search-row .kb-select .btn{height:44px;min-height:44px}}
+/* 窄屏:操作区不收缩(⋯ 永远可见),面包屑让位;属性按钮收进 ⋯ */
+@media (max-width:599px){
+  .kb-workbench-dual .kb-workspace-bar-right{flex:none;overflow:visible}
+}
+@media (max-width:1023px){
+  .kb-workbench-dual .kb-workspace-bar .btn.kb-back-btn{width:32px;height:32px;padding:0;justify-content:center}
+}
+/* 文档页的提示条放在文档顶栏下面,不压住编辑 / 保存按钮 */
+.kb-app[data-chrome^=workbench] .kb-toasts{top:calc(64px + var(--safe-top))}
+
+/* ---- 多选 + 「我的知识库 / 共享给我」切换(F3 分享与协作) ---- */
+.kb-scope{padding:var(--sp-2) var(--sp-3) 0;flex:none}
+.kb-scope .kb-seg{width:100%}
+.kb-scope .kb-seg i{flex:1;text-align:center}
+.kb-sel-toggle{margin-left:auto}
+.kb-sel-mark{flex:none;display:inline-grid;place-items:center;width:18px;height:18px;border:var(--hl) solid var(--border-strong);border-radius:var(--r-xs);color:var(--on-accent)}
+.kb-sel-mark.is-on{background:var(--accent);border-color:var(--accent)}
+.kb-sidebar-item.is-selected{background:color-mix(in srgb,var(--accent) 18%,transparent)}
+@media (pointer:coarse){.kb-sel-toggle{min-height:44px;padding-inline:var(--sp-2)}}
+
+/* ======== 平板版面(设计规范):按可用宽度,不按设备类型 ========
+   <600 单栏(上面的 @media (max-width:599px));600–839 两栏:目录栏 + 文档,目录栏可收起、选中文档后自动收起;
+   840–1279 三栏:目录栏 | 文档 | 右侧栏,右侧栏可收起;≥1024 右侧栏并排,更窄时盖在文档上。 */
+
+/* 右侧栏:<1024 盖在文档上(原来只有单栏版面有,现在 600–1023 都要) */
+@media (max-width:1023px){
+  .kb-workbench-dual .kb-inspector-panel{position:absolute;z-index:6;top:0;right:0;bottom:0;width:min(380px,92%);box-shadow:var(--sh3)}
+}
+/* 平板档并排的右侧栏窄一点:1024 宽时文档还能剩 430 左右 */
+@media (min-width:1024px) and (max-width:1279px){
+  .kb-workbench-dual .kb-inspector-panel{width:clamp(260px,26vw,300px)}
+}
+/* 平板档的目录栏封顶:桌面上拖宽并记住的宽度搬到平板上不能把文档挤没 */
+@media (min-width:840px) and (max-width:1279px){
+  .kb-workbench-dual .kb-sidebar{width:min(var(--sidebar-w,280px),264px)}
+}
+/* 两栏:目录栏占三分之一左右,不可拖宽(触屏没有拖动的手) */
+@media (min-width:600px) and (max-width:839px){
+  .kb-workbench-dual .kb-sidebar{width:clamp(240px,42%,300px)}
+  .kb-workbench-dual .kb-resizer{display:none}
+}
+.kb-dir-btn{gap:6px;flex:none;white-space:nowrap}
+.kb-dir-btn > span{font-weight:500}
+
+/* 触屏:小按钮视觉 36px、点击区 44px(device.css),但两个字以内的短按钮宽度不够 */
+@media (pointer:coarse){
+  .kb-workbench-dual .btn.sm{min-width:44px}
+  /* 药丸、页签:视觉不变,用伪元素把点击区撑到 44px */
+  .kb-workbench-dual .kb-sidebar-pill,.kb-workbench-dual .kb-sidebar-tab-btn{position:relative}
+  .kb-workbench-dual .kb-sidebar-pill::before,.kb-workbench-dual .kb-sidebar-tab-btn::before{content:"";position:absolute;inset:-8px 0}
+  /* 「目录」「选择」只有两个字,宽度不到 44 */
+  .kb-workbench-dual .kb-sidebar-tab-btn{min-width:44px}
+  .kb-workbench-dual .kb-sidebar-search-clear{width:44px;height:44px;right:0;top:0;display:grid;place-items:center;padding:0}
+  .kb-workbench-dual .kb-sidebar-search-input{padding-right:44px}
+}
+/* 右侧栏的属性表:栏窄(260–320)时标签列按内容收,值可换行,不被切在栏外 */
+.kb-inspector-panel .kb-form{grid-template-columns:minmax(4.5em,max-content) minmax(0,1fr);padding:var(--sp-3);align-content:start}
+.kb-inspector-panel .kb-form > span{min-width:0;overflow-wrap:anywhere}
+/* 右侧栏里的评论 / 关系 / 历史列表:左右留白(原来评论头像贴着栏的边缘,「发表评论」按钮顶到屏幕右缘) */
+.kb-inspector-panel .kb-scroll-y{padding-inline:var(--sp-3)}
+
+/* 手机上知识库列表之上的控件区(范围 / 集合 / 搜索排序筛选 / 类型药丸 / 列表目录选择)不超过屏高的 30%(视觉基线规范):
+   各行内容本身是触屏要求的 36~48px,能压的只有行与行之间的内外边距 */
+@media (max-width:600px){
+  .kb-workbench-dual .kb-sidebar-head{height:44px}
+  .kb-workbench-dual .kb-sidebar-search-row{padding-top:4px;padding-bottom:4px}
+  .kb-workbench-dual .kb-sidebar-pills{padding-bottom:4px}
+}
+/* 手机(单栏)再合并两行,控件区从 5 行变 4 行:
+   ① 「新建」搬进范围切换那一行(原来单占一行,右边大片空白);
+   ② 集合选择和类型药丸同一行(原来页头单占一行)。药丸多了在自己的格子里横向滑动,集合名超长时省略。
+   .kb-sidebar-pill-list 在桌面 / 平板上不参与布局(display:contents),药丸仍是 .kb-sidebar-pills 的直接子项,原有样式不变 */
+.kb-sidebar-pill-list{display:contents}
+.kb-sidebar.is-narrow .kb-scope{display:flex;align-items:center;gap:var(--sp-2)}
+.kb-sidebar.is-narrow .kb-scope .kb-seg{flex:1 1 auto;width:auto;min-width:0}
+.kb-sidebar.is-narrow .kb-scope .kb-new-btn{flex:none}
+.kb-sidebar.is-narrow .kb-sidebar-pills{gap:6px;overflow:visible}
+.kb-sidebar.is-narrow .kb-sidebar-pills > .kb-sidebar-title{flex:0 1 auto;min-width:0;max-width:58%}
+.kb-sidebar.is-narrow .kb-sidebar-pills > .kb-select .btn{max-width:100%}
+.kb-sidebar.is-narrow .kb-sidebar-pills > .kb-select .btn > span:not(.kb-select-icon){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kb-sidebar.is-narrow .kb-sidebar-pill-list{display:flex;align-items:center;gap:2px;flex:1 1 0;min-width:0;overflow-x:auto;scrollbar-width:none}
+.kb-sidebar.is-narrow .kb-sidebar-pill-list::-webkit-scrollbar{display:none}
+.kb-sidebar.is-narrow .kb-sidebar-pill-list > *{flex:none}
+
+/* 最窄的屏(≤340):排序和筛选两个下拉占掉 189px,搜索框的输入区只剩 27px,放不下任何占位符。
+   宁可不显示也不显示半截字(设计规范);左边的放大镜图标已经说明这是搜索框 */
+@media (max-width:340px){
+  .kb-sidebar-search-input::placeholder{color:transparent}
+}

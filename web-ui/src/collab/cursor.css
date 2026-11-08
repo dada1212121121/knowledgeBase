@@ -1,0 +1,88 @@
+/* 协作光标(别人的光标与选区)。DOM 由 cursor.ts 的 buildCursor 生成,颜色与字色走 --cursor-color / --cursor-ink。
+   名牌平时显示,3 秒后收起只留光标线;鼠标移到光标线上、或这个人又动了光标(y-prosemirror 会重建这个元素)时重新出现。
+   收起靠动画延迟而不是定时器:不用管理计时器,也不会因为组件卸载漏清。 */
+.kb-cursor {
+  position: relative;
+  margin-left: -1px;
+  margin-right: -1px;
+  border-left: 2px solid var(--cursor-color, var(--accent));
+  word-break: normal;
+  pointer-events: none;
+}
+.kb-cursor-label {
+  position: absolute;
+  bottom: 100%;
+  left: -2px;
+  z-index: 3;
+  max-width: 10em;
+  padding: 1px 6px;
+  border-radius: var(--r1) var(--r1) var(--r1) 0;
+  background: var(--cursor-color, var(--accent));
+  color: var(--cursor-ink, var(--on-accent));
+  font-family: var(--sans, system-ui, sans-serif);
+  font-weight: var(--fw-medium);
+  font-size: var(--text-11);
+  line-height: 1.45;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+  /* 出现 3 秒后收起 */
+  animation: kb-cursor-hide 0.2s ease 3s forwards;
+}
+/* 鼠标移到光标线附近时展开:光标元素本身不接收指针事件,所以用一圈透明的热区(伪元素)接 */
+.kb-cursor::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -2px;
+  left: -8px;
+  width: 16px;
+  pointer-events: auto;
+}
+.kb-cursor:hover .kb-cursor-label {
+  animation: none;
+  opacity: 1;
+  visibility: visible;
+}
+@keyframes kb-cursor-hide {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kb-cursor-label {
+    animation-duration: 0.01s;
+  }
+}
+/* 选区:同色半透明底(库默认用 70 的十六进制透明度,换成变量后用 color-mix) */
+.kb-cursor-selection {
+  background-color: color-mix(in srgb, var(--cursor-color, var(--accent)) 28%, transparent);
+}
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+  .kb-cursor-selection {
+    background-color: var(--accent-soft);
+  }
+}
+/* 手机:名牌再小一点,免得盖住上一行的字 */
+@media (max-width: 599px) {
+  .kb-cursor-label {
+    font-size: calc(10px * var(--fs));
+    line-height: 1.4;
+    padding: 0 5px;
+  }
+}
+/* 光标靠近一行最右端:名牌翻到光标左边,右对齐(cursor.ts 的 fitCursorLabel 量过之后加 is-flip) */
+.kb-cursor.is-flip .kb-cursor-label {
+  left: auto;
+  right: -2px;
+  border-radius: var(--r1) var(--r1) 0 var(--r1);
+}
+/* 点头像跳转后,所有名牌重新亮几秒(DocEditor 在文档根上加 is-revealing):盖掉 3 秒后收起的动画 */
+.is-revealing .kb-cursor-label {
+  animation: none;
+  opacity: 1;
+  visibility: visible;
+}

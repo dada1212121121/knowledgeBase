@@ -1,0 +1,30 @@
+---
+source: crates/kb-index/tests/chunk_snapshots.rs
+assertion_line: 100
+expression: views
+---
+- key: "#1"
+  start_line: 1
+  end_line: 2
+  symbol: ~
+  header: demo › fixtures/swift.swift
+- key: protocol Resettable
+  start_line: 4
+  end_line: 6
+  symbol: protocol Resettable
+  header: demo › fixtures/swift.swift › protocol Resettable
+- key: class Counter
+  start_line: 8
+  end_line: 19
+  symbol: class Counter
+  header: "demo › fixtures/swift.swift › struct Counter: Resettable"
+- key: class Direction
+  start_line: 21
+  end_line: 24
+  symbol: class Direction
+  header: demo › fixtures/swift.swift › enum Direction
+- key: "class Counter #2"
+  start_line: 26
+  end_line: 30
+  symbol: class Counter
+  header: demo › fixtures/swift.swift › extension Counter

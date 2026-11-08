@@ -1,0 +1,59 @@
+name: Bug 报告
+description: 报告可复现的问题
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        安全漏洞请勿在此提交,请按仓库根目录的 SECURITY.md 私下报告。
+  - type: textarea
+    id: what
+    attributes:
+      label: 现象
+      description: 发生了什么?期望是什么?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 启动 kb daemon
+        2. 访问 ...
+        3. 看到 ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本 / 提交
+      description: 输出 `kb --version` 或 commit hash
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: 运行环境
+      options:
+        - Linux (x86_64)
+        - Linux (aarch64)
+        - macOS
+        - Windows / WSL
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志 / 截图
+      description: 请先删掉密钥、域名、个人路径等敏感信息。
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 确认
+      options:
+        - label: 已搜索现有 issue,没有重复
+          required: true
+        - label: 已删除日志中的密钥 / 个人信息
+          required: true

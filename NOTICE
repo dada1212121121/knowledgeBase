@@ -1,0 +1,33 @@
+knowledgeBase 原创代码以 PolyForm Noncommercial 1.0.0 发布(全文见 LICENSE),禁止商业使用。
+本项目使用了下列第三方软件的源码与字体,按其许可证要求在此署名:
+
+一、BetterOffice（https://github.com/openooxml/betteroffice）
+Copyright 2026 Elia Hilse, The OpenOOXML Project
+许可证：Apache License 2.0
+@betteroffice/{docx,xlsx,pptx,fonts} 以 npm 依赖方式使用（web-ui/package.json、office-worker/package.json），不在此目录内。
+下面这些文件收编或改写自它的上游源码（当前版本起上游的 React 包 docx-react / xlsx-react / pptx-react 及其 i18n 包已不再依赖，
+只保留这里列出的、不依赖 React 的部分；每个文件头部注明了来源文件）：
+- web-ui/src/editor/engines/docx/vendor/（来自 packages/docx-react 0.5.1 的 Worker 编辑会话、回显画笔、输入准入、
+  视图状态、剪贴板等模块，只改了 import 路径）；
+- web-ui/src/editor/engines/docx.ts、docx/session.ts、docx/collab.ts、docx/fonts.ts（改写自 peerless 编辑器的
+  openResident、usePeerlessEditSession、peerlessCollaboration、workerFonts 等）；
+- web-ui/src/editor/surfaces/page/（commands/intents.ts、edit/presenceGeometry.ts、edit/pageWindow.ts、edit/RemotePresence.vue、
+  input/attachDocxInput.ts、input/pointer.ts、input/viewport.ts：改写自 peerless 的 shellController、remotePresenceGeometry、
+  CanvasPagesView、PeerlessRemotePresence、PeerlessInput、PeerlessPagedEditor）；
+- web-ui/src/editor/engines/pptxText.ts、web-ui/src/editor/surfaces/slide/resize.ts（命中分类与缩放边界规则参考 pptx-react 的
+  interactions.ts、resizedBounds）；
+- web-ui/src/editor/collab/officeRoomTransport.ts（改自 shared/editor-host/collaboration/createRoomTransport.ts）。
+
+二、随前端产物（web-ui/dist）分发的字体
+- 界面字体：Inter、Noto Sans SC（经 @fontsource-variable/inter、@fontsource-variable/noto-sans-sc 分发），SIL Open Font License 1.1。
+- Word 在线编辑的拉丁字体：Carlito（Copyright 2010-2012 tyPoland Lukasz Dziedzic，保留字体名 "Carlito"）、
+  Liberation Sans / Liberation Serif（Copyright 2012 Red Hat, Inc.，保留字体名 "Liberation"），均为 SIL OFL 1.1，
+  原样取自 @betteroffice/fonts 0.4.2 的 assets 目录，未修改。
+- 中文字体：Noto Sans SC Regular 2.004（Copyright Adobe）的 GB2312 裁剪版（6763 个汉字 + 标点 / 全角 / ASCII），
+  SIL OFL 1.1；裁剪属于修改版本，字体里的版权与许可说明（name 表 0 / 13 / 14）原样保留。Word 和 PowerPoint 共用。
+- PowerPoint 幻灯片字形与度量字体（web-ui/src/editor/engines/fonts/gen/）：由上面的 Carlito 与 Noto Sans SC 裁剪而来；
+  Carlito 派生的部分按 OFL 保留字体名条款改名为 "KbOffice Latin"，版权与许可说明保留。
+- 公式字体：KaTeX（MIT；字体取自 KaTeX 发行包）。
+- PDF 预览的标准字体：pdf.js 自带的 Liberation Sans（SIL OFL 1.1）与 Foxit 字体（许可见 public/pdfjs/standard_fonts/LICENSE_FOXIT）。
+SIL OFL 1.1 全文：web-ui/src/editor/engines/fonts/OFL-Carlito.txt、OFL-Liberation.txt、OFL-NotoSansSC.txt；
+构建产物里同一批文本在 /licenses/ 下，随 dist 一起分发。

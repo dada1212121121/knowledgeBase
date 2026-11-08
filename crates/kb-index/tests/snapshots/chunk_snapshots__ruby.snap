@@ -1,0 +1,15 @@
+---
+source: crates/kb-index/tests/chunk_snapshots.rs
+assertion_line: 98
+expression: views
+---
+- key: "#1"
+  start_line: 1
+  end_line: 2
+  symbol: ~
+  header: demo › fixtures/ruby.rb
+- key: module Queue
+  start_line: 4
+  end_line: 33
+  symbol: module Queue
+  header: demo › fixtures/ruby.rb › module Queue

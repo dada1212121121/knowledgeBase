@@ -1,0 +1,14 @@
+---
+source: crates/kb-index/tests/chunk_snapshots.rs
+expression: views
+---
+- key: namespace demo
+  start_line: 1
+  end_line: 94
+  symbol: namespace demo
+  header: demo › fixtures/cpp.cpp › namespace demo
+- key: int main()
+  start_line: 96
+  end_line: 106
+  symbol: int main()
+  header: demo › fixtures/cpp.cpp › int main()

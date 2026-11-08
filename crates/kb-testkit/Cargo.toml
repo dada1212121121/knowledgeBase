@@ -1,0 +1,18 @@
+[package]
+name = "kb-testkit"
+description = "测试辅助(只作为 dev-dependency 使用):临时 KB_HOME、注入好的适配器、fixture 语料"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+flate2 = { workspace = true }
+kb-core = { path = "../kb-core" }
+kb-embed = { path = "../kb-embed", features = ["testkit"] }
+kb-index = { path = "../kb-index" }
+kb-meta = { path = "../kb-meta" }
+kb-store-lance = { path = "../kb-store-lance" }
+tempfile = { workspace = true }
+tokio = { workspace = true }

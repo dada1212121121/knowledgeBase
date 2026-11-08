@@ -1,0 +1,7 @@
+# 默认按文本存储并统一用 LF;需要逐字节保留的夹具在下面单独标为 binary
+* text=auto eol=lf
+
+# CSV 夹具必须逐字节保留 BOM / CRLF / 末尾空白；按二进制存，禁止 Git 换行归一化
+web-ui/src/editor/codecs/fixtures/csv/** binary
+# 邮件夹具保留原始 CRLF
+web-ui/e2e/fixtures/sample.eml binary

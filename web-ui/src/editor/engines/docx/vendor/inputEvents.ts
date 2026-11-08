@@ -1,0 +1,184 @@
+/**
+ * 来源：BetterOffice（Apache-2.0）@betteroffice/docx-react 0.5.1 源码 `packages/docx-react/src/components/DocxEditor/peerless/inputEvents.ts`，
+ * 为在 Vue 里复用上游「Worker 编辑会话 + 画布帧 + 回显 + 输入准入」这一层而原样收编（只改了 import 路径）。
+ * 为什么收编而不是重写：这一层是输入法组合、回显画笔与引擎命令围栏相互配合的状态机，行为正确性来自上游的长期验证；
+ * 上游把它放在 React 组件包里、没有作为框架无关包导出，所以只能放进 engines/（唯一允许 import @betteroffice/* 的目录）。
+ * 许可与署名见仓库 NOTICE。升级 @betteroffice/docx* 时对照上游同名文件。
+ */
+import type { DocxCommandPayloads } from '@betteroffice/docx/yrs';
+import type { PeerlessSelectionIntent } from './selection';
+
+/** @internal Relative mutation payloads omit main-side selection positions. */
+export type PeerlessTextIntent = {
+  [K in 'insertText' | 'replaceSelection' | 'deleteBackward' | 'deleteForward' | 'paragraphBreak' | 'lineBreak']:
+    { kind: K; payload: DocxCommandPayloads[K] };
+}['insertText' | 'replaceSelection' | 'deleteBackward' | 'deleteForward' | 'paragraphBreak' | 'lineBreak'];
+
+/** @internal */
+export type PeerlessPartIntent = { [K in 'openPart' | 'ensurePart' | 'removePart']: { kind: K; payload: DocxCommandPayloads[K] } }['openPart' | 'ensurePart' | 'removePart'];
+
+type PeerlessRulerKind = 'setSectionMargins' | 'setParagraphAttrs' | 'setTabStops' | 'removeTabStop';
+type PeerlessRulerIntent = { [K in PeerlessRulerKind]: { kind: K; payload: DocxCommandPayloads[K] } }[PeerlessRulerKind];
+
+type PeerlessPropertyKind = 'setHyperlink' | 'setObjectProperties' | 'setSectionProperties' | 'setNoteProperties' | 'setWatermark' | 'resizeObject' | 'moveObject' | 'moveEmbed';
+export type PeerlessPropertyIntent = { [K in PeerlessPropertyKind]: { kind: K; payload: DocxCommandPayloads[K] } }[PeerlessPropertyKind];
+
+type PeerlessControlKind = 'setContentControlValue' | 'addRepeatingItem' | 'removeRepeatingItem';
+export type PeerlessControlIntent = { [K in PeerlessControlKind]: { kind: K; payload: DocxCommandPayloads[K] } }[PeerlessControlKind];
+
+type PeerlessTableKind = 'insertTableRow' | 'insertTableColumn' | 'deleteTableRow' | 'deleteTableColumn' | 'deleteTable' | 'mergeTableCells' | 'splitTableCell' | 'setTableCellShading' | 'setTableBorders' | 'setTableProperties';
+export type PeerlessTableIntent = { [K in PeerlessTableKind]: { kind: K; payload: K extends 'setTableProperties' ? DocxCommandPayloads[K] : Omit<DocxCommandPayloads[K], 'selection'> } }[PeerlessTableKind];
+
+export type PeerlessInputIntent = PeerlessProposalIntent | PeerlessRevisionIntent | { [K in 'applyEdits' | 'addComment' | 'updateComment' | 'removeComment']: { kind: K; payload: DocxCommandPayloads[K] } }['applyEdits' | 'addComment' | 'updateComment' | 'removeComment'] | PeerlessControlIntent | PeerlessRulerIntent | PeerlessPropertyIntent | PeerlessPartIntent | PeerlessSelectionIntent | PeerlessTextIntent | PeerlessTableIntent | { kind: 'undo' | 'redo'; payload: Record<string, never> } | { kind: 'replaceMatches'; payload: DocxCommandPayloads['replaceMatches'] } | { [K in 'setRenderEnvironment' | 'setFontEnvironment']: { kind: K; payload: DocxCommandPayloads[K] } }['setRenderEnvironment' | 'setFontEnvironment'] | { [K in 'insertImage' | 'insertTable' | 'insertPageBreak' | 'insertSectionBreak' | 'pasteFragment']: { kind: K; payload: Omit<DocxCommandPayloads[K], 'selection'> } }['insertImage' | 'insertTable' | 'insertPageBreak' | 'insertSectionBreak' | 'pasteFragment'];
+
+type PeerlessProposalKind = 'propose' | 'setProposalStates' | 'withdrawProposals';
+export type PeerlessProposalIntent = { [K in PeerlessProposalKind]: { kind: K; payload: DocxCommandPayloads[K] } }[PeerlessProposalKind];
+/** Without a revisionId the decision targets the change at the selection its predecessor leaves. */
+export type PeerlessRevisionIntent = { [K in 'acceptRevision' | 'rejectRevision']: { kind: K; payload: Partial<Omit<DocxCommandPayloads[K], 'expectVersion'>> } }['acceptRevision' | 'rejectRevision'];
+
+const implicitVerticalGoals = new WeakSet<PeerlessInputIntent>();
+
+export function hasImplicitVerticalGoal(intent: PeerlessInputIntent): boolean {
+  return implicitVerticalGoals.has(intent);
+}
+
+/** @internal Native-event ownership and trailing-composition deduplication state. */
+export interface PeerlessInputEventState {
+  composing: boolean;
+  compositionId: number | null;
+  lastHandledEventId: number | null;
+  trailingCompositionText: string | null;
+}
+
+/** @internal The caller gives overlapping browser events the same eventId. */
+export type PeerlessInputEvent = { eventId: number; inputTime: number } & (
+  | { source: 'beforeinput'; inputType: string; data: string | null; isComposing: boolean }
+  | { source: 'keydown'; key: string; code: string; shift: boolean; alt: boolean; ctrl: boolean; meta: boolean; goalX?: number; pageDistance?: number }
+  | { source: 'input'; inputType: string; value: string; isComposing: boolean }
+  | { source: 'paste'; text: string }
+);
+
+/** @internal */
+export interface PeerlessNormalizedInput {
+  state: PeerlessInputEventState;
+  intents: readonly PeerlessInputIntent[];
+  preventDefault: boolean;
+  fence: boolean;
+}
+
+/** @internal */
+export const selectsAll = (event: PeerlessInputEvent): boolean =>
+  event.source === 'keydown' && (event.ctrl || event.meta) && event.key.toLowerCase() === 'a';
+
+/** @internal */
+export function normalizeInputEvent(
+  _event: PeerlessInputEvent,
+  _state: PeerlessInputEventState
+): PeerlessNormalizedInput {
+  const event = _event;
+  const state = _state;
+  const result = (intents: PeerlessInputIntent[], fence = false): PeerlessNormalizedInput => ({
+    state: intents.length ? { ...state, lastHandledEventId: event.eventId, trailingCompositionText: null } : state,
+    intents, preventDefault: intents.length > 0, fence,
+  });
+  if (state.composing || ('isComposing' in event && event.isComposing)) return result([]);
+  if (state.lastHandledEventId === event.eventId) {
+    return { state, intents: [], preventDefault: true, fence: false };
+  }
+  if (state.trailingCompositionText !== null &&
+    ((event.source === 'beforeinput' && event.data === state.trailingCompositionText &&
+      /^(insertText|insertFromComposition|insertCompositionText)$/.test(event.inputType)) ||
+    (event.source === 'input' && event.value === state.trailingCompositionText))) {
+    return { state: { ...state, lastHandledEventId: event.eventId, trailingCompositionText: null },
+      intents: [], preventDefault: true, fence: true };
+  }
+  if (event.source === 'paste') {
+    return result(pasteIntents(event.text), true);
+  }
+  if (event.source === 'keydown') {
+    const { key, shift: extend, alt, ctrl, meta } = event;
+    if ((ctrl || meta) && !alt && (key.toLowerCase() === 'z' || key.toLowerCase() === 'y')) return result([{ kind: key.toLowerCase() === 'y' || extend ? 'redo' : 'undo', payload: {} }], true);
+    if (selectsAll(event)) return result([
+      { kind: 'navigate', payload: { unit: 'document-boundary', direction: 'backward', extend: false } },
+      { kind: 'navigate', payload: { unit: 'document-boundary', direction: 'forward', extend: true } },
+    ], true);
+    if (key === 'ArrowLeft' || key === 'ArrowRight') return result([{ kind: 'navigate', payload: {
+      unit: meta ? 'line' : ctrl || alt ? 'word' : 'character',
+      direction: key === 'ArrowLeft' ? 'backward' : 'forward', extend,
+    } }], true);
+    if (key === 'ArrowUp' || key === 'ArrowDown') {
+      const intent: PeerlessInputIntent = { kind: 'navigate', payload:
+        meta || ctrl || alt ? {
+          unit: meta ? 'document-boundary' : 'paragraph',
+          direction: key === 'ArrowUp' ? 'backward' : 'forward', extend,
+        } : { unit: 'line', direction: key === 'ArrowUp' ? 'up' : 'down', extend, goalX: event.goalX ?? 0 },
+      };
+      if (!meta && !ctrl && !alt && event.goalX === undefined) implicitVerticalGoals.add(intent);
+      return result([intent], true);
+    }
+    if ((key === 'PageUp' || key === 'PageDown') && !meta && !ctrl && !alt &&
+      event.pageDistance !== undefined && Number.isFinite(event.pageDistance) && event.pageDistance > 0) {
+      const intent: PeerlessInputIntent = { kind: 'navigate', payload: {
+        unit: 'page', direction: key === 'PageUp' ? 'up' : 'down', extend,
+        goalX: event.goalX ?? 0, distance: event.pageDistance,
+      } };
+      if (event.goalX === undefined) implicitVerticalGoals.add(intent);
+      return result([intent], true);
+    }
+    if (key === 'Home' || key === 'End') return result([{ kind: 'navigate', payload: {
+      unit: ctrl || meta ? 'document-boundary' : 'line',
+      direction: key === 'Home' ? 'backward' : 'forward', extend,
+    } }], true);
+    if (key === 'Backspace' || key === 'Delete') {
+      const backward = key === 'Backspace';
+      const deletion: PeerlessTextIntent = { kind: backward ? 'deleteBackward' : 'deleteForward', payload: {} };
+      return result(ctrl || alt || meta ? [{ kind: 'navigate', payload: {
+        unit: meta ? 'line' : 'word', direction: backward ? 'backward' : 'forward', extend: true,
+      } }, deletion] : [deletion], ctrl || alt || meta);
+    }
+    if (key === 'Enter' && !ctrl && !meta && !alt) return result([{ kind: extend ? 'lineBreak' : 'paragraphBreak', payload: {} }], true);
+    return result([]);
+  }
+  const text = event.source === 'beforeinput' ? event.data : event.value;
+  switch (event.inputType) {
+    case 'historyUndo': return result([{ kind: 'undo', payload: {} }], true);
+    case 'historyRedo': return result([{ kind: 'redo', payload: {} }], true);
+    case 'insertText': case 'insertFromComposition':
+      return text ? result([{ kind: 'insertText', payload: { text } }]) : result([]);
+    case 'insertFromPaste': case 'insertFromDrop':
+      return result(pasteIntents(text ?? ''), true);
+    case 'insertReplacementText':
+      return text ? result([{ kind: 'replaceSelection', payload: { text } }], true) : result([]);
+    case 'insertLineBreak':
+      return result([{ kind: 'lineBreak', payload: {} }], true);
+    case 'insertParagraph':
+      return result([{ kind: 'paragraphBreak', payload: {} }], true);
+    case 'deleteContentBackward':
+      return result([{ kind: 'deleteBackward', payload: {} }]);
+    case 'deleteContentForward': case 'deleteByCut':
+      return result([{ kind: 'deleteForward', payload: {} }], event.inputType === 'deleteByCut');
+    case 'deleteWordBackward': case 'deleteWordForward':
+    case 'deleteSoftLineBackward': case 'deleteSoftLineForward': {
+      const backward = event.inputType.endsWith('Backward');
+      return result([
+        { kind: 'navigate', payload: { unit: event.inputType.startsWith('deleteWord') ? 'word' : 'line',
+          direction: backward ? 'backward' : 'forward', extend: true } },
+        { kind: backward ? 'deleteBackward' : 'deleteForward', payload: {} },
+      ], true);
+    }
+    default:
+      return event.source === 'input' && text && !event.inputType
+        ? result([{ kind: 'insertText', payload: { text } }]) : result([]);
+  }
+}
+
+function pasteIntents(text: string): PeerlessInputIntent[] {
+  if (!text) return [];
+  const lines = text.split(/\r\n|[\r\n\u000B\u2028\u2029]/u);
+  const intents: PeerlessInputIntent[] = [{ kind: 'replaceSelection', payload: { text: lines[0]! } }];
+  for (const line of lines.slice(1)) {
+    intents.push({ kind: 'paragraphBreak', payload: {} });
+    if (line) intents.push({ kind: 'insertText', payload: { text: line } });
+  }
+  return intents;
+}

@@ -1,0 +1,158 @@
+// CodeMirror 主题:颜色、字号、圆角全部取自 kb-ui 的 CSS 变量,所以深浅色、强调色、字号档位切换时
+// 不需要重建编辑器(变量在运行时解析)。语法色见 tokens/semantic.css 的 --code-*。
+import { HighlightStyle } from '@codemirror/language'
+import { EditorView } from '@codemirror/view'
+import { tags as t } from '@lezer/highlight'
+
+export const kbHighlight = HighlightStyle.define([
+  { tag: [t.keyword, t.modifier, t.operatorKeyword, t.controlKeyword], color: 'var(--code-kw)' },
+  { tag: [t.string, t.special(t.string), t.regexp], color: 'var(--code-str)' },
+  { tag: [t.number, t.bool, t.null, t.atom], color: 'var(--code-num)' },
+  { tag: [t.function(t.variableName), t.function(t.propertyName), t.labelName], color: 'var(--code-fn)' },
+  { tag: [t.typeName, t.className, t.namespace, t.definition(t.typeName)], color: 'var(--code-type)' },
+  { tag: [t.tagName, t.angleBracket], color: 'var(--code-tag)' },
+  { tag: [t.attributeName, t.propertyName], color: 'var(--code-fn)' },
+  { tag: [t.operator, t.punctuation, t.separator, t.bracket], color: 'var(--code-op)' },
+  { tag: [t.comment, t.lineComment, t.blockComment, t.docComment], color: 'var(--code-com)', fontStyle: 'italic' },
+  { tag: t.meta, color: 'var(--code-com)' },
+  { tag: t.invalid, color: 'var(--status-danger-text)' },
+  // Markdown
+  { tag: [t.heading, t.heading1, t.heading2, t.heading3, t.heading4, t.heading5, t.heading6], color: 'var(--code-kw)', fontWeight: '600' },
+  { tag: t.strong, fontWeight: '700', color: 'var(--code-num)' },
+  { tag: t.emphasis, fontStyle: 'italic' },
+  { tag: t.strikethrough, textDecoration: 'line-through' },
+  { tag: [t.link, t.url], color: 'var(--accent-text)' },
+  { tag: t.monospace, color: 'var(--code-str)' },
+  { tag: t.quote, color: 'var(--text-tertiary)' },
+  { tag: t.processingInstruction, color: 'var(--text-tertiary)' },
+  { tag: t.contentSeparator, color: 'var(--text-tertiary)' },
+])
+
+/** 查找面板、浮层的中文文案(CodeMirror 默认是英文)。 */
+export const zhPhrases: Record<string, string> = {
+  Find: '查找',
+  Replace: '替换',
+  next: '下一个',
+  previous: '上一个',
+  all: '全部匹配',
+  'match case': '区分大小写',
+  regexp: '正则',
+  'by word': '整词',
+  replace: '替换',
+  'replace all': '全部替换',
+  close: '关闭',
+  'Go to line': '跳到行',
+  go: '跳转',
+  'current match': '当前匹配',
+  'on line': '在第',
+  Folded: '已折叠',
+  'Fold line': '折叠此行',
+  'Unfold line': '展开此行',
+  'Control character': '控制字符',
+  'Selection deleted': '已删除所选内容',
+}
+
+export const kbTheme = EditorView.theme({
+  '&': {
+    height: '100%',
+    color: 'var(--text-primary)',
+    backgroundColor: 'transparent',
+    fontSize: 'calc(12.5px * var(--fs))',
+  },
+  '&.cm-focused': { outline: 'none' },
+  '.cm-scroller': {
+    fontFamily: 'var(--font-mono)',
+    lineHeight: '1.7',
+    overflow: 'auto',
+  },
+  '.cm-content': { caretColor: 'var(--text-primary)', padding: '10px 0' },
+  '.cm-line': { padding: '0 12px 0 8px' },
+  '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--text-primary)', borderLeftWidth: '2px' },
+  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
+    backgroundColor: 'color-mix(in srgb, var(--accent) 32%, transparent)',
+  },
+  '.cm-activeLine': { backgroundColor: 'rgba(var(--ink), .035)' },
+  '.cm-gutters': {
+    backgroundColor: 'transparent',
+    color: 'var(--text-quaternary)',
+    border: 'none',
+    borderRight: 'var(--hl) solid var(--border-subtle)',
+  },
+  // 行号是文字，不能用只保证 3:1 的弱化档（--m2）；否则 axe 在深浅两套主题都报 color-contrast
+  '.cm-lineNumbers .cm-gutterElement': { padding: '0 8px 0 12px', minWidth: '3ch', fontVariantNumeric: 'tabular-nums', color: 'var(--text-tertiary)' },
+  '.cm-activeLineGutter': { backgroundColor: 'rgba(var(--ink), .035)', color: 'var(--text-secondary)' },
+  '.cm-foldGutter .cm-gutterElement': { cursor: 'pointer', padding: '0 4px', color: 'var(--text-quaternary)' },
+  '.cm-foldPlaceholder': {
+    backgroundColor: 'var(--surface-hover)',
+    border: 'var(--hl) solid var(--border-default)',
+    color: 'var(--text-tertiary)',
+    borderRadius: 'var(--r-xs)',
+    padding: '0 6px',
+  },
+  '.cm-matchingBracket': { backgroundColor: 'color-mix(in srgb, var(--accent) 22%, transparent)', outline: 'none' },
+  '.cm-selectionMatch': { backgroundColor: 'color-mix(in srgb, var(--accent) 18%, transparent)' },
+  '.cm-searchMatch': {
+    backgroundColor: 'color-mix(in srgb, var(--status-warning) 28%, transparent)',
+    outline: 'var(--hl) solid color-mix(in srgb, var(--status-warning) 55%, transparent)',
+  },
+  '.cm-searchMatch.cm-searchMatch-selected': {
+    backgroundColor: 'color-mix(in srgb, var(--accent) 38%, transparent)',
+  },
+  '.kb-ce-hit': { backgroundColor: 'color-mix(in srgb, var(--accent) 16%, transparent)', boxShadow: 'inset 2px 0 0 var(--accent)' },
+  '.cm-placeholder': { color: 'var(--text-quaternary)' },
+  // 查找面板:跟全站输入框 / 按钮一个样
+  '.cm-panels': { backgroundColor: 'var(--surface-2)', color: 'var(--text-primary)', borderColor: 'var(--border-default)' },
+  '.cm-panels.cm-panels-top': { borderBottom: 'var(--hl) solid var(--border-default)' },
+  '.cm-panels.cm-panels-bottom': { borderTop: 'var(--hl) solid var(--border-default)' },
+  '.cm-panel.cm-search': {
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '8px 36px 8px 10px',
+    fontSize: 'calc(12px * var(--fs))',
+  },
+  '.cm-panel.cm-search br': { display: 'none' },
+  '.cm-panel.cm-search input.cm-textfield': {
+    minWidth: '0',
+    flex: '1 1 140px',
+    height: 'var(--ctl-h)',
+    padding: '0 8px',
+    color: 'var(--text-primary)',
+    backgroundColor: 'var(--input-bg)',
+    border: 'var(--hl) solid var(--border-default)',
+    borderRadius: 'var(--r1)',
+    fontFamily: 'var(--font-mono)',
+  },
+  '.cm-panel.cm-search input.cm-textfield:focus': { outline: 'none', borderColor: 'var(--accent)' },
+  '.cm-panel.cm-search button.cm-button': {
+    height: 'var(--ctl-h)',
+    padding: '0 10px',
+    color: 'var(--text-secondary)',
+    backgroundImage: 'none',
+    backgroundColor: 'var(--btn-bg)',
+    border: 'var(--hl) solid var(--btn-border)',
+    borderRadius: 'var(--btn-radius)',
+    cursor: 'pointer',
+  },
+  '.cm-panel.cm-search button.cm-button:hover': { color: 'var(--text-primary)', borderColor: 'var(--border-strong)' },
+  '.cm-panel.cm-search label': { display: 'inline-flex', alignItems: 'center', gap: '4px', color: 'var(--text-tertiary)', whiteSpace: 'nowrap' },
+  '.cm-panel.cm-search [name=close]': {
+    position: 'absolute',
+    top: '6px',
+    right: '6px',
+    width: 'var(--ctl-h)',
+    height: 'var(--ctl-h)',
+    color: 'var(--text-tertiary)',
+    background: 'transparent',
+    border: '0',
+    fontSize: 'calc(16px * var(--fs))',
+    cursor: 'pointer',
+  },
+  '.cm-tooltip': {
+    backgroundColor: 'var(--surface-3)',
+    color: 'var(--text-primary)',
+    border: 'var(--hl) solid var(--border-default)',
+    borderRadius: 'var(--r1)',
+  },
+})

@@ -1,0 +1,51 @@
+# cargo-deny 配置:依赖许可、已知漏洞、来源与重复版本。
+#
+# 运行:
+#   cargo deny check
+# CI 在 Rust job 里跑同一份配置。许可证白名单只覆盖当前依赖树实际出现的许可证;
+# 新增依赖若带来源不明或不兼容的许可证,CI 会失败,需要先评估再改这里。
+[graph]
+targets = [
+  { triple = "x86_64-unknown-linux-gnu" },
+]
+
+[advisories]
+version = 2
+yanked = "warn"
+# 只对工作区自身检查未维护标记;第三方传递依赖的 unmaintained 告警
+# 交给 Dependabot 与定期审计跟踪,避免把无法直接升级的传递依赖变成合并阻塞。
+unmaintained = "workspace"
+
+[licenses]
+version = 2
+confidence-threshold = 0.8
+allow = [
+  "0BSD",
+  "Apache-2.0",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "BSL-1.0",
+  "CC0-1.0",
+  "CDLA-Permissive-2.0",
+  "ISC",
+  "MIT",
+  "MIT-0",
+  "MPL-2.0",
+  "PolyForm-Noncommercial-1.0.0",
+  "Unicode-3.0",
+  "Unlicense",
+  "Zlib",
+]
+
+[bans]
+# 同一个库的多个版本很常见,先告警;真正需要禁止的重复由 deny 列表单独加。
+multiple-versions = "warn"
+wildcards = "deny"
+# 工作区内部一律用 path 依赖且不写版本号,这是 Cargo 的标准写法;
+# 允许这类通配路径,但仍拒绝来自 registry 的无版本依赖。
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

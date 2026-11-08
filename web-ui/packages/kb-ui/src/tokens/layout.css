@@ -1,0 +1,15 @@
+/* appearance axes: data-layout = sidebar | rail | topnav ; data-width = fluid | centered */
+.tnav{display:none}
+:root[data-layout=rail] .side{width:60px;padding:12px 8px;align-items:center}
+:root[data-layout=rail] .side .ws{font-size:0;padding:4px 0 12px;justify-content:center}
+:root[data-layout=rail] .side .ws .m,:root[data-layout=rail] .side .srch,:root[data-layout=rail] .side .sec,:root[data-layout=rail] .side .ni.sub,:root[data-layout=rail] .side .ni .cnt,:root[data-layout=rail] .side .ni .m{display:none}
+:root[data-layout=rail] .side .ni{font-size:0;width:44px;height:36px;justify-content:center;padding:0;gap:0}
+:root[data-layout=topnav] .side{display:none}
+:root[data-layout=topnav] .tnav{display:flex;align-items:center;gap:4px;height:48px;flex:none;padding:0 16px;border-bottom:var(--hl) solid var(--b);background:var(--bg-sidebar)}
+.tnav .ws{padding:0 12px 0 0;margin-right:8px;border-right:var(--hl) solid var(--b);height:24px}
+.tnav .ni{height:30px;padding:0 10px}
+.tnav .srch{margin:0 0 0 auto;width:220px}
+@media (max-width:639px){:root[data-layout=topnav] .tnav{display:none}}
+@media (max-width:1023px) and (min-width:640px){:root[data-layout=topnav] .tnav .ni span.lbl2{display:none}}
+:root[data-width=centered] .content{max-width:1180px;margin:0 auto;width:100%}
+:root[data-layout=topnav] .tnav .r{display:flex;gap:8px;margin-left:8px}

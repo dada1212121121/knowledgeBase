@@ -1,0 +1,50 @@
+/* 页面层的动效(卡 M:页面太素,加上层次感)。
+   原则:全部走 motion 令牌(--dur-* / --ease-* / --stagger / --dist-page / --lift),所以「外观 → 动效」的
+   克制 / 默认 / 活泼三档会一起变,选「减少」或系统开了减弱动态效果时令牌是 0,这里全部直接到位。
+   只动 opacity / transform;fill-mode 用 backwards(只管开头的延迟期),结束后元素上不留动画,
+   免得 transform 动画留着给里面的 fixed / sticky 元素造出新的包含块。 */
+
+@keyframes kb-card-in { from { opacity: 0; transform: translateY(calc(var(--dist-page) * 1.25)) scale(.985); } }
+
+/* 内容区里最外层的卡片:同一排 / 同一列里按顺序依次升起(最多错开 7 个,再多就一起出来,免得页面等太久)。
+   卡里嵌的卡不再动;弹窗、抽屉在 #kb-main 之外,不受影响。晚到的卡(数据读回来才出现)挂载时自己播一次。 */
+#kb-main .card:not(.card .card) { animation: kb-card-in var(--dur-page) var(--ease-out) backwards; animation-delay: calc(var(--kb-n, 0) * var(--stagger) * 2.5); }
+#kb-main .card:not(.card .card):nth-child(2) { --kb-n: 1; }
+#kb-main .card:not(.card .card):nth-child(3) { --kb-n: 2; }
+#kb-main .card:not(.card .card):nth-child(4) { --kb-n: 3; }
+#kb-main .card:not(.card .card):nth-child(5) { --kb-n: 4; }
+#kb-main .card:not(.card .card):nth-child(6) { --kb-n: 5; }
+#kb-main .card:not(.card .card):nth-child(n+7) { --kb-n: 6; }
+#kb-main .card:not(.card .card):nth-child(6) { --kb-n: 5; }
+
+/* 表格前 12 行、手机卡片列表前 10 张:淡入并按行错开。翻页 / 换筛选后新行出现时也会再播一次 */
+#kb-main tbody:not(.stagger) > tr { animation: kb-fade-in var(--dur-slow) var(--ease-out) backwards; animation-delay: calc(var(--kb-n, 0) * var(--stagger)); }
+#kb-main tbody:not(.stagger) > tr:nth-child(n+13) { animation: none; }
+#kb-main tbody:not(.stagger) > tr:nth-child(2) { --kb-n: 1; }
+#kb-main tbody:not(.stagger) > tr:nth-child(3) { --kb-n: 2; }
+#kb-main tbody:not(.stagger) > tr:nth-child(4) { --kb-n: 3; }
+#kb-main tbody:not(.stagger) > tr:nth-child(5) { --kb-n: 4; }
+#kb-main tbody:not(.stagger) > tr:nth-child(6) { --kb-n: 5; }
+#kb-main tbody:not(.stagger) > tr:nth-child(7) { --kb-n: 6; }
+#kb-main tbody:not(.stagger) > tr:nth-child(8) { --kb-n: 7; }
+#kb-main tbody:not(.stagger) > tr:nth-child(9) { --kb-n: 8; }
+#kb-main tbody:not(.stagger) > tr:nth-child(10) { --kb-n: 9; }
+#kb-main tbody:not(.stagger) > tr:nth-child(11) { --kb-n: 10; }
+#kb-main tbody:not(.stagger) > tr:nth-child(12) { --kb-n: 11; }
+#kb-main .kb-rt-cards > li { animation: kb-rise var(--dur-slow) var(--ease-mac) backwards; animation-delay: calc(var(--kb-n, 0) * var(--stagger)); }
+#kb-main .kb-rt-cards > li:nth-child(n+11) { animation: none; }
+#kb-main .kb-rt-cards > li:nth-child(2) { --kb-n: 1; }
+#kb-main .kb-rt-cards > li:nth-child(3) { --kb-n: 2; }
+#kb-main .kb-rt-cards > li:nth-child(4) { --kb-n: 3; }
+#kb-main .kb-rt-cards > li:nth-child(5) { --kb-n: 4; }
+#kb-main .kb-rt-cards > li:nth-child(6) { --kb-n: 5; }
+#kb-main .kb-rt-cards > li:nth-child(7) { --kb-n: 6; }
+#kb-main .kb-rt-cards > li:nth-child(8) { --kb-n: 7; }
+#kb-main .kb-rt-cards > li:nth-child(9) { --kb-n: 8; }
+#kb-main .kb-rt-cards > li:nth-child(10) { --kb-n: 9; }
+
+/* 指标卡悬停:轻轻抬起(--lift 在「克制」档是 -1px,「活泼」档 -3px,「减少」是 0) */
+.card.metric:hover { transform: translateY(var(--lift)); box-shadow: var(--hi), 0 10px 30px -14px rgba(var(--shade), .55), 0 0 0 var(--hl) var(--border-default); }
+
+/* 运行中的任务图标缓慢转动:一眼看出「这个正在跑」。其它状态不动 */
+.kb-job-icon.is-accent .kb-job-svg { animation: kb-spin calc(var(--dur-page) * 6) linear infinite; }

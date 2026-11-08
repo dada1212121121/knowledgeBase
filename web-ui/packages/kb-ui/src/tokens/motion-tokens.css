@@ -1,0 +1,14 @@
+/* GENERATED — motion tokens. html[data-motion]= mac (default) | crisp | lively | reduce */
+:root,:root[data-motion=mac]{
+ --dur-instant:80ms;--dur-fast:140ms;--dur-base:220ms;--dur-slow:320ms;--dur-page:420ms;
+ --ease-out:cubic-bezier(.22,1,.36,1);--ease-in-out:cubic-bezier(.65,0,.35,1);--ease-in:cubic-bezier(.4,0,1,1);
+ --ease-mac:cubic-bezier(.32,.72,0,1);            /* macOS sheet/window curve */
+ --ease-spring:linear(0,0.05,0.167,0.312,0.459,0.595,0.711,0.806,0.878,0.932,0.969,0.994,1.009,1.017,1.02,1.02,1.018,1.015,1.012,1.009,1.007,1.005,1.003,1.002,1);
+ --ease-spring-soft:linear(0,0.038,0.127,0.239,0.357,0.47,0.573,0.662,0.738,0.8,0.85,0.889,0.92,0.943,0.961,0.974,0.983,0.99,0.994,0.997,0.999,1,1.001,1.001,1);
+ --spring-dur:480ms;--overshoot-scale:1.02;--stagger:20ms;--press-scale:.97;--lift:-2px;--dist-page:8px;--motion-on:1;
+}
+:root[data-motion=crisp]{--ease-spring:cubic-bezier(.22,1,.36,1);--ease-spring-soft:cubic-bezier(.22,1,.36,1);--spring-dur:220ms;--overshoot-scale:1;
+ --dur-base:180ms;--dur-slow:240ms;--dur-page:280ms;--stagger:12ms;--press-scale:.98;--lift:-1px}
+:root[data-motion=lively]{--ease-spring:linear(0,0.112,0.359,0.634,0.869,1.032,1.121,1.148,1.133,1.097,1.057,1.021,0.996,0.983,0.978,0.98,0.985,0.991,0.997,1,1.002,1.003,1.003,1.002,1);--spring-dur:640ms;--overshoot-scale:1.06;--stagger:30ms;--press-scale:.94;--lift:-3px;--dist-page:12px}
+:root[data-motion=reduce]{--dur-instant:0ms;--dur-fast:0ms;--dur-base:0ms;--dur-slow:0ms;--dur-page:0ms;--spring-dur:0ms;--stagger:0ms;--press-scale:1;--lift:0px;--dist-page:0px;--overshoot-scale:1;--motion-on:0}
+@media (prefers-reduced-motion:reduce){:root:not([data-motion=force]){--dur-fast:0ms;--dur-base:0ms;--dur-slow:0ms;--dur-page:0ms;--spring-dur:0ms;--stagger:0ms;--press-scale:1;--lift:0px;--dist-page:0px;--motion-on:0}}

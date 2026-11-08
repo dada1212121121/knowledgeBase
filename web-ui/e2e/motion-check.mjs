@@ -1,0 +1,167 @@
+// 动效验收:在「真实时间」下(不关动画)采样,证明动画确实在跑,而不只是 CSS 写在那里。
+// 每项给出:起点 → 中间帧 → 终点的数值,中间帧必须严格介于两端之间(= 在过渡中)。
+import { chromium } from '@playwright/test'
+import { startStaticServer } from './serve.mjs'
+import { installFixture } from './fixture.mjs'
+
+const { server, base } = await startStaticServer()
+const browser = await chromium.launch({ chromiumSandbox: false })
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, timezoneId: 'Asia/Shanghai', locale: 'zh-CN' })
+await installFixture(ctx)
+const tab = await ctx.newPage()
+const results = []
+const check = (name, ok, detail) => {
+  results.push(ok)
+  console.log(`${ok ? '✓' : '✗'} ${name}  ${detail}`)
+}
+const rectX = (sel) => tab.evaluate((s) => document.querySelector(s)?.getBoundingClientRect().left ?? null, sel)
+const sleep = (ms) => tab.waitForTimeout(ms)
+
+await tab.goto(`${base}/dashboard`, { waitUntil: 'networkidle' })
+await sleep(900)
+
+// 1) 侧栏高亮块:点「浏览器」,滑块应在途中出现过中间位置
+const pillY = () => tab.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector('.kb-nav-pill')).transform).m42)
+const y0 = await pillY()
+await tab.click('.side a[href="/browser"]')
+await sleep(70)
+const yMid = await pillY()
+await sleep(900)
+const y1 = await pillY()
+check('侧栏高亮块滑动', Math.min(y0, y1) < yMid && yMid < Math.max(y0, y1), `起 ${y0.toFixed(1)} → 中 ${yMid.toFixed(1)} → 终 ${y1.toFixed(1)}`)
+
+// 2) 页面进场:导航后新页面 opacity 从 <1 升到 1
+await tab.click('.side a[href="/dashboard"]')
+await sleep(40)
+const opMid = await tab.evaluate(() => Number(getComputedStyle(document.querySelector('.kb-page-root')).opacity))
+await sleep(700)
+const opEnd = await tab.evaluate(() => Number(getComputedStyle(document.querySelector('.kb-page-root')).opacity))
+check('页面进场淡入', opMid < 1 && opEnd === 1, `中 ${opMid.toFixed(2)} → 终 ${opEnd}`)
+
+// 3) 数字滚动:知识条目从 0 滚到 12,438
+const num = () => tab.evaluate(() => document.querySelector('.metric .v')?.textContent?.replace(/[^\d]/g, '') ?? '')
+await tab.goto(`${base}/dashboard`, { waitUntil: 'domcontentloaded' })
+await sleep(260)
+const n1 = Number(await num())
+await sleep(1500)
+const n2 = Number(await num())
+check('数字滚动', n1 < n2 && n2 === 12438, `中 ${n1} → 终 ${n2}`)
+
+// 4) 弹出菜单:点「全部项目」,菜单层从缩小放大,选项依次落位
+await tab.goto(`${base}/dashboard`, { waitUntil: 'networkidle' })
+await sleep(600)
+await tab.click('.kb-select .btn')
+await sleep(60)
+const scaleMid = await tab.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector('.kb-pop-layer')).transform).a)
+const itemMid = await tab.evaluate(() => Number(getComputedStyle(document.querySelector('.kb-pop-item:last-child')).opacity))
+await sleep(900)
+const scaleEnd = await tab.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector('.kb-pop-layer')).transform).a)
+const itemEnd = await tab.evaluate(() => Number(getComputedStyle(document.querySelector('.kb-pop-item:last-child')).opacity))
+check('菜单从按钮长出', scaleMid < 1 && scaleEnd === 1, `缩放 中 ${scaleMid.toFixed(2)} → 终 ${scaleEnd}`)
+check('菜单选项依次落位', itemMid < 1 && itemEnd === 1, `末项不透明度 中 ${itemMid.toFixed(2)} → 终 ${itemEnd}`)
+await tab.keyboard.press('Escape')
+await sleep(300)
+const hidden = await tab.evaluate(() => getComputedStyle(document.querySelector('.kb-pop-layer')).visibility)
+check('Esc 收起菜单', hidden === 'hidden', `visibility=${hidden}`)
+
+// 5) 确认弹窗:回弹进场(缩放过冲)→ 点确认 → 就地变 ✓ → 自动收起
+await tab.goto(`${base}/projects`, { waitUntil: 'networkidle' })
+await sleep(500)
+await tab.evaluate(() => { window.confirm = () => { throw new Error('不应再用原生 confirm') } })
+await tab.click('.kb-coll-actions .kb-ghost')
+await sleep(120)
+const dlgScale = await tab.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector('.kb-confirm')).transform).a)
+await sleep(700)
+const focused = await tab.evaluate(() => document.activeElement?.textContent?.trim())
+check('确认弹窗进场缩放', dlgScale > 0.85 && dlgScale <= 1.06, `120ms 时缩放 ${dlgScale.toFixed(3)}`)
+check('破坏性操作先聚焦「取消」', focused === '取消', `焦点在「${focused}」`)
+await tab.click('.kb-confirm .btn.is-danger')
+await sleep(400)
+const phase = await tab.evaluate(() => document.querySelector('.kb-confirm')?.className ?? '')
+check('确认后原地进入完成态', phase.includes('is-done'), phase)
+await sleep(1500)
+const gone = await tab.evaluate(() => !document.querySelector('.kb-confirm'))
+check('完成态停留后自动收起', gone, gone ? '已收起' : '仍在')
+
+// 7) 复制按钮:图标翻转 + 气泡弹出,2 秒后复原
+await tab.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+const flipA = () => tab.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector('.kb-flip-back')).transform).m11)
+await tab.goto(`${base}/settings?tab=llm`, { waitUntil: 'networkidle' })
+await sleep(500)
+const f0 = await flipA()
+await tab.click('.kb-copy .btn')
+await sleep(110)
+const fMid = await flipA()
+await sleep(500)
+const f1 = await flipA()
+const bubbleOn = await tab.evaluate(() => Number(getComputedStyle(document.querySelector('.kb-copy-bubble')).opacity))
+check('复制按钮图标翻转', f0 < fMid && fMid < f1, `背面 cos ${f0.toFixed(2)} → ${fMid.toFixed(2)} → ${f1.toFixed(2)}`)
+check('复制气泡弹出', bubbleOn === 1, `不透明度 ${bubbleOn}`)
+await sleep(2300)
+const bubbleOff = await tab.evaluate(() => Number(getComputedStyle(document.querySelector('.kb-copy-bubble')).opacity))
+check('2 秒后气泡收起', bubbleOff === 0, `不透明度 ${bubbleOff}`)
+
+// 8) 保存按钮:保存后文字向上滚成「✓ 已保存」,宽度随之变化,随后滚回
+await tab.goto(`${base}/browser`, { waitUntil: 'networkidle' })
+await sleep(800)
+await tab.focus('.kb-md-input')
+await tab.keyboard.type('x')
+const w0 = await tab.evaluate(() => document.querySelector('.kb-submit').getBoundingClientRect().width)
+await tab.click('.kb-submit')
+await sleep(500)
+// Toast:保存成功后出现,倒计时条在收缩
+const toastN = await tab.evaluate(() => document.querySelectorAll('.kb-toast').length)
+check('Toast 出现', toastN >= 1, `${toastN} 条`)
+const barA = await tab.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector('.kb-toast-timer')).transform).a)
+await sleep(500)
+const barB = await tab.evaluate(() => new DOMMatrix(getComputedStyle(document.querySelector('.kb-toast-timer')).transform).a)
+check('Toast 倒计时条在收缩', barB < barA, `${barA.toFixed(2)} → ${barB.toFixed(2)}`)
+const done = await tab.evaluate(() => document.querySelector('.kb-submit').classList.contains('is-done'))
+const w1 = await tab.evaluate(() => document.querySelector('.kb-submit').getBoundingClientRect().width)
+check('保存后进入「已保存」态', done, done ? 'is-done' : '未进入')
+check('保存态按钮宽度平滑变化', w1 !== w0, `${w0.toFixed(1)}px → ${w1.toFixed(1)}px`)
+await sleep(2400)
+const back = await tab.evaluate(() => !document.querySelector('.kb-submit').classList.contains('is-done'))
+check('随后复原为「保存」', back, back ? '已复原' : '仍是已保存')
+
+// 9) 命令面板:⌘K 打开时面板从上方落下(位移 + 透明度在过渡中),项目名是真实名字,Enter 能跳转
+await tab.goto(`${base}/dashboard`, { waitUntil: 'networkidle' })
+await sleep(500)
+await tab.keyboard.press('Control+k')
+await sleep(80)
+const palMid = await tab.evaluate(() => ({ op: Number(getComputedStyle(document.querySelector('.pal')).opacity), y: new DOMMatrix(getComputedStyle(document.querySelector('.pal')).transform).m42 }))
+await sleep(800)
+const palEnd = await tab.evaluate(() => ({ op: Number(getComputedStyle(document.querySelector('.pal')).opacity), y: new DOMMatrix(getComputedStyle(document.querySelector('.pal')).transform).m42 }))
+check('命令面板落下', palMid.op < 1 && palMid.y < 0 && palEnd.op === 1 && Math.abs(palEnd.y) < 0.5, `不透明度 ${palMid.op.toFixed(2)}→${palEnd.op},y ${palMid.y.toFixed(1)}→${palEnd.y.toFixed(1)}`)
+const firstActive = await tab.evaluate(() => document.querySelector('.pal .ni.on .lbl2')?.textContent?.trim())
+check('默认选中第一项', firstActive === '搜索演练场', `选中「${firstActive}」`)
+await tab.keyboard.type('@')
+await sleep(200)
+const projNames = await tab.evaluate(() => [...document.querySelectorAll('.pal .ni .lbl2')].map((el) => el.textContent.trim()))
+check('@ 列出真实项目名', projNames.includes('knowledgeBase') && !projNames.includes('undefined'), projNames.join(' / '))
+await tab.keyboard.press('Escape')
+await sleep(400)
+check('Esc 关闭面板', await tab.evaluate(() => !document.querySelector('.pal')), '已关闭')
+// 冷门页面只在搜索时出现:默认不占位,输入「系统」能找到「系统状态」
+await tab.keyboard.press('Control+k')
+await sleep(500)
+const defaultHasSystem = await tab.evaluate(() => [...document.querySelectorAll('.pal .ni .lbl2')].some((el) => el.textContent.includes('系统状态')))
+await tab.keyboard.type('系统')
+await sleep(200)
+const searchHasSystem = await tab.evaluate(() => [...document.querySelectorAll('.pal .ni .lbl2')].some((el) => el.textContent.includes('系统状态')))
+check('⌘K 默认不列系统状态、搜「系统」能找到', !defaultHasSystem && searchHasSystem, `默认=${defaultHasSystem} 搜索=${searchHasSystem}`)
+await tab.keyboard.press('Escape')
+await sleep(400)
+
+// 10) 系统状态页的入口:页脚「kbd 运行中」可点击,点开能到 /system(此前除了手输 URL 没有任何入口)
+await tab.goto(`${base}/dashboard`, { waitUntil: 'networkidle' })
+await sleep(500)
+await tab.click('.kb-foot-status')
+await sleep(500)
+check('页脚状态点击进入系统状态页', new URL(tab.url()).pathname === '/system', new URL(tab.url()).pathname)
+
+await browser.close()
+server.close()
+const failed = results.filter((ok) => !ok).length
+console.log(failed ? `\n✗ ${failed} 项失败` : `\n✓ 全部 ${results.length} 项动效验收通过`)
+process.exitCode = failed ? 1 : 0

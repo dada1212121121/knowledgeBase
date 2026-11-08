@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "knowledgeBase",
+  "short_name": "知识库",
+  "description": "本机 AI 开发知识库的管理端:检索、浏览、审核、导入与系统管理",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#08080a",
+  "theme_color": "#08080a",
+  "categories": ["productivity", "developer tools"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "搜索", "short_name": "搜索", "url": "/search", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "知识库", "short_name": "知识库", "url": "/kb", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ]
+}

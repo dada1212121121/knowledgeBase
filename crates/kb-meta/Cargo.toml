@@ -1,0 +1,20 @@
+[package]
+name = "kb-meta"
+description = "MetaStore 的 SQLite 实现 + 迁移脚本(rusqlite)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+kb-core = { path = "../kb-core" }
+rusqlite = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

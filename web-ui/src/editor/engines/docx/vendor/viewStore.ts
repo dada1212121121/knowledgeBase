@@ -1,0 +1,204 @@
+/**
+ * 来源：BetterOffice（Apache-2.0）@betteroffice/docx-react 0.5.1 源码 `packages/docx-react/src/components/DocxEditor/peerless/viewStore.ts`，
+ * 为在 Vue 里复用上游「Worker 编辑会话 + 画布帧 + 回显 + 输入准入」这一层而原样收编（只改了 import 路径）。
+ * 为什么收编而不是重写：这一层是输入法组合、回显画笔与引擎命令围栏相互配合的状态机，行为正确性来自上游的长期验证；
+ * 上游把它放在 React 组件包里、没有作为框架无关包导出，所以只能放进 engines/（唯一允许 import @betteroffice/* 的目录）。
+ * 许可与署名见仓库 NOTICE。升级 @betteroffice/docx* 时对照上游同名文件。
+ */
+import type { EditSessionState } from './sessionTypes';
+import type { DisplayPage } from '@betteroffice/docx/layout/render';
+import type {
+  DocxCommandFrame,
+  DocxCommandPageIdentity,
+  DocxCommandSelection,
+  DocxEditState,
+  DocxEchoRect,
+  DocxEchoTransform,
+  DocxFrameReservations,
+} from '@betteroffice/docx/yrs';
+
+/** @internal */
+export interface PeerlessViewIdentity {
+  session: string;
+  incarnation: number;
+  epoch: number;
+}
+
+/** @internal Worker-minted bytes retained without decoding on main. */
+export interface PeerlessSelectionAnchors {
+  anchor: Uint8Array;
+  focus: Uint8Array;
+}
+
+/** @internal Installed geometry is independent of acknowledged worker selection. */
+export interface PeerlessFrameGeometry {
+  documentVersion?: string;
+  identity: PeerlessViewIdentity;
+  coversThroughSeq: number;
+  frameEpoch: number;
+  layoutRevision: number;
+  /** The worker pagination run the pages show; frames that only move the caret keep it. */
+  layoutEpoch?: number;
+  documentWidth?: number;
+  layoutProvisional?: boolean;
+  /** The reservation set the layout includes. */
+  reservations?: DocxFrameReservations;
+  pages: readonly {
+    page: DocxCommandPageIdentity;
+    bounds: DocxEchoRect;
+    transform: DocxEchoTransform;
+    displayPage?: DisplayPage;
+  }[];
+  caret: DocxEchoRect | null;
+  selectionFocus?: DocxEchoRect | null;
+  selectionRects: readonly DocxEchoRect[];
+  parts?: DocxCommandFrame['payload']['parts'];
+  objects?: DocxCommandFrame['payload']['geometry'];
+}
+
+/** @internal */
+export interface PeerlessProvisionalCaret {
+  source?: 'click' | 'echo';
+  readonly throughSeq: number | undefined;
+  pageIndex: number;
+  rect: DocxEchoRect;
+}
+
+/** @internal */
+export interface PeerlessViewSnapshot {
+  identity: PeerlessViewIdentity;
+  version: number;
+  throughSeq: number;
+  presentedThroughSeq: number;
+  /** The throughSeq of the first worker state at the current version; set by the store. */
+  versionSinceSeq?: number;
+  workerSelection: DocxCommandSelection | null | undefined;
+  anchors: PeerlessSelectionAnchors | null;
+  editState: DocxEditState | undefined;
+  geometry: PeerlessFrameGeometry | null;
+  provisionalCaret?: PeerlessProvisionalCaret | null;
+}
+
+/**
+ * @internal Installed geometry shows the document as acknowledged: it covers the acknowledged sequence, or it covers
+ * the start of the current document version, so only selection commands lie between them.
+ */
+export function geometryMatchesDocument(snapshot: PeerlessViewSnapshot): boolean {
+  const covers = snapshot.geometry?.coversThroughSeq;
+  return covers !== undefined && (covers === snapshot.throughSeq ||
+    snapshot.versionSinceSeq !== undefined && snapshot.versionSinceSeq <= covers && covers < snapshot.throughSeq);
+}
+
+/** @internal Stable snapshots and subscriptions for useSyncExternalStore. */
+export interface PeerlessViewStore {
+  subscribe(listener: () => void): () => void;
+  getSnapshot(): PeerlessViewSnapshot;
+  getServerSnapshot(): PeerlessViewSnapshot;
+  acceptWorkerState(
+    identity: PeerlessViewIdentity,
+    state: EditSessionState<DocxCommandSelection | null, DocxEditState>
+  ): void;
+  installFrameGeometry(geometry: PeerlessFrameGeometry): void;
+  setProvisionalCaret(caret: PeerlessProvisionalCaret | null): void;
+  subscribeProvisionalCaret?(listener: () => void): () => void;
+  getProvisionalCaret?(): PeerlessProvisionalCaret | null;
+  dispose(): void;
+}
+
+/** @internal */
+export function createPeerlessViewStore(initial: PeerlessViewSnapshot): PeerlessViewStore {
+  const anchors = (selection: PeerlessViewSnapshot['workerSelection']): PeerlessSelectionAnchors | null =>
+    selection?.anchor.sticky && selection.focus.sticky
+      ? { anchor: selection.anchor.sticky.slice(), focus: selection.focus.sticky.slice() } : null;
+  let snapshot: PeerlessViewSnapshot = {
+    ...initial, versionSinceSeq: initial.throughSeq, provisionalCaret: null, identity: { ...initial.identity }, anchors: anchors(initial.workerSelection),
+    workerSelection: initial.workerSelection === undefined ? undefined : structuredClone(initial.workerSelection),
+  };
+  let selectionInput = initial.workerSelection;
+  let provisionalRevision = {
+    version: initial.version, documentVersion: initial.geometry?.documentVersion, layoutRevision: initial.geometry?.layoutRevision,
+  };
+  let disposed = false;
+  const listeners = new Set<() => void>();
+  const caretListeners = new Set<() => void>();
+  const sameIdentity = (identity: PeerlessViewIdentity) =>
+    identity.session === snapshot.identity.session && identity.incarnation === snapshot.identity.incarnation &&
+    identity.epoch === snapshot.identity.epoch;
+  const publish = (next: PeerlessViewSnapshot) => {
+    const previous = snapshot;
+    snapshot = next;
+    const caretChanged = previous.provisionalCaret !== next.provisionalCaret;
+    const otherChanged = previous.identity !== next.identity || previous.version !== next.version ||
+      previous.throughSeq !== next.throughSeq || previous.presentedThroughSeq !== next.presentedThroughSeq ||
+      previous.versionSinceSeq !== next.versionSinceSeq || previous.workerSelection !== next.workerSelection ||
+      previous.anchors !== next.anchors || previous.editState !== next.editState || previous.geometry !== next.geometry;
+    const echoOnly = caretChanged && !otherChanged && previous.provisionalCaret?.source !== 'click' &&
+      next.provisionalCaret?.source !== 'click' &&
+      (previous.provisionalCaret?.source === 'echo' || next.provisionalCaret?.source === 'echo');
+    if (otherChanged || (caretChanged && !echoOnly)) for (const listener of listeners) listener();
+    if (caretChanged) for (const listener of caretListeners) listener();
+  };
+  return {
+    subscribe(listener) {
+      if (disposed) return () => {};
+      listeners.add(listener);
+      return () => { listeners.delete(listener); };
+    },
+    getSnapshot: () => snapshot,
+    getServerSnapshot: () => snapshot,
+    acceptWorkerState(identity, state) {
+      if (disposed || state.epoch !== identity.epoch || identity.session !== snapshot.identity.session ||
+        identity.incarnation < snapshot.identity.incarnation || identity.epoch < snapshot.identity.epoch) return;
+      const replacement = !sameIdentity(identity);
+      if (!replacement && (state.version < snapshot.version || state.throughSeq < snapshot.throughSeq)) return;
+      const selected = state.selection === undefined && !replacement ? snapshot.workerSelection : state.selection;
+      const editState = state.editState === undefined && !replacement ? snapshot.editState : state.editState;
+      if (!replacement && state.version === snapshot.version && state.throughSeq === snapshot.throughSeq &&
+        (state.selection === undefined || state.selection === selectionInput) && editState === snapshot.editState) return;
+      selectionInput = selected;
+      publish({
+        identity: { ...identity }, version: state.version, throughSeq: state.throughSeq,
+        versionSinceSeq: replacement || state.version !== snapshot.version ? state.throughSeq : snapshot.versionSinceSeq,
+        presentedThroughSeq: replacement ? -1 : snapshot.presentedThroughSeq,
+        workerSelection: selected === undefined ? undefined : structuredClone(selected),
+        anchors: anchors(selected), editState,
+        geometry: replacement ? null : snapshot.geometry,
+        provisionalCaret: replacement || (snapshot.provisionalCaret?.source !== 'echo' &&
+          state.version > provisionalRevision.version) ? null : snapshot.provisionalCaret,
+      });
+    },
+    installFrameGeometry(geometry) {
+      if (disposed || !sameIdentity(geometry.identity) || geometry.coversThroughSeq < snapshot.presentedThroughSeq ||
+        (snapshot.geometry && (geometry.frameEpoch <= snapshot.geometry.frameEpoch ||
+          geometry.layoutRevision < snapshot.geometry.layoutRevision))) return;
+      const seq = snapshot.provisionalCaret?.throughSeq;
+      publish({ ...snapshot, presentedThroughSeq: geometry.coversThroughSeq, geometry,
+        provisionalCaret: (seq !== undefined && geometry.coversThroughSeq >= seq) ||
+          (snapshot.provisionalCaret?.source !== 'echo' &&
+            (geometry.documentVersion !== provisionalRevision.documentVersion ||
+              (provisionalRevision.layoutRevision !== undefined && geometry.layoutRevision > provisionalRevision.layoutRevision)))
+          ? null : snapshot.provisionalCaret });
+    },
+    setProvisionalCaret(caret) {
+      if (disposed || snapshot.provisionalCaret === caret ||
+        (caret?.throughSeq !== undefined && snapshot.geometry && snapshot.geometry.coversThroughSeq >= caret.throughSeq) ||
+        (caret?.throughSeq !== undefined && snapshot.provisionalCaret?.throughSeq !== undefined &&
+          caret.throughSeq < snapshot.provisionalCaret.throughSeq)) return;
+      provisionalRevision = {
+        version: snapshot.version, documentVersion: snapshot.geometry?.documentVersion, layoutRevision: snapshot.geometry?.layoutRevision,
+      };
+      publish({ ...snapshot, provisionalCaret: caret });
+    },
+    subscribeProvisionalCaret(listener) {
+      if (disposed) return () => {};
+      caretListeners.add(listener);
+      return () => { caretListeners.delete(listener); };
+    },
+    getProvisionalCaret: () => snapshot.provisionalCaret ?? null,
+    dispose() {
+      disposed = true;
+      listeners.clear();
+      caretListeners.clear();
+    },
+  };
+}

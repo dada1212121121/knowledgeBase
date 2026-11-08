@@ -1,0 +1,93 @@
+/* 使用指南正文的排版。网页里的「使用指南」页、离线 HTML、PDF 三处共用这一份;
+   颜色、圆角全部走主题变量,离线版在 utils/guideExport.ts 里补一份浅色色板。
+   ReaderDoc 里也有一套文章样式,但它只在那个组件加载后才存在,/guide 页面不能依赖它。 */
+.kb-guide-article {
+  max-width: 46em;
+  margin: 0 auto;
+  color: var(--t);
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+.kb-guide-article h1,
+.kb-guide-article h2,
+.kb-guide-article h3 {
+  margin: 1.6em 0 0.5em;
+  line-height: 1.35;
+  color: var(--t);
+  scroll-margin-top: 1em;
+}
+.kb-guide-article h1 { font-size: 1.7em; margin-top: 0; }
+.kb-guide-article h2 { font-size: 1.35em; padding-bottom: 0.25em; border-bottom: var(--hl) solid var(--b2); }
+.kb-guide-article h3 { font-size: 1.12em; }
+.kb-guide-article p { margin: 0.7em 0; }
+.kb-guide-article ul,
+.kb-guide-article ol { padding-left: 1.5em; }
+.kb-guide-article li { margin: 0.25em 0; }
+.kb-guide-article a { color: var(--accent-text); text-decoration: underline; }
+.kb-guide-article hr { border: 0; border-top: var(--hl) solid var(--b2); margin: 1.4em 0; }
+
+.kb-guide-article code,
+.kb-guide-article pre {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: var(--surface-3);
+  border-radius: var(--r-xs);
+}
+.kb-guide-article code { padding: 0.1em 0.35em; }
+.kb-guide-article pre { padding: 0.8em 1em; overflow: auto; line-height: 1.6; }
+.kb-guide-article pre code { padding: 0; background: none; }
+
+/* 提示框:「提示」用强调色,「注意」用警示色 */
+.kb-guide-article blockquote { margin: 1em 0; padding: 0.2em 1em; color: var(--t2); border-left: 3px solid var(--b2); border-radius: 0 var(--r1) var(--r1) 0; background: var(--surface-2); }
+.kb-guide-article .kb-guide-note.is-tip { border-left-color: var(--accent); background: var(--accent-soft); }
+.kb-guide-article .kb-guide-note.is-warn { border-left-color: var(--status-warning); background: color-mix(in srgb, var(--status-warning) 12%, transparent); }
+
+/* 截图:带细边框,图注居中 */
+.kb-guide-article .kb-guide-fig { margin: 1.2em 0; }
+.kb-guide-article .kb-guide-fig img { display: block; max-width: 100%; height: auto; margin: 0 auto; border: var(--hl) solid var(--b2); border-radius: var(--r1); }
+.kb-guide-article .kb-guide-fig figcaption { margin-top: 0.45em; font-size: 0.88em; color: var(--m); text-align: center; }
+.kb-guide-article .kb-guide-fig.is-phone img { max-width: min(100%, 300px); }
+
+/* 表格:放在自己的横向滚动容器里。全站在手机上会把 table/tr/td 改成 block(表格变卡片),
+   指南里的表格是对照表,变成卡片就看不出列了,所以这里把显示方式改回去 */
+.kb-guide-article .kb-guide-table { overflow-x: auto; margin: 1em 0; max-width: 100%; }
+.kb-guide-article table { display: table !important; width: max-content; min-width: 100%; border-collapse: collapse; }
+.kb-guide-article thead { display: table-header-group !important; }
+.kb-guide-article tbody { display: table-row-group !important; }
+.kb-guide-article tr { display: table-row !important; min-height: 0 !important; padding: 0 !important; }
+.kb-guide-article th,
+.kb-guide-article td {
+  display: table-cell !important;
+  width: auto !important;
+  min-width: 5em;
+  max-width: 24em;
+  padding: 6px 10px !important;
+  border: var(--hl) solid var(--b2) !important;
+  vertical-align: top;
+  text-align: left;
+  /* 全站 td 是「数据表」样式:不换行 + 省略号。指南里的表格是说明文,截断等于把内容吃掉,
+     所以单元格回到正常换行(宽度仍受上面的 max-width 限制,不会把页面撑宽) */
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word;
+}
+.kb-guide-article th { background: var(--surface-2); font-weight: 600; }
+
+@media print {
+  .kb-guide-article { max-width: none; }
+  .kb-guide-article .kb-guide-table { overflow: visible; }
+  /* border-collapse 的外边框有一半画在表格盒子外面,贴着页边会被裁掉;留 2px 余量 */
+  .kb-guide-article table { width: calc(100% - 2px); margin-left: 1px; }
+  .kb-guide-article th,
+  .kb-guide-article td { max-width: none; }
+  .kb-guide-article h2,
+  .kb-guide-article h3 { break-after: avoid; }
+  /* 再高的图也不能超过一页的可用高度,否则会被页面边缘截掉一截 */
+  .kb-guide-article .kb-guide-fig img { max-height: 130mm; width: auto; max-width: 100%; }
+  .kb-guide-article .kb-guide-fig,
+  .kb-guide-article pre,
+  .kb-guide-article tr,
+  .kb-guide-article blockquote { break-inside: avoid; }
+}

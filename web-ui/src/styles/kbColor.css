@@ -1,0 +1,37 @@
+/* 笔记字色 / 底色调色板(旧编辑器 DocEditor 与新文本面共用, 从 DocEditor.vue 抽出)。
+   Markdown 里存的是固定 hex(见 utils/colorPalette.ts),这里只按 key 上色,深浅色各自取对比合适的值 */
+.kb-color.is-fg-gray { color: #8b8d98; } /* tokens-allow */
+.kb-color.is-fg-red { color: #e5484d; } /* tokens-allow */
+.kb-color.is-fg-orange { color: #f76b15; } /* tokens-allow */
+.kb-color.is-fg-yellow { color: #ca8a04; } /* tokens-allow */
+.kb-color.is-fg-green { color: #30a46c; } /* tokens-allow */
+.kb-color.is-fg-blue { color: #0090ff; } /* tokens-allow */
+.kb-color.is-fg-purple { color: #8e4ec6; } /* tokens-allow */
+:root:not([data-tone='light']) .kb-color.is-fg-red { color: #ff6369; } /* tokens-allow */
+:root:not([data-tone='light']) .kb-color.is-fg-yellow { color: #f5c400; } /* tokens-allow */
+:root:not([data-tone='light']) .kb-color.is-fg-blue { color: #52a9ff; } /* tokens-allow */
+:root:not([data-tone='light']) .kb-color.is-fg-purple { color: #b98cf0; } /* tokens-allow */
+.kb-color.is-bg-gray { background: #ececec; } /* tokens-allow */
+.kb-color.is-bg-red { background: #ffe3e3; } /* tokens-allow */
+.kb-color.is-bg-orange { background: #ffe8d1; } /* tokens-allow */
+.kb-color.is-bg-yellow { background: #fff3a3; } /* tokens-allow */
+.kb-color.is-bg-green { background: #d3f9d8; } /* tokens-allow */
+.kb-color.is-bg-blue { background: #d0ebff; } /* tokens-allow */
+.kb-color.is-bg-purple { background: #e5dbff; } /* tokens-allow */
+:root:not([data-tone='light']) .kb-color[class*='is-bg-'] { color: var(--t); }
+:root:not([data-tone='light']) .kb-color.is-bg-gray { background: rgba(255, 255, 255, 0.14); } /* tokens-allow */
+:root:not([data-tone='light']) .kb-color.is-bg-red { background: rgba(229, 72, 77, 0.3); } /* tokens-allow */
+:root:not([data-tone='light']) .kb-color.is-bg-orange { background: rgba(247, 107, 21, 0.28); } /* tokens-allow */
+:root:not([data-tone='light']) .kb-color.is-bg-yellow { background: rgba(245, 196, 0, 0.28); } /* tokens-allow */
+:root:not([data-tone='light']) .kb-color.is-bg-green { background: rgba(48, 164, 108, 0.3); } /* tokens-allow */
+:root:not([data-tone='light']) .kb-color.is-bg-blue { background: rgba(0, 144, 255, 0.28); } /* tokens-allow */
+:root:not([data-tone='light']) .kb-color.is-bg-purple { background: rgba(142, 78, 198, 0.32); } /* tokens-allow */
+
+/* 字体（utils/colorPalette.ts 的 FONT_FAMILIES；Markdown 里存的是同一份字体栈，这里按 key 套样式，两处要一致） */
+.kb-color.is-font-sans { font-family: PingFang SC, Microsoft YaHei, Noto Sans SC, sans-serif; }
+.kb-color.is-font-serif { font-family: Songti SC, SimSun, Noto Serif SC, serif; }
+.kb-color.is-font-kai { font-family: Kaiti SC, KaiTi, STKaiti, serif; }
+.kb-color.is-font-fang { font-family: STFangsong, FangSong, serif; }
+.kb-color.is-font-mono { font-family: SF Mono, Cascadia Code, Consolas, Menlo, monospace; }
+.kb-color.is-font-georgia { font-family: Georgia, Times New Roman, serif; }
+.kb-color.is-font-arial { font-family: Arial, Helvetica, sans-serif; }

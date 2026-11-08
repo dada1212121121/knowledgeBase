@@ -1,0 +1,32 @@
+From: =?utf-8?B?5byg5LiJ?= <zhang@example.com>
+To: li@example.com
+Subject: =?utf-8?B?5ZGo5Lya57qq6KaBIMK3IFJSRiDor4TmtYs=?=
+Date: Mon, 26 Oct 2026 10:00:00 +0800
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="M"
+
+--M
+Content-Type: multipart/alternative; boundary="A"
+
+--A
+Content-Type: text/plain; charset=utf-8
+
+大家好，RRF 评测结果见附件。
+--A
+Content-Type: text/html; charset=utf-8
+
+<p>大家好，<b>RRF</b> 评测结果见附件。</p><p>图：<img src="cid:logo"></p>
+--A--
+--M
+Content-Type: image/png
+Content-ID: <logo>
+Content-Transfer-Encoding: base64
+
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNg+M/AAAADAQEAGN2NsAAAAABJRU5ErkJggg==
+--M
+Content-Type: application/pdf; name="report.pdf"
+Content-Disposition: attachment; filename="report.pdf"
+Content-Transfer-Encoding: base64
+
+JVBERi0xLjQgZmFrZSVQREYtMS40IGZha2UlUERGLTEuNCBmYWtlJVBERi0xLjQgZmFrZSVQREYtMS40IGZha2UlUERGLTEuNCBmYWtlJVBERi0xLjQgZmFrZSVQREYtMS40IGZha2UlUERGLTEuNCBmYWtlJVBERi0xLjQgZmFrZSVQREYtMS40IGZha2UlUERGLTEuNCBmYWtlJVBERi0xLjQgZmFrZSVQREYtMS40IGZha2UlUERGLTEuNCBmYWtlJVBERi0xLjQgZmFrZSVQREYtMS40IGZha2UlUERGLTEuNCBmYWtlJVBERi0xLjQgZmFrZSVQREYtMS40IGZha2U=
+--M--

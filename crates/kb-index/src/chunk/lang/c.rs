@@ -1,0 +1,14 @@
+//! C 的定义类节点。
+
+use crate::chunk::lang::LangSpec;
+
+/// C 的分块配置。
+pub fn spec() -> LangSpec {
+    LangSpec {
+        name: "c",
+        language: || tree_sitter_c::LANGUAGE.into(),
+        definitions: &[("function_definition", ""), ("struct_specifier", "struct")],
+        transparent: &[],
+        named_child: &[],
+    }
+}

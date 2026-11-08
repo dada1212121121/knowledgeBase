@@ -1,0 +1,20 @@
+---
+source: crates/kb-index/tests/chunk_snapshots.rs
+assertion_line: 99
+expression: views
+---
+- key: "#1"
+  start_line: 1
+  end_line: 4
+  symbol: ~
+  header: demo › fixtures/php.php
+- key: class Router
+  start_line: 6
+  end_line: 26
+  symbol: class Router
+  header: demo › fixtures/php.php › class Router
+- key: interface Middleware
+  start_line: 28
+  end_line: 31
+  symbol: interface Middleware
+  header: demo › fixtures/php.php › interface Middleware

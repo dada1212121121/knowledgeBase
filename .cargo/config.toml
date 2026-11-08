@@ -1,0 +1,5 @@
+# 所有 cargo 命令(包括测试)都要能找到 jieba 词典。
+# lance 在构建分词器时才读取该变量,测试进程不经过 main(),所以必须在这里提供。
+# kb 二进制运行时会在 main() 中把它覆盖为 <KB_HOME>/lang()。
+[env]
+LANCE_LANGUAGE_MODEL_HOME = { value = "crates/kb-testkit/lance-home", relative = true }

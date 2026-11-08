@@ -1,0 +1,1 @@
+dict.txt 取自 jieba-rs 0.11.0 (src/data/dict.txt), 许可证 MIT (见 jieba-rs Cargo.toml license 字段); 原始词典来自 jieba 项目 (MIT)。

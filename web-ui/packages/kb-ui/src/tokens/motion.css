@@ -1,0 +1,70 @@
+/* per-component motion — transform/opacity only (+ backdrop-filter on overlays) */
+@keyframes kb-page-in{from{opacity:0;transform:translateY(var(--dist-page))}}
+@keyframes kb-item-in{from{opacity:0;transform:translateY(6px)}}
+@keyframes kb-pop-in{from{opacity:0;transform:scale(.96)}}
+@keyframes kb-spot-in{0%{opacity:0;transform:translateY(-12px) scale(.98)}}
+@keyframes kb-fade-in{from{opacity:0}}
+@keyframes kb-shimmer{to{transform:translateX(100%)}}
+@keyframes kb-ring-pulse{0%{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 90%,transparent),0 0 0 0 color-mix(in srgb,var(--accent) 45%,transparent)}100%{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 90%,transparent),0 0 0 6px color-mix(in srgb,var(--accent) 0%,transparent)}}
+@keyframes kb-draw{from{stroke-dashoffset:var(--len,400)}}
+@keyframes kb-grow{from{transform:scaleY(0)}}
+@keyframes kb-toast-in{from{opacity:0;transform:translateX(24px) scale(.98)}}
+@keyframes kb-sweep{from{transform:translateX(-120%) skewX(-12deg)}to{transform:translateX(220%) skewX(-12deg)}}
+/* page */
+/* .content 进场动画已由 .kb-page-enter-* 接管(见下方) */
+/* list stagger: JS sets --i */
+.stagger>*{animation:kb-item-in var(--dur-slow) var(--ease-mac) both;animation-delay:calc(var(--i,0) * var(--stagger))}
+/* cards: hover lift + highlight sweep */
+.card{transition:transform var(--dur-base) var(--ease-mac),box-shadow var(--dur-base) var(--ease-mac)}
+.card.lift{overflow:hidden}
+.card.lift:hover,.card.lift.is-hover{transform:translateY(var(--lift));box-shadow:var(--hi),0 10px 30px -10px rgba(var(--shade),.6),0 0 0 var(--hl) var(--border-default)}
+.card.lift::after{content:"";position:absolute;inset:0 auto 0 0;width:40%;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(var(--ink),.06),transparent);transform:translateX(-120%) skewX(-12deg)}
+.card.lift:hover::after,.card.lift.is-hover::after{animation:kb-sweep calc(var(--dur-page)*1.6) var(--ease-out) 1}
+.card.lift{position:relative}
+/* button press */
+.btn,.tb,.seg i,.ni{transition:transform var(--dur-instant) var(--ease-out),background-color var(--dur-fast),color var(--dur-fast)}
+.btn:active,.btn.is-press{transform:scale(var(--press-scale))}
+/* switch & segmented thumb spring */
+.sw::after{transition:transform var(--spring-dur) var(--ease-spring),left var(--spring-dur) var(--ease-spring)}
+.sw{transition:background var(--dur-base) var(--ease-out)}
+.segx{position:relative;display:inline-flex;padding:2px;border-radius:var(--r2);background:rgba(var(--shade),.25);box-shadow:inset 0 0 0 var(--hl) var(--b2)}
+[data-tone=light] .segx{background:var(--surface-sunken)}
+.segx i{position:relative;z-index:1;font-style:normal;height:24px;padding:0 12px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--m);cursor:pointer;transition:color var(--dur-fast)}
+.segx i.on{color:var(--t)}
+.segx .thumb{position:absolute;top:2px;bottom:2px;left:0;border-radius:calc(var(--r2) - 2px);background:linear-gradient(180deg,rgba(var(--ink),.09),rgba(var(--ink),.05));box-shadow:inset 0 0 0 .5px rgba(var(--ink),.1),0 1px 2px rgba(var(--shade),.4);transition:transform var(--spring-dur) var(--ease-spring),width var(--spring-dur) var(--ease-spring)}
+[data-tone=light] .segx .thumb{background:var(--surface-2);box-shadow:0 0 0 .5px rgba(var(--shade),.1),0 1px 2px rgba(var(--shade),.08)}
+/* sidebar morph */
+.side{transition:width var(--dur-slow) var(--ease-mac)}
+.side .ni span.lbl2{transition:opacity var(--dur-fast) var(--ease-out)}
+/* skeleton */
+.skel{position:relative;overflow:hidden;background:rgba(var(--ink),.05);border-radius:var(--r1)}
+.skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(var(--ink),.07),transparent);animation:kb-shimmer 1.4s var(--ease-in-out) infinite}
+:root[data-motion=reduce] .skel::after{display:none}
+/* charts */
+.draw path.ln,.draw polyline{stroke-dasharray:var(--len,400);animation:kb-draw calc(var(--dur-page)*2) var(--ease-mac) both}
+.draw .barg{transform-box:fill-box;transform-origin:50% 100%;animation:kb-grow var(--dur-page) var(--ease-spring) both;animation-delay:calc(var(--i,0)*var(--stagger)*2)}
+/* drag reorder */
+.dragging-item{transform:scale(1.02);box-shadow:0 18px 40px -12px rgba(var(--shade),.7),0 0 0 var(--hl) var(--border-strong);z-index:5;position:relative;transition:transform var(--dur-fast) var(--ease-spring),box-shadow var(--dur-fast)}
+.reorder>*{transition:transform var(--spring-dur) var(--ease-spring)}
+/* focus ring glow pulse */
+.inp:focus-within,.ring-pulse{animation:kb-ring-pulse 900ms var(--ease-out) 1;box-shadow:var(--ring)}
+/* tab bar dock magnify */
+.tb i{transition:transform var(--spring-dur) var(--ease-spring);display:block}
+.tb.press i{transform:scale(1.22) translateY(-3px)}
+/* theme switch: view transition circular reveal (JS sets --vt-x/--vt-y) */
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-new(root){animation:kb-reveal var(--dur-page) var(--ease-mac)}
+@keyframes kb-reveal{from{clip-path:circle(0 at var(--vt-x,50%) var(--vt-y,50%))}to{clip-path:circle(150vmax at var(--vt-x,50%) var(--vt-y,50%))}}
+:root[data-motion=reduce] .content,:root[data-motion=reduce] .stagger>*{animation:none}
+.kb-static *,.kb-static *::before,.kb-static *::after{animation:none!important;transition:none!important}
+
+/* ---- 常驻外壳:页面容器 + 切页过渡 ---- */
+.kb-slot{display:contents}
+.kb-page-root{flex:1;display:flex;min-width:0;min-height:0}
+.kb-page-root > *:first-child{flex:1;min-width:0}
+/* 离场瞬间完成(不让用户等),进场用页面曲线;动效偏好为「减少」时时长为 0 */
+.kb-page-leave-active{transition:none}
+.kb-page-enter-active{transition:opacity var(--dur-base) var(--ease-mac),transform var(--dur-page) var(--ease-mac)}
+.kb-page-enter-from{opacity:0;transform:translateY(var(--dist-page))}
+/* 原来 .content 自己带进场动画;现在统一由路由过渡负责,避免同一页动两次 */
+.content{animation:none}

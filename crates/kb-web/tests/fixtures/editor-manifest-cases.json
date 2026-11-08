@@ -1,0 +1,248 @@
+[
+  {
+    "name": "最小合法清单",
+    "ok": true,
+    "manifest": { "id": "kb.min", "name": "最小", "version": "0.1.0", "api_version": 1 }
+  },
+  {
+    "name": "单段 id 合法",
+    "ok": true,
+    "manifest": { "id": "demo", "name": "演示", "version": "1.0.0", "api_version": 1 }
+  },
+  {
+    "name": "带预发布与构建元数据的 semver 合法",
+    "ok": true,
+    "manifest": { "id": "kb.pre", "name": "预发布", "version": "1.0.0-beta.1+build.7", "api_version": 1 }
+  },
+  {
+    "name": "完整清单(所有贡献类型)合法",
+    "ok": true,
+    "manifest": {
+      "id": "kb.full",
+      "name": "完整",
+      "version": "2.3.4",
+      "api_version": 1,
+      "description": "什么都注册一遍",
+      "entry": "dist/main.js",
+      "permissions": ["document.read", "document.write", "clipboard", "network", "ai", "ui"],
+      "contributes": {
+        "commands": [{ "id": "kb.full.run", "title": "运行" }],
+        "toolbar": [{ "id": "kb.full.button" }],
+        "slash": [{ "id": "kb.full.slash" }],
+        "panels": [{ "id": "kb.full.panel", "title": "面板", "icon": "∑" }],
+        "codecs": [{ "id": "kb.full.codec", "extensions": ["foo", "bar2"] }],
+        "surfaces": [{ "id": "kb.full.surface", "extensions": ["foo"] }],
+        "ai_tools": [{ "id": "kb.full.ai", "title": "改写" }]
+      }
+    }
+  },
+  {
+    "name": "未识别的键被忽略(新增可选字段不升版本)",
+    "ok": true,
+    "manifest": { "id": "kb.future", "name": "未来", "version": "1.0.0", "api_version": 1, "homepage": "https://example.com", "contributes": { "themes": [] } }
+  },
+  {
+    "name": "清单不是对象",
+    "ok": false,
+    "manifest": ["id"],
+    "error_contains": "键值表"
+  },
+  {
+    "name": "缺 id",
+    "ok": false,
+    "manifest": { "name": "x", "version": "1.0.0", "api_version": 1 },
+    "error_contains": "缺少 id"
+  },
+  {
+    "name": "id 含大写",
+    "ok": false,
+    "manifest": { "id": "Kb.Upper", "name": "x", "version": "1.0.0", "api_version": 1 },
+    "error_contains": "id"
+  },
+  {
+    "name": "id 以点结尾",
+    "ok": false,
+    "manifest": { "id": "kb.", "name": "x", "version": "1.0.0", "api_version": 1 },
+    "error_contains": "id"
+  },
+  {
+    "name": "id 含连续分隔符",
+    "ok": false,
+    "manifest": { "id": "kb..x", "name": "x", "version": "1.0.0", "api_version": 1 },
+    "error_contains": "id"
+  },
+  {
+    "name": "id 含路径分隔符",
+    "ok": false,
+    "manifest": { "id": "kb/x", "name": "x", "version": "1.0.0", "api_version": 1 },
+    "error_contains": "id"
+  },
+  {
+    "name": "id 超长",
+    "ok": false,
+    "manifest": { "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "name": "x", "version": "1.0.0", "api_version": 1 },
+    "error_contains": "id"
+  },
+  {
+    "name": "缺 name",
+    "ok": false,
+    "manifest": { "id": "kb.x", "version": "1.0.0", "api_version": 1 },
+    "error_contains": "name"
+  },
+  {
+    "name": "name 全空白",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "   ", "version": "1.0.0", "api_version": 1 },
+    "error_contains": "name"
+  },
+  {
+    "name": "version 不是 semver(两段)",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0", "api_version": 1 },
+    "error_contains": "semver"
+  },
+  {
+    "name": "version 前导零",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "01.0.0", "api_version": 1 },
+    "error_contains": "semver"
+  },
+  {
+    "name": "version 带 v 前缀",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "v1.0.0", "api_version": 1 },
+    "error_contains": "semver"
+  },
+  {
+    "name": "缺 api_version",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0" },
+    "error_contains": "api_version"
+  },
+  {
+    "name": "api_version 大于 1 被拒并说明原因",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 2 },
+    "error_contains": "更新版本"
+  },
+  {
+    "name": "api_version 是 0",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 0 },
+    "error_contains": "api_version"
+  },
+  {
+    "name": "api_version 是字符串",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": "1" },
+    "error_contains": "api_version"
+  },
+  {
+    "name": "api_version 是小数",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1.5 },
+    "error_contains": "api_version"
+  },
+  {
+    "name": "未知权限被拒",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "permissions": ["document.read", "filesystem"] },
+    "error_contains": "filesystem"
+  },
+  {
+    "name": "permissions 不是数组",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "permissions": "ui" },
+    "error_contains": "permissions"
+  },
+  {
+    "name": "permissions 里有非字符串",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "permissions": [1] },
+    "error_contains": "permissions[0]"
+  },
+  {
+    "name": "entry 含上级目录",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "entry": "../evil.js" },
+    "error_contains": "entry"
+  },
+  {
+    "name": "entry 是绝对路径",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "entry": "/etc/passwd.js" },
+    "error_contains": "entry"
+  },
+  {
+    "name": "entry 不是 .js",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "entry": "index.ts" },
+    "error_contains": "entry"
+  },
+  {
+    "name": "contributes 不是表",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "contributes": [] },
+    "error_contains": "contributes"
+  },
+  {
+    "name": "contributes.panels 不是数组",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "contributes": { "panels": { "id": "kb.x.p" } } },
+    "error_contains": "contributes.panels"
+  },
+  {
+    "name": "贡献 id 缺少扩展 id 前缀",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "contributes": { "commands": [{ "id": "mark.toggle", "title": "抢内置命令" }] } },
+    "error_contains": "kb.x."
+  },
+  {
+    "name": "贡献 id 只有前缀没有后缀",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "contributes": { "commands": [{ "id": "kb.x.", "title": "t" }] } },
+    "error_contains": "kb.x."
+  },
+  {
+    "name": "同一类里贡献 id 重复",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "contributes": { "toolbar": [{ "id": "kb.x.a" }, { "id": "kb.x.a" }] } },
+    "error_contains": "重复"
+  },
+  {
+    "name": "命令缺 title",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "contributes": { "commands": [{ "id": "kb.x.run" }] } },
+    "error_contains": "title"
+  },
+  {
+    "name": "面板 icon 过长",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "contributes": { "panels": [{ "id": "kb.x.p", "title": "p", "icon": "123456789" }] } },
+    "error_contains": "icon"
+  },
+  {
+    "name": "codec 缺 extensions",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "contributes": { "codecs": [{ "id": "kb.x.c" }] } },
+    "error_contains": "extensions"
+  },
+  {
+    "name": "codec 扩展名带点",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "contributes": { "codecs": [{ "id": "kb.x.c", "extensions": [".foo"] }] } },
+    "error_contains": "extensions[0]"
+  },
+  {
+    "name": "surface 扩展名含大写",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "contributes": { "surfaces": [{ "id": "kb.x.s", "extensions": ["FOO"] }] } },
+    "error_contains": "extensions[0]"
+  },
+  {
+    "name": "贡献项不是表",
+    "ok": false,
+    "manifest": { "id": "kb.x", "name": "x", "version": "1.0.0", "api_version": 1, "contributes": { "ai_tools": ["kb.x.ai"] } },
+    "error_contains": "contributes.ai_tools[0]"
+  }
+]

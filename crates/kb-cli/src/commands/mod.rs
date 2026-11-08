@@ -1,0 +1,20 @@
+//! CLI 子命令实现。
+
+pub mod accel;
+pub mod auth;
+pub mod backup;
+pub mod convert;
+pub mod eval;
+pub mod hook;
+pub mod hooks;
+pub mod index;
+pub mod integrate;
+pub mod jobs;
+pub mod mcp;
+pub mod migrate;
+pub mod project;
+pub mod retention;
+pub mod search;
+pub mod service;
+pub mod skill;
+pub mod user;
