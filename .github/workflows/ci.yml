@@ -21,7 +21,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            g++ pkg-config libssl-dev protobuf-compiler libprotobuf-dev
+            g++ pkg-config libssl-dev protobuf-compiler libprotobuf-dev bubblewrap
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: 1.99.1
