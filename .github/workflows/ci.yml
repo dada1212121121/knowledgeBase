@@ -22,6 +22,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             g++ pkg-config libssl-dev protobuf-compiler libprotobuf-dev bubblewrap
+      # Ubuntu 24.04 默认限制非特权 user namespace,bwrap 会因此无法建立沙箱;
+      # 技能沙箱测试必须真实走 bwrap,不能用 allow_unsandboxed 退回裸跑。
+      - name: 启用 bwrap 用户命名空间
+        run: |
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+          sudo sysctl -w kernel.unprivileged_userns_clone=1 || true
+          bwrap --dev-bind / / true
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: 1.99.1
