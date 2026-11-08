@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  linux-x86_64:
+    name: Linux x86_64 二进制
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装系统依赖
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            g++ pkg-config libssl-dev protobuf-compiler
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.99.1
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web-ui/package-lock.json
+
+      - name: 构建前端
+        working-directory: web-ui
+        run: npm ci && npm run build
+
+      - name: 构建守护进程
+        run: cargo build --release --locked -p kb-cli
+
+      - name: 打包
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          NAME="knowledgeBase-${VERSION}-x86_64-linux"
+          mkdir -p "dist/${NAME}"
+          cp target/release/kb "dist/${NAME}/kb"
+          cp -r web-ui/dist "dist/${NAME}/web-ui"
+          cp LICENSE NOTICE THIRD_PARTY_LICENSES.md README.md CHANGELOG.md "dist/${NAME}/"
+          tar -C dist -czf "dist/${NAME}.tar.gz" "${NAME}"
+          (cd dist && sha256sum "${NAME}.tar.gz" > SHA256SUMS)
+
+      - name: 发布
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.tar.gz
+            dist/SHA256SUMS
+          generate_release_notes: false
+          body_path: CHANGELOG.md

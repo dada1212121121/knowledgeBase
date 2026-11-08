@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    name: Rust(格式 / Clippy / 测试)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: 安装系统依赖
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            g++ pkg-config libssl-dev protobuf-compiler
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.99.1
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: 架构门禁(依赖方向 / 文档对表 / 配置索引 / 文件行数)
+        run: |
+          node scripts/check-deps.mjs
+          node scripts/check-docs.mjs
+          node scripts/gen-config-index.mjs
+          git diff --exit-code
+          node scripts/check-file-size.mjs
+      - name: 依赖许可与漏洞
+        uses: EmbarkStudios/cargo-deny-action@v2
+      - name: 格式
+        run: cargo fmt --all -- --check
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: 测试
+        run: cargo test --workspace --locked
+
+  web:
+    name: Web(类型 / Lint / 测试 / 构建)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: web-ui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web-ui/package-lock.json
+      - run: npm ci
+      - name: 依赖许可
+        run: npm run check:licenses
+      - name: Lint(含设计 token / 对比度检查)
+        run: npm run lint
+      - name: 单元测试
+        run: npm run test
+      - name: 构建
+        run: npm run build
+
+  office-worker:
+    name: Office worker(许可 / 测试)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: office-worker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: office-worker/package-lock.json
+      - run: npm ci
+      - name: 依赖许可
+        run: npm run check:licenses
+      - name: 测试
+        run: npm test
