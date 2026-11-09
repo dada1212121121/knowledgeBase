@@ -340,18 +340,11 @@ impl ServiceBackend {
             .unwrap_or_else(|| "unknown".to_owned());
         // 抽取器 id(设计稿 的「抽取器」一行):谁把这个文件抽成块的,由注册表实际挑选决定
         let mut extractor: Option<String> = None;
-        // 读不到原件时不要冒充成“空文件”:图片 / 音视频抽取器对空 bytes 也会产出占位块,
-        // 那样界面会显示“抽取器 图片 OCR / 0 块”,与真的空文件无法区分
+        // 读不到原件时不要冒充成“空文件”:图片 / 音视频抽取器对空 bytes 也会产出占位块,界面会显示成“抽取器 图片 OCR / 0 块”
         let mut read_error: Option<String> = None;
         let mut blocks: Vec<Value> = Vec::new();
-        // PDF 例外:建索引时已经把每页的文字 / OCR 抽过一遍,这里再抽一次会让打开文件变成
-        // “重新 OCR 整份 PDF”(扫描件实测 13 页要 88 秒),而原生 PDF 查看器只需要字节流。
-        // 直接用落库块拼出文字层,既保持「文字层」可用,又让打开动作回到毫秒级。
         if format == "pdf" {
-            if !chunk_list.is_empty() {
-                extractor = Some("application/pdf".to_owned());
-                blocks = pdf_blocks_of_chunks(&chunk_list);
-            }
+            (extractor, blocks) = super::pdf_preview::preview(&chunk_list);
         } else if let Some(path) = self.locate_file(&args.collection, &args.path).await? {
             let (found, extracted, error) = preview_parts(Some(&path)).await;
             extractor = found;
@@ -360,8 +353,7 @@ impl ServiceBackend {
         }
         // 文本类文件额外返回原文与“可编辑”标记(在线编辑用)。
         // 不按扩展名白名单判断(白名单之外的 .cs / .ini / .conf / .svg / .ipynb 等文本也要能改),
-        // 看内容:≤512 KB、合法 UTF-8、没有 NUL 字节。GBK 等非 UTF-8 文本不提供编辑,
-        // 因为保存会把编码悄悄改成 UTF-8。
+        // 看内容:≤512 KB、合法 UTF-8、没有 NUL 字节。GBK 等非 UTF-8 文本不提供编辑(保存会把编码悄悄改成 UTF-8)。
         // `content` 是查看用的全文(最大 VIEWABLE_MAX_BYTES);能不能编辑另算:全文不超过编辑上限才行
         let content = match self.locate_file(&args.collection, &args.path).await? {
             Some(path) => read_text_within(&path, VIEWABLE_MAX_BYTES),
@@ -662,27 +654,6 @@ impl ServiceBackend {
     }
 }
 
-/// PDF 预览块直接复用建索引时落库的块,不再重新抽取。
-///
-/// PDF 的「块」在入库阶段已经由文本层 / OCR 产生,`file_preview` 再抽一次对扫描件等于重跑整份 OCR。
-/// 这里只把落库块换成界面需要的 `{anchor, kind, text}` 形状;空文本跳过,免得文字层出现空段落。
-fn pdf_blocks_of_chunks(chunks: &[Value]) -> Vec<Value> {
-    chunks
-        .iter()
-        .filter_map(|chunk| {
-            let text = chunk.get("text")?.as_str()?;
-            if text.trim().is_empty() {
-                return None;
-            }
-            Some(json!({
-                "anchor": chunk.get("anchor").cloned().unwrap_or(Value::Null),
-                "kind": "paragraph",
-                "text": text,
-            }))
-        })
-        .collect()
-}
-
 /// 预览的三件套:`(抽取器 id, 块, 读失败原因)`。
 ///
 /// 读失败与抽取失败都不报抽取器;读失败还要给出原因,别让界面把它显示成“空文件”。
@@ -966,10 +937,7 @@ mod list_files_tests {
 #[cfg(test)]
 mod preview_tests {
     //! `file_preview` 的抽取器判定与路径传递。
-    use super::{
-        EDITABLE_MAX_BYTES, VIEWABLE_MAX_BYTES, extract_preview, pdf_blocks_of_chunks,
-        read_text_within,
-    };
+    use super::{EDITABLE_MAX_BYTES, VIEWABLE_MAX_BYTES, extract_preview, read_text_within};
 
     /// 临时文件:`tempfile` 已经是 dev-dependency,用它管生命周期(手搓目录不会自己清理）
     fn temp_file(name: &str, bytes: &[u8]) -> (tempfile::TempDir, std::path::PathBuf) {
@@ -990,30 +958,6 @@ mod preview_tests {
         let (extractor, blocks) = extract_preview(b"", &path).await;
         assert_eq!(extractor, None);
         assert!(blocks.is_empty());
-    }
-
-    /// PDF 预览不该再走抽取器:落库块已经带了页码和文字,直接复用。
-    #[test]
-    fn pdf_preview_blocks_reuse_indexed_chunks() {
-        let chunks = vec![
-            serde_json::json!({
-                "anchor": { "kind": "page", "page": 3 },
-                "text": "合同金额一百万",
-            }),
-            serde_json::json!({
-                "anchor": { "kind": "page", "page": 4 },
-                "text": "   ",
-            }),
-        ];
-        let blocks = pdf_blocks_of_chunks(&chunks);
-        assert_eq!(blocks.len(), 1, "空块不该出现在文字层里");
-        assert_eq!(blocks[0]["kind"].as_str(), Some("paragraph"));
-        assert_eq!(blocks[0]["text"].as_str(), Some("合同金额一百万"));
-        assert_eq!(
-            blocks[0]["anchor"]["page"].as_u64(),
-            Some(3),
-            "页码要保留,搜索联动靠它"
-        );
     }
 
     #[tokio::test]

@@ -10,6 +10,7 @@ mod files;
 mod files_ops;
 mod jobs;
 mod links;
+mod pdf_preview;
 mod providers;
 mod search;
 mod system;
