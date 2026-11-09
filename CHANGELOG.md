@@ -5,6 +5,15 @@
 
 ## [Unreleased]
 
+### 修复
+
+- 修复旧浏览器内核下 PDF 预览失败：补齐现代 Promise API，改用 pdf.js legacy 构建与同源 worker
+
+### 性能
+
+- PDF 预览改走 HTTP Range 分段加载，首屏不再等待整份文件下载完
+- PDF 预览接口复用建索引时已落库的文字块，避免打开扫描件时重新跑整份 OCR
+
 ### 计划中
 
 - 提供带校验和的预编译 Linux 二进制与容器镜像

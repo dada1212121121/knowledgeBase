@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // PDF 查看器(pdf.js,Apache-2.0):真实页面渲染 + 文字层(可选中复制)+ 链接 + 查找高亮。
-//   - 原件经 `fetchOriginal` 带会话拿到 ArrayBuffer(PDF 在服务端是 attachment,fetch 不受影响);
+//   - 原件直接交给 pdf.js 按 URL 加载:服务端 `/download` 支持 Range,首屏只取需要的段,
+//     不再像以前那样先 `fetch` 整份 PDF 到 ArrayBuffer(大扫描件在慢网下会卡几十秒);
 //   - 页面由 pdf_viewer 虚拟化渲染:只画可见页,几百页的 PDF 也不卡;
 //   - 缩放:适应宽度(默认,宽屏封顶 1.6×)/ ± / Ctrl+滚轮 / 双指捏合;
 //   - 缩略图:宽屏常驻左侧,窄屏是抽屉;
@@ -10,8 +11,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { KbIcon, isComposing } from '@kb-ui/index'
 import ViewerToolbar from '@/components/ViewerToolbar.vue'
-import 'pdfjs-dist/web/pdf_viewer.css'
-import { fetchOriginal, OriginalError } from '@/utils/fetchOriginal'
+import 'pdfjs-dist/legacy/web/pdf_viewer.css'
 import { documentParams, loadPdfJs, type PdfJsLib, type PdfViewerModule } from '@/utils/pdfjs'
 
 const props = defineProps<{
@@ -79,7 +79,6 @@ let pdfDoc: Awaited<ReturnType<PdfJsLib['getDocument']>['promise']> | null = nul
 let loadingTask: ReturnType<PdfJsLib['getDocument']> | null = null
 let eventBus: InstanceType<PdfViewerModule['EventBus']> | null = null
 let pdfViewer: InstanceType<PdfViewerModule['PDFViewer']> | null = null
-let abort: AbortController | null = null
 let resizeObserver: ResizeObserver | null = null
 let thumbObserver: IntersectionObserver | null = null
 const renderedThumbs = new Set<number>()
@@ -98,8 +97,12 @@ function fail(message: string) {
 }
 
 function describe(error: unknown): string {
-  if (error instanceof OriginalError) return error.message
   const name = (error as { name?: string })?.name
+  const status = Number((error as { status?: unknown })?.status)
+  if (status === 401 || status === 403) return '没有权限读取这份 PDF,请重新登录后再试'
+  if (status === 404) return '找不到 PDF 文件'
+  if (status === 413) return 'PDF 文件太大,无法在页内打开'
+  if (status === 416) return 'PDF 文件读取失败(服务器不支持分段读取)'
   if (name === 'PasswordException') return '这份 PDF 有密码保护,页内无法渲染'
   if (name === 'InvalidPDFException') return 'PDF 文件已损坏或不是有效的 PDF'
   if (name === 'MissingPDFException') return '找不到 PDF 文件'
@@ -111,19 +114,17 @@ async function load() {
   disposed = false
   phase.value = 'loading'
   progress.value = 0
-  abort = new AbortController()
   try {
-    const [loaded, buffer] = await Promise.all([
-      loadPdfJs(),
-      fetchOriginal(props.url, {
-        signal: abort.signal,
-        onProgress: (done, total) => (progress.value = total ? done / total : 0),
-      }),
-    ])
+    const loaded = await loadPdfJs()
     if (disposed) return
     lib = loaded.pdfjs
     viewerLib = loaded.viewer
-    loadingTask = lib.getDocument(documentParams(buffer))
+    // 直接把 URL 交给 pdf.js:它自己发 Range 请求,首屏不必等整份文件下载完。
+    // 服务端 `/api/v1/download` 无 64 MB 上限并支持单段 Range;分享页的 `/raw` 仍是整份。
+    loadingTask = lib.getDocument(documentParams(props.url))
+    loadingTask.onProgress = ({ loaded: done, total }: { loaded: number; total: number }) => {
+      if (!disposed) progress.value = total ? done / total : 0
+    }
     pdfDoc = await loadingTask.promise
     if (disposed || !container.value || !viewerEl.value) return
     await setupViewer()
@@ -219,8 +220,6 @@ function toggleThumbs() {
 
 function teardown() {
   disposed = true
-  abort?.abort()
-  abort = null
   window.clearTimeout(resizeTimer)
   resizeObserver?.disconnect()
   resizeObserver = null

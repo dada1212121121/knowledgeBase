@@ -5,6 +5,14 @@ import FileViewer from './FileViewer.vue'
 // 预取 WASM 会真的发网络请求：用桩替掉，测试只关心「该不该调用」
 const prefetchSpy = vi.hoisted(() => vi.fn())
 vi.mock('@/editor/engines/pptxWasm', () => ({ prefetchPptxWasm: prefetchSpy, pptxWasmModule: vi.fn() }))
+// PdfViewer 走真实 pdf.js 时，测试环境没有 worker/静态字体资源；这里只验证「渲染器失败后是否
+// 退回文字层」，所以把 pdf.js 入口替成固定的 404，顺带锁住错误文案映射（原件不存在）。
+vi.mock('@/utils/pdfjs', () => ({
+  loadPdfJs: vi.fn(async () => {
+    throw Object.assign(new Error('not found'), { status: 404 })
+  }),
+  documentParams: vi.fn(() => ({})),
+}))
 
 const block = { anchor: { kind: 'page' as const, page: 1 }, kind: 'paragraph' as const, text: '抽取出来的文字' }
 const base = { blocks: [block], chunks: [], highlight: null }
@@ -27,10 +35,9 @@ describe('FileViewer routing', () => {
     expect(wrapper.find('.kb-dv').exists()).toBe(true)
   })
   it('falls back to the text layer with a retry strip when the renderer reports an error', async () => {
-    vi.stubGlobal('fetch', bytesResponse('', 404))
     const wrapper = mount(FileViewer, { props: { ...base, format: 'pdf', sourceUrl: '/api/v1/raw?x=1' }, attachTo: document.body })
     await vi.waitFor(() => expect(wrapper.find('.kb-fv-strip.is-warn').exists()).toBe(true), { timeout: 5000 })
-    expect(wrapper.find('.kb-fv-strip').text()).toContain('找不到原件')
+    expect(wrapper.find('.kb-fv-strip').text()).toContain('找不到 PDF 文件')
     expect(wrapper.find('.kb-dv').exists()).toBe(true)
     wrapper.unmount()
   })
